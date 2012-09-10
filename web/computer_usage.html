@@ -1,0 +1,143 @@
+<html>
+<head>
+	<script src="js/socket.io-0.8.7.js"></script>
+	<script src="js/jquery-1.7.1.min.js"></script>
+	<script src="js/jsIP.js"></script>
+	<script src="js/underscore.js"></script>
+	<script src="js/flot/jquery.flot.js"></script>
+	<script src="js/jquery.grapher.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
+
+
+	<title>GATD - Computer Usage Statistics</title>
+
+</head>
+
+<body>
+	<h1>Computer Usage Statistics</h1>
+
+	<div id="graph" style="width:1000px;height:500px;float:left"></div>
+	<div id="graph_key"></div>
+
+	<div id="hostname_select" style="float:right">
+		<ul style="list-style-type:none;">
+		</ul>
+	</div>
+
+	<script type="text/javascript">
+
+	var socket;
+	var hostnames = {};
+	var g;
+	var active_hostnames = [];
+
+	var keep_hostnames_for = 900000;
+
+	function sanitize_hostname (h) {
+		return h.replace(/[^a-zA-Z0-9]./g, "");
+	}
+
+	function remove_old_hostnames () {
+		timenow = new Date().getTime();
+
+		for (h in hostnames) {
+			if (hostnames[h] + keep_hostnames_for < timenow) {
+				delete hostnames[h];
+			}
+		}
+	}
+
+	function display_hostnames () {
+		for (h in hostnames) {
+			if ($("#hostname_select ul #check_" + sanitize_hostname(h)).length == 0) {
+				add_checkbox(h);
+			}
+		}
+	}
+
+	function add_checkbox(name) {
+		var container = $('#hostname_select ul');
+
+		sname = sanitize_hostname(name);
+		var html = '<li><input type="checkbox" id="check_'+sname+'" value="'+name+'" /> <label for="check_'+sname+'">'+name+'</label></li>';
+		container.append($(html));
+		$("#hostname_select input[type='checkbox']").change(update_active_hostnames);
+	}
+
+	function update_active_hostnames () {
+		active_hostnames.splice(0, active_hostnames.length);
+		$("#hostname_select input[type='checkbox']").each(function () {
+			if ($(this).attr('checked') == 'checked') {
+				active_hostnames.push($(this).attr('value'));
+			} else {
+				g.removeSeries($(this).attr('value'));
+			}
+		});
+		g.update();
+	}
+
+	function toggle_hostname (name) {
+		for (var i=0; i<active_hostnames.length; i++) {
+			if (active_hostnames[i] == name) {
+				active_hostnames.splice(i, 1);
+				g.removeSeries(name);
+				g.update();
+				return;
+			}
+		}
+		active_hostnames.push(name);
+	}
+
+	function hostname_is_active (name) {
+		for (var i=0; i<active_hostnames.length; i++) {
+			if (active_hostnames[i] == name) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
+
+	onload = function() {
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+
+		socket.on('connect', function (data) {
+			var query = {profile_id: 'aWXe5FTVxu'};
+			socket.emit('query', query);
+		});
+
+		socket.on('data', function (data) {
+			hostnames[data['hostname']] = data['time'];
+
+			remove_old_hostnames();
+			display_hostnames();
+
+			if (hostname_is_active(data['hostname'])) {
+				pdw = {};
+				pd  = {};
+				pd['cpu_usage']       = [data['time']-14400000, data['cpu_usage']];
+				pd['disk_usage']      = [data['time']-14400000, data['disk_usage']];
+				pd['memory_usage']    = [data['time']-14400000, data['memory_usage']];
+				if (_.has(data, 'network_sent') && _.has(data, 'network_receive')) {
+					pd['network_sent']    = [data['time']-14400000, data['network_sent']];
+					pd['network_receive'] = [data['time']-14400000, data['network_receive']];
+				}
+				pdw = {name: data['hostname'], data:pd};
+				g.addData(pdw);
+				g.update();
+			}
+		});
+
+
+		g = $.grapher($("#graph"), {graph_key: $("#graph_key")});
+
+
+
+	}
+	</script>
+
+
+</body>
+</html>

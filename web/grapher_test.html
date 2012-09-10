@@ -1,0 +1,91 @@
+<html>
+<head>
+	<script src="js/socket.io-0.8.7.js"></script>
+	<script src="js/jquery-1.7.1.min.js"></script>
+	<script src="js/jsIP.js"></script>
+	<script src="js/underscore.js"></script>
+	<script src="js/flot/jquery.flot.js"></script>
+	<script src="js/jquery.grapher.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
+	<title>test</title>
+
+</head>
+
+<body>
+	<h1>a</h1>
+
+	<div id="graph" style="width:1000px;height:500px;"></div>
+
+	<script>
+
+	var socket;
+	var jsIP = require('./jsIP');
+	var g;
+
+
+
+	function display_data (data) {
+		out = "<div>";
+		out += "<span>Address: " + jsIP(data['address']).pureStr() + "</span>";
+		out += "<ul>";
+		for (var key in data) {
+			if (key != 'address' && key != '_id') {
+				if (key == 'timestamp') {
+					title = 'Time';
+					var date = new Date(data[key]);
+					value = date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+				} else {
+					title = key;
+					value = data[key];
+				}
+				out += "<li>" + title + ": " + value + "</li>";
+			}
+		}
+		out += "</ul></div>";
+		return out;
+	}
+
+	onload = function() {
+	//	socket = io.connect('127.0.0.1:8080/stream');
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+
+
+		socket.on('connect', function (data) {
+			console.log('yay connected');
+		//	socket.emit('query', {'port': {$exists:true}});
+		//	socket.emit('query', {'hostname': 'orangeiguana'});
+			socket.emit('query', {$or: [{hostname:'orangeiguana'},
+			                            {hostname:'fightingapple'},
+			                            {hostname:'awesomeWagon'}]
+			                     });
+		//	socket.emit('query', {'hostname': 'nuclear.eecs.umich.edu'});
+		//	socket.emit('query', {'hostname': 'memristor.eecs.umich.edu'});
+		});
+
+		socket.on('data', function (data) {
+			pdw = {};
+			pd  = {};
+			pd['cpu_usage']    = [data['time']-14400000, data['cpu_usage']];
+			pd['disk_usage']   = [data['time']-14400000, data['disk_usage']];
+			pd['memory_usage'] = [data['time']-14400000, data['memory_usage']];
+			pdw = {name: data['hostname'], data:pd};
+			g.addData(pdw);
+			g.update();
+		//	console.log("woo");
+			console.log(pd);
+		//	socket.emit('my other event', { my: 'data' });
+		//	$("div#stream").append(data["address"] + " " +  data["seq"] + "<br />");
+		//	$("div#stream").prepend(display_data(data));
+		});
+
+		g = $.grapher($("#graph"));
+
+
+	}
+	</script>
+
+
+
+	<div id="stream"></div>
+</body>
+</html>
