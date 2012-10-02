@@ -2,7 +2,7 @@ import IPy
 import json
 import struct
 
-class computerStatsParser () :
+class computerStatsParser (parser) :
 
 	def __init__ (self):
 		pass

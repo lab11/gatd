@@ -204,7 +204,7 @@ class profileManager:
 
 		if uid == None:
 			# Don't recognize this packet
-			return None
+			raise FE.ParserNotFound("No parser for this packet.")
 
 		settings = self.settings[uid]
 		parser   = settings['parser']
@@ -213,10 +213,12 @@ class profileManager:
 		# Create dict of settings that need to get passed to parser
 		psettings = {}
 
-		psettings['public'] = False
-		if 'access' in settings:
+		try:
 			if settings['access'] == 'public':
 				psettings['public'] = True
+		except KeyError:
+			psettings['public'] = False
+
 
 		# need to fill in extra at some point
 		extra = {}

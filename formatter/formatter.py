@@ -44,7 +44,8 @@ def unpackPacket (pkt):
 		port    = record[4]
 		time    = record[5]
 		if len(pkt) > PKT_HEADER_LEN_UDP:
-			data = struct.unpack('>%is' % (len(pkt)-PKT_HEADER_LEN_UDP), pkt[PKT_HEADER_LEN_UDP:])[0]
+			data = struct.unpack('>%is' % (len(pkt)-PKT_HEADER_LEN_UDP),
+			                     pkt[PKT_HEADER_LEN_UDP:])[0]
 		else:
 			data = ''
 
@@ -79,30 +80,28 @@ def packet_callback (channel, method, prop, body):
 
 	try:
 
+		# Parse out the fields from the receiver
 		data, meta = unpackPacket(body)
 
-	#	if pm.isPacketKnown(data=data, meta=meta):
-		# Parse
+		# Process the packet by the correct parser
 		ret = pm.parsePacket(data=data, meta=meta)
 
-		if (ret != None):
-			# packet is known and whatnot
+		# Convert dict to nice json thingy
+		jsonv = json.dumps(ret)
 
-			# Convert dict to nice json thingy
-			jsonv = json.dumps(ret)
+		# Save in database
+		mi.writeFormatted(ret)
 
-			# save in database
-			mi.writeFormatted(ret)
+		# Send to streamer
+		ri.publish(exchange=RMQ_STR_EXC, body=jsonv)
 
-			# send to streamer
-			ri.publish(exchange=RMQ_STR_EXC, body=jsonv)
 
-		else:
-			print "unknown"
-			print data
-			# archive
-			mi.writeUnformatted({'meta': meta,
-			                     'data': bson.binary.Binary(body[26:], 0)})
+	except FE.ParserNotFound as e:
+		print "unknown"
+		print data
+		# archive
+		mi.writeUnformatted({'meta': meta,
+			                 'data': bson.binary.Binary(body[26:], 0)})
 
 	except FE.BadPacket as e:
 		print "BadPacket: " + str(e)
@@ -113,6 +112,7 @@ def packet_callback (channel, method, prop, body):
 	except UnicodeDecodeError:
 		pass
 
+	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
 	ri.ack(method.delivery_tag)
 
 

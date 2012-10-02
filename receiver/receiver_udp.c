@@ -64,7 +64,12 @@ void receive_udp () {
 		int32_t             packet_len;
 		int32_t             stored_len;
 
-		packet_len = recvfrom(socket_world, buffer, MAX_INCOMING_LENGTH, 0, (struct sockaddr*) &sender_addr, &sender_addr_len);
+		packet_len = recvfrom(socket_world,
+		                      buffer,
+		                      MAX_INCOMING_LENGTH,
+		                      0,
+		                      (struct sockaddr*) &sender_addr,
+		                      &sender_addr_len);
 
 		if (packet_len > -1) {
 			message.time = bswap_64(get_time());
@@ -77,7 +82,14 @@ void receive_udp () {
 			amqp_message.bytes = &message;
 
 			// Publish
-			ret = amqp_basic_publish(amqp_conn, 1, amqp_exchange, amqp_routing_key, 0, 0, NULL, amqp_message);
+			ret = amqp_basic_publish(amqp_conn,
+			                         1,
+			                         amqp_exchange,
+			                         amqp_routing_key,
+			                         0,
+			                         0,
+			                         NULL,
+			                         amqp_message);
 		}
 
 	}

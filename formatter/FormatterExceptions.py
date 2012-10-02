@@ -12,3 +12,6 @@ class BadPacket(GatdException):
 
 class ParserError(GatdException):
 	pass
+
+class ParserNotFound(GatdException):
+	pass
