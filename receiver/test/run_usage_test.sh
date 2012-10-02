@@ -1,14 +1,16 @@
 #!/bin/bash
 
+echo "Run the computer usage GATD test"
+
 # Check if already running
 SCREEN_OUT=`screen -ls`
 if [[ "$SCREEN_OUT" =~ .*gatd-usage-test.* ]]; then
 	echo "usage monitor already running"
 	exit
 fi
-exit
 
 # Check if psutil is installed
+echo "Checking if psutil is installed"
 python -c "import psutil" > /dev/null 2> /dev/null
 
 if [ "$?" -ne 0 ]; then
