@@ -1,9 +1,10 @@
 import IPy
 import json
 import struct
+
 import parser
 
-class computerStatsParser (parser.parser) :
+class fitbitLocatorParser (parser.parser) :
 
 	def __init__ (self):
 		pass
@@ -13,7 +14,7 @@ class computerStatsParser (parser.parser) :
 
 		datamap = json.loads(data[10:])
 
-
+		"""
 		ret['address']         = meta['addr']
 		ret['port']            = meta['port']
 		try:
@@ -31,7 +32,7 @@ class computerStatsParser (parser.parser) :
 		ret['public']          = settings['public']
 
 #		print str(IPy.IP(meta['addr'])) + ' usage: ' + str(datamap['cpu'])
-
+		"""
 		return ret
 
 

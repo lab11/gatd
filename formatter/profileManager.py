@@ -2,7 +2,7 @@ import ConfigParser
 import copy
 import FormatterExceptions as FE
 import IPy
-from pymongo import objectid
+#from pymongo import objectid
 import random
 import string
 import StringIO

@@ -1,6 +1,7 @@
 import pymongo
-import pymongo.objectid
+#import pymongo.objectid
 import time
+import bson
 
 
 class MongoInterface:
@@ -46,7 +47,7 @@ class MongoInterface:
 		return str(id)
 
 	def updateConfig (self, uid, name, config_file, profile_id):
-		config_map = {'_id'       : pymongo.objectid.ObjectId(uid),
+		config_map = {'_id'       : bson.objectid.ObjectId(uid),
 		              'name'      : name,
 		              'config'    : config_file,
 		              'profile_id': profile_id}
