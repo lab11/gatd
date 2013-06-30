@@ -33,6 +33,7 @@ extern const char         amqp_username[];
 extern const char         amqp_password[];
 extern const amqp_bytes_t amqp_exchange;
 extern const amqp_bytes_t amqp_routing_key;
+extern const amqp_channel_t amqp_channel;
 
 extern const int          MESSAGE_ITEM_BASE_SIZE;
 
