@@ -11,9 +11,9 @@ import RabbitInterface
 import struct
 import sys
 
-RMQ_HOST    = 'inductor.eecs.umich.edu'
-RMQ_QUEUE   = 'receive_queue'
-RMQ_STR_EXC = 'streamer_exchange'
+RMQ_HOST        = 'inductor.eecs.umich.edu'
+RECEIVE_QUEUE   = 'receive_queue'
+STREAM_EXCHANGE = 'streamer_exchange'
 
 MONGO_HOST  = 'inductor.eecs.umich.edu'
 MONGO_PORT  = 19000
@@ -62,24 +62,6 @@ def unpackPacket (pkt):
 	return None
 
 
-
-mi = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
-pm = profileManager.profileManager(mi)
-ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
-#ri = RabbitInterface.RabbitInterface(host=RMQ_HOST)
-
-connection = pika.BlockingConnection(pika.ConnectionParameters(host=RMQ_HOST))
-channel = connection.channel()
-#channel.queue_declare(queue=RMQ_QUEUE)
-
-# Read in all config files
-for root, dirs, files in os.walk('.'):
-	for f in files:
-		name, ext = os.path.splitext(f)
-		if ext == '.config':
-			pm.addConfigFile(root + '/' + f)
-
-
 def packet_callback (channel, method, prop, body):
 
 	try:
@@ -97,11 +79,14 @@ def packet_callback (channel, method, prop, body):
 		mi.writeFormatted(ret)
 
 		# Send to streamer
-		channel.basic_publish(exchange=RMQ_STR_EXC, body=jsonv, routing_key='')
+		# Set the headers to the keys present in the streamed message
+		props = pika.spec.BasicProperties(headers=dict((x,x) for x in ret.keys()))
+		channel.basic_publish(exchange=STREAM_EXCHANGE, body=jsonv,
+		                      properties=props, routing_key='')
 
 
 	except FE.ParserNotFound as e:
-		print "unknown"
+		print "No parser found for the incoming message."
 		print data
 		# archive
 		mi.writeUnformatted({'meta': meta,
@@ -117,13 +102,29 @@ def packet_callback (channel, method, prop, body):
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
-#	ri.ack(method.delivery_tag)
 	channel.basic_ack(delivery_tag=method.delivery_tag)	
 
 
-#ri.consume(packet_callback, queue=RMQ_QUEUE, no_ack=False)
+mi = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
+pm = profileManager.profileManager(mi)
+ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
-channel.basic_consume(packet_callback, queue=RMQ_QUEUE, no_ack=False)
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=RMQ_HOST))
+channel = connection.channel()
+
+# Create the exchange for the streaming packets.
+# Let the queues be created by the streamers. If there are no streamers
+# running, then the messages will just be dropped and that is OK.
+channel.exchange_declare(exchage=STREAM_EXCHANGE, exchange_type='headers',
+                         durable=True)
+
+# Read in all config files
+for root, dirs, files in os.walk('.'):
+	for f in files:
+		name, ext = os.path.splitext(f)
+		if ext == '.config':
+			pm.addConfigFile(root + '/' + f)
+
+channel.basic_consume(packet_callback, queue=RECEIVE_QUEUE, no_ack=False)
 channel.start_consuming()
-
 
