@@ -56,6 +56,8 @@ void receive_udp () {
 		return;
 	}
 
+	printf("starting receive\n");
+
 	// Receive
 	while (1) {
 		uint8_t             buffer[MAX_INCOMING_LENGTH];
@@ -72,6 +74,7 @@ void receive_udp () {
 		                      &sender_addr_len);
 
 		if (packet_len > -1) {
+			printf("got packet\n");
 			message.time = bswap_64(get_time());
 			message.port = sender_addr.sin6_port;
 			stored_len   = min(packet_len, MAX_INCOMING_LENGTH);

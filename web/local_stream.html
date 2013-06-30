@@ -18,7 +18,7 @@
 
 	function display_data (data) {
 		out = "<div>";
-		out += "<span>Address: " + jsIP(data['address']).pureStr() + "</span>";
+		out += "<span>Address: " + jsIP(parseInt(data['address'])).pureStr() + "</span>";
 		out += "<ul>";
 		for (var key in data) {
 			if (key != 'address' && key != '_id') {
@@ -38,7 +38,7 @@
 	}
 
 	onload = function() {
-		socket = io.connect('127.0.0.1:8080/stream');
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
 	//	socket.emit('configuration', {'address': ["2607:f018:8000:bbba:12:6d45:507f:a245", "2607:f018:8000:bbba:12:6d45:507e:eacd"]//,
 //		socket.emit('configuration', {	'required_fields':['temperature_fahrenheit', 'humidity'],
 //										'display_fields': ['temperature_fahrenheit', 'address', 'timestamp', 'location3'],
@@ -49,7 +49,7 @@
 	//	socket.emit('query', {'required_fields': ['time']});
 		socket.on('connect', function (data) {
 			console.log('yay connected');
-			socket.emit('query', {'port': {$gt:1000}});
+			socket.emit('query', {'address': '42540578174783136222189769316707415774'});
 		});
 
 		socket.on('data', function (data) {

@@ -11,6 +11,7 @@ class computerStatsParser (parser.parser) :
 	def parse (self, data, meta, extra, settings):
 		ret = {}
 
+
 		datamap = json.loads(data[10:])
 
 
@@ -30,7 +31,7 @@ class computerStatsParser (parser.parser) :
 			ret['network_receive'] = datamap['net-recv']
 		ret['public']          = settings['public']
 
-#		print str(IPy.IP(meta['addr'])) + ' usage: ' + str(datamap['cpu'])
+		print str(IPy.IP(meta['addr'])) + ' usage: ' + str(datamap['cpu'])
 
 		return ret
 

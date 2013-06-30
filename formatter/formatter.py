@@ -66,7 +66,11 @@ def unpackPacket (pkt):
 mi = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
 pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
-ri = RabbitInterface.RabbitInterface(host=RMQ_HOST)
+#ri = RabbitInterface.RabbitInterface(host=RMQ_HOST)
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=RMQ_HOST))
+channel = connection.channel()
+#channel.queue_declare(queue=RMQ_QUEUE)
 
 # Read in all config files
 for root, dirs, files in os.walk('.'):
@@ -93,7 +97,7 @@ def packet_callback (channel, method, prop, body):
 		mi.writeFormatted(ret)
 
 		# Send to streamer
-		ri.publish(exchange=RMQ_STR_EXC, body=jsonv)
+		channel.basic_publish(exchange=RMQ_STR_EXC, body=jsonv, routing_key='')
 
 
 	except FE.ParserNotFound as e:
@@ -113,8 +117,13 @@ def packet_callback (channel, method, prop, body):
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
-	ri.ack(method.delivery_tag)
+#	ri.ack(method.delivery_tag)
+	channel.basic_ack(delivery_tag=method.delivery_tag)	
 
 
-ri.consume(packet_callback, queue=RMQ_QUEUE, no_ack=False)
+#ri.consume(packet_callback, queue=RMQ_QUEUE, no_ack=False)
+
+channel.basic_consume(packet_callback, queue=RMQ_QUEUE, no_ack=False)
+channel.start_consuming()
+
 

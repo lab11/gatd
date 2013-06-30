@@ -8,6 +8,8 @@ class shedCommitParser () :
 	def parse (self, data, meta, extra, settings):
 		ret = {}
 
+		print "parsing shed data"
+
 		lines = data.split('\n')
 		t     = time.strptime(lines[2][0:19], '%Y-%m-%d %H:%M:%S')
 		ti    = int(time.mktime(t)*1000)
