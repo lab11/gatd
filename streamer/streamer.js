@@ -17,14 +17,15 @@ var clients = {};
 // AMQP
 var amqp_conn = amqp.createConnection({host: RMQ_HOST});
 amqp_conn.on('ready', function () {
-	var q = amqp_conn.queue('streamer_queue', {durable:true, autoDelete:false});
-
+	var q = amqp_conn.queue('', {exclusive:true}, function () {
+		q.bind('streamer_exchange', '');
+	});
 	q.subscribe(function (message) {
 
 		jmsg = JSON.parse(message.data);
 
 		access = __.has(jmsg, 'public') && jmsg['public'] == true;
-
+console.log(jmsg);
 
 		//	console.log(jmsg);
 		sockets = __.keys(clients);
