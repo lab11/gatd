@@ -80,7 +80,7 @@ def packet_callback (channel, method, prop, body):
 
 		# Send to streamer
 		# Set the headers to the keys present in the streamed message
-		props = pika.spec.BasicProperties(headers=dict((x,x) for x in ret.keys()))
+		props = pika.spec.BasicProperties(headers=dict((x,struct.pack("B",0)) for x in ret.keys()))
 		channel.basic_publish(exchange=STREAM_EXCHANGE, body=jsonv,
 		                      properties=props, routing_key='')
 
@@ -115,7 +115,7 @@ channel = connection.channel()
 # Create the exchange for the streaming packets.
 # Let the queues be created by the streamers. If there are no streamers
 # running, then the messages will just be dropped and that is OK.
-channel.exchange_declare(exchage=STREAM_EXCHANGE, exchange_type='headers',
+channel.exchange_declare(exchange=STREAM_EXCHANGE, exchange_type='headers',
                          durable=True)
 
 # Read in all config files
