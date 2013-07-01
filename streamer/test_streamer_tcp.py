@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST, PORT = "localhost", 22500
+HOST, PORT = "inductor.eecs.umich.edu", 22500
 data = " ".join(sys.argv[1:])
 
 # Create a socket (SOCK_STREAM means a TCP socket)
