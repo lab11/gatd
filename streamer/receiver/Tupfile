@@ -1,0 +1,6 @@
+!cc = |> gcc %f -Wall -Werror -ljson-c -o %o |>
+
+
+: receiver_tcp.c |> !cc |> receiver_tcp
+
+.gitignore
