@@ -45,24 +45,9 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 				current_time)
 
 			amqp_pkt += data
-			print amqp_pkt
-
-			print current_time
-			print self.request
-			print len(data)
-			print data
-			print self.client_address
-
-
-
-			print addr
 
 			self.amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE,
 				body=amqp_pkt, routing_key='')
-
-
-
-
 
 	def finish (self):
 		if self.amqp_chan.is_open:

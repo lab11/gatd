@@ -87,7 +87,10 @@ def packet_callback (channel, method, prop, body):
 
 	except FE.ParserNotFound as e:
 		print "No parser found for the incoming message."
-		print data
+		print "Data: {}".format(data)
+		print "Addr: {}".format(IPy.IP(meta['addr']))
+		print "Port: {}".format(meta['port'])
+		print "Time: {}".format(meta['time'])
 		# archive
 		mi.writeUnformatted({'meta': meta,
 			                 'data': bson.binary.Binary(body[26:], 0)})
