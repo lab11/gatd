@@ -1,0 +1,6 @@
+!cc = |> gcc -Wall -Werror -O2 -lrabbitmq -c %f -o %o |>
+
+: foreach *.c |> !cc |> %B.o {objs}
+: {objs} |> gcc %f -lrabbitmq -o %o |> receiver-udp
+
+.gitignore
