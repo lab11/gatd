@@ -41,7 +41,11 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 		# Take the query and create the first pass filter by telling the
 		# stream exchange that we only want packets that have certain keys in 
 		# them.
+		# We can do better if the query wants a specific profile because the
+		# profile is included in the headers.
 		keys = dict((x,struct.pack("B",0)) for x in query.keys())
+		if 'profile_id' in query:
+			keys['profile_id'] = query['profile_id']
 		keys['x-match'] = "all"
 
 		# Setup a queue to get the necessary stream

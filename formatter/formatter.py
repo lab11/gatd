@@ -32,10 +32,10 @@ def unpackPacket (pkt):
 		# Packet can't have any payload, discard it
 		raise FE.BadPacket('Packet too short. No payload.')
 
-	type = struct.unpack('B', pkt[0:1])[0]
-	pkt  = pkt[1:]
+	ptype = struct.unpack('B', pkt[0:1])[0]
+	pkt   = pkt[1:]
 
-	if type == PKT_TYPE_UDP or type == PKT_TYPE_TCP:
+	if ptype == PKT_TYPE_UDP or ptype == PKT_TYPE_TCP:
 		if len(pkt) < PKT_HEADER_LEN_UDP:
 			raise FE.BadPacket('Malformed udp/tcp packet.')
 
@@ -78,9 +78,18 @@ def packet_callback (channel, method, prop, body):
 		# Save in database
 		mi.writeFormatted(ret)
 
-		# Send to streamer
 		# Set the headers to the keys present in the streamed message
-		props = pika.spec.BasicProperties(headers=dict((x,struct.pack("B",0)) for x in ret.keys()))
+		# The headers are key, value pairs where the keys are the same keys as
+		# in the packet and the values are a single NULL byte. The only
+		# exception is the "profile_id" key, which is set to the profile id
+		# string because it is included in ALL packets. This allows for
+		# efficient handling of a common use case, which is to receive all
+		# packets from a specific profile.
+		headers = dict((x,struct.pack('B',0)) for x in ret.keys())
+		headers['profile_id'] = ret['profile_id']
+		props = pika.spec.BasicProperties(headers=headers)
+
+		# Send to streamer
 		channel.basic_publish(exchange=STREAM_EXCHANGE, body=jsonv,
 		                      properties=props, routing_key='')
 
