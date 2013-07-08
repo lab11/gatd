@@ -96,7 +96,8 @@ def packet_callback (channel, method, prop, body):
 
 	except FE.ParserNotFound as e:
 		print "No parser found for the incoming message."
-		print "Data: {}".format(data)
+		print "Len:  {}".format(len(data))
+		print "Data: {}".format(data[0:10])
 		print "Addr: {}".format(IPy.IP(meta['addr']))
 		print "Port: {}".format(meta['port'])
 		print "Time: {}".format(meta['time'])
