@@ -9,17 +9,21 @@ import pika
 import json
 import struct
 
+# Hostname to connect to for rabbitmq queue
 HOSTNAME = "inductor.eecs.umich.edu"
-
-HOST = "::"
-PORT = 22500
 
 STREAM_EXCHANGE = "streamer_exchange"
 
+# Bind to localhost on the given port
+HOST = "::"
+PORT = 22500
+
 class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
+	# When a client connects setup a channel to the rabbitmq server
 	def setup (self):
-		self.amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOSTNAME))
+		self.amqp_conn = pika.BlockingConnection(
+			pika.ConnectionParameters(host=HOSTNAME))
 		self.amqp_chan = self.amqp_conn.channel();
 
 	def handle (self):
@@ -28,16 +32,20 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
 		# data should be a JSON blob describing what data the client wants
 		try:
-			query = json.loads(data)
+			self.query = json.loads(data)
 		except ValueError:
 			# Not a valid JSON blop
-			self.request.sendall("ERROR: Not a valid JSON blob")
+			self.request.sendall("ERROR: Query was not a valid JSON string.")
 			return
 
-		# Temporary: just match all packets that have all the same keys.
-		# Ideally, this should be expanded to allow for full queries and only
-		# use the amqp filtering as a rough first step.
-		keys = dict((x,struct.pack("B",0)) for x in query.keys())
+		# Take the query and create the first pass filter by telling the
+		# stream exchange that we only want packets that have certain keys in 
+		# them.
+		# We can do better if the query wants a specific profile because the
+		# profile is included in the headers.
+		keys = dict((x,struct.pack("B",0)) for x in self.query.keys())
+		if 'profile_id' in self.query:
+			keys['profile_id'] = self.query['profile_id']
 		keys['x-match'] = "all"
 
 		# Setup a queue to get the necessary stream
@@ -52,13 +60,19 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 		if self.amqp_chan.is_open:
 			self.amqp_chan.close()
 
+	# Called when each packet is received by this handler.
 	def process_packet (self, ch, method, properties, body):
-		try:
-			# Send the matching blob to the client
-			a = self.request.sendall(body)
-		except Exception:
-			self.amqp_chan.close()
-			return
+		# Determine if the incoming packet matches the query from the client
+		pkt = json.loads(body)
+		if (all((k in pkt and pkt[k]==v) for k,v in self.query.iteritems())):
+			# All of the key value pairs in the query are also in the newest
+			# packet
+			try:
+				# Send the matching blob to the client
+				a = self.request.sendall(body)
+			except Exception:
+				self.amqp_chan.close()
+				return
 
 class ThreadedTCPServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	address_family = socket.AF_INET6
@@ -71,4 +85,3 @@ class ThreadedTCPServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 # Run the server
 server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 server.serve_forever()
-

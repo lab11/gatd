@@ -12,6 +12,7 @@
 #include "utils.h"
 
 #include "receiver.h"
+#include "receiver_udp.h"
 
 // Global constants
 const char           amqp_hostname[]    = "localhost";
