@@ -11,8 +11,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
 	# Connect to server and send data
 	sock.connect((HOST, PORT))
-	for i in range(0,10):
-		sock.sendall("\x42")
+	for i in range(0,3):
+		sock.sendall("\x42\x43\x44EFG")
 		time.sleep(1)
 
 finally:

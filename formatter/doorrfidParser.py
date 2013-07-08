@@ -35,7 +35,7 @@ class doorrfidParser (parser.parser) :
 					uniqname = uniqname[0:i]
 					break
 			rfid_code = int("0x{:x}{:x}".format(values[2], values[3]), 16)
-			
+
 			ret['type'] = "rfid"
 			ret['seq_no'] = seq_no
 			ret['uniqname'] = uniqname
@@ -44,10 +44,10 @@ class doorrfidParser (parser.parser) :
 		elif len(data) == 7:
 			# This RFID card does not have access to the room
 			values = struct.unpack("!HLB", data)
-			
+
 			seq_no = values[0]
 			rfid_code = int("0x{:x}{:x}".format(values[1], values[2]), 16)
-			
+
 			ret['type'] = "rfid_invalid"
 			ret['seq_no'] = seq_no
 			ret['rfid_code'] = rfid_code
@@ -66,27 +66,10 @@ class doorrfidParser (parser.parser) :
 			ret['opener_address'] = str(remote_src_addr)
 			ret['password'] = password
 
-			
-			
 
-#		if len(data) == 11:
-#			values = struct.unpack("!HHHHBH", data);
-#		elif len(data) == 9:
-#			values = struct.unpack("!HHHHB", data);
-
-		ret['address']         = str(meta['addr'])
-		ret['port']            = meta['port']
-	#	ret['time'] 	       = meta['time']
-#		ret['temperature']     = values[1]
-#		ret['humidity']        = values[2]
-#		ret['light']           = values[3]
-#		ret['motion']          = bool(values[4])
-#		if len(values) == 6:
-#			ret['battery'] = values[5]
-		ret['public']          = settings['public']
-
-		print ret		
+		ret['address'] = str(meta['addr'])
+		ret['port']    = meta['port']
+		ret['time']    = meta['time']
+		ret['public']  = settings['public']
 
 		return ret
-
-
