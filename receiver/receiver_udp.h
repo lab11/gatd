@@ -9,7 +9,6 @@
 
 
 #define UDP_RECEIVE_PORT 4001
-#define MAX_INCOMING_LENGTH 4096
 #define PKT_TYPE_UDP 0
 
 extern const char           amqp_hostname[];

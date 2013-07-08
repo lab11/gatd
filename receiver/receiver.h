@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 
+#define MAX_INCOMING_LENGTH 4096
+
 struct message_item_t {
 	uint8_t         type;   // 8 bits to identify the structure of this packet
 	                        //  in case it changes
