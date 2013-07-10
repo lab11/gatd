@@ -19,19 +19,20 @@ class coilcubeParser (parser.parser) :
 		cc_type = values[10]
 
 		if cc_type == self.DATA_TYPE_RAW:
-			if len(data) < 29:
+			if len(data) < 30:
 				# not sure what to do
 				print "COILCUBE: Too short!"
 				return
 
 			# Parse out the rest of the values
-			values = struct.unpack("!QQBB", data[11:29])
+			values = struct.unpack("!QQBBB", data[11:30])
 
 			ret['type'] = 'coilcube_raw'
 			ret['ccid'] = values[0]
 			ret['time'] = values[1]/1000
-			ret['seq_no'] = values[2]
-			ret['counter'] = values[3]
+			ret['version'] = values[2]
+			ret['seq_no'] = values[3]
+			ret['counter'] = values[4]
 
 
 		ret['address'] = str(meta['addr'])
