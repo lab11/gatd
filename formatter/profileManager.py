@@ -228,13 +228,18 @@ class profileManager:
 
 		try:
 			r = parser.parse(data=data, meta=meta, extra=extra, settings=psettings)
-			r['profile_id'] = pid
+			if r == None:
+				# Just dump this packet
+				return None
 		except Exception as e:
 			print "Bad Parser: " + str(e)
 			r = None
 
 		if type(r) != dict:
 			raise FE.ParserError('Parser does not return a dict.')
+
+		# Require that the profile ID is set
+		r['profile_id'] = pid
 
 		return r
 

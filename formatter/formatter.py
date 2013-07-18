@@ -39,10 +39,10 @@ def unpackPacket (pkt):
 		if len(pkt) < PKT_HEADER_LEN_UDP:
 			raise FE.BadPacket('Malformed udp/tcp packet.')
 
-		record  = struct.unpack('>4IHQ', pkt[0:PKT_HEADER_LEN_UDP])
-		addr    = int('0x%x%x%x%x' % tuple(record[0:4]), 16)
-		port    = record[4]
-		time    = record[5]
+		record  = struct.unpack('>QQHQ', pkt[0:PKT_HEADER_LEN_UDP])
+		addr    = int('0x{:0>16x}{:0>16x}'.format(*record[0:2]), 16)
+		port    = record[2]
+		time    = record[3]
 		if len(pkt) > PKT_HEADER_LEN_UDP:
 			data = struct.unpack('>%is' % (len(pkt)-PKT_HEADER_LEN_UDP),
 			                     pkt[PKT_HEADER_LEN_UDP:])[0]
@@ -71,10 +71,13 @@ def packet_callback (channel, method, prop, body):
 
 		# Process the packet by the correct parser
 		ret = pm.parsePacket(data=data, meta=meta)
+		if ret == None:
+			# Discard this packet from storage and the streamer
+			raise Exception
 
 		# Convert dict to nice json thingy
 		jsonv = json.dumps(ret)
-
+		
 		# Save in database
 		mi.writeFormatted(ret)
 
@@ -112,6 +115,9 @@ def packet_callback (channel, method, prop, body):
 		print "ParseError: " + str(e)
 
 	except UnicodeDecodeError:
+		pass
+	
+	except Exception:
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it

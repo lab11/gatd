@@ -5,9 +5,6 @@ import parser
 
 class coilcubeParser (parser.parser) :
 
-	DATA_TYPE_RAW = 1
-	DATA_TYPE_CALCULATED = 2
-
 	def __init__ (self):
 		pass
 
@@ -16,28 +13,30 @@ class coilcubeParser (parser.parser) :
 
 		# Get the type of coilcube packet
 		values = struct.unpack("!10BB", data[0:11])
-		cc_type = values[10]
+		cc_version = values[10]
+		data = data[11:]
 
-		if cc_type == self.DATA_TYPE_RAW:
-			if len(data) < 30:
+		if cc_version == 1:
+			if len(data) != 2:
 				# not sure what to do
 				print "COILCUBE: Too short!"
-				return
+				return None
 
 			# Parse out the rest of the values
-			values = struct.unpack("!QQBBB", data[11:30])
+			values = struct.unpack("!BB", data)
 
 			ret['type'] = 'coilcube_raw'
-			ret['ccid'] = values[0]
-			ret['time'] = values[1]/1000
-			ret['version'] = values[2]
-			ret['seq_no'] = values[3]
-			ret['counter'] = values[4]
+			# remove the prefix and toggle the bit
+			ret['ccid'] = (meta['addr'] & 0xFFFFFFFFFFFFFFFF) ^ (0x0200000000000000)
+			ret['ccid'] = (meta['addr'] & 0xFFFFFFFFFFFFFFFF)
+			ret['version'] = 1
+			ret['seq_no'] = values[1]
+			ret['counter'] = values[0]
 
 
 		ret['address'] = str(meta['addr'])
 		ret['port']    = meta['port']
-#		ret['time']    = meta['time']
+		ret['time']    = meta['time']
 		ret['public']  = settings['public']
 
 		return ret
