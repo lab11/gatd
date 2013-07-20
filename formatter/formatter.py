@@ -20,6 +20,7 @@ MONGO_PORT  = 19000
 
 PKT_TYPE_UDP       = 0
 PKT_TYPE_TCP       = 1
+PKT_TYPE_PROCESSED = 2
 
 PKT_HEADER_LEN_UDP = 26
 PKT_HEADER_LEN_TCP = 26
@@ -56,6 +57,17 @@ def unpackPacket (pkt):
 
 		return (data, meta)
 
+	elif ptype == PKT_TYPE_PROCESSED:
+		try:
+			data = json.loads(pkt)
+
+			if 'profile_id' not in data:
+				raise FE.BadPacket('"profile_id" key must be in processed data json blob')
+
+			return (data, None)
+
+		except ValueError as e:
+			raise FE.BadPacket("Processed packet not JSON.")
 	else:
 		raise FE.BadPacket('Invalid type of packet')
 
@@ -69,11 +81,17 @@ def packet_callback (channel, method, prop, body):
 		# Parse out the fields from the receiver
 		data, meta = unpackPacket(body)
 
-		# Process the packet by the correct parser
-		ret = pm.parsePacket(data=data, meta=meta)
-		if ret == None:
-			# Discard this packet from storage and the streamer
-			raise Exception
+		if meta == None:
+			# This is a processed packet that has already been through
+			# the system once. It does not need to be formatted.
+			ret = data
+
+		else:
+			# Process the packet by the correct parser
+			ret = pm.parsePacket(data=data, meta=meta)
+			if ret == None:
+				# Discard this packet from storage and the streamer
+				raise Exception
 
 		# Convert dict to nice json thingy
 		jsonv = json.dumps(ret)
@@ -118,6 +136,10 @@ def packet_callback (channel, method, prop, body):
 		pass
 	
 	except Exception:
+		pass
+
+	except TypeError:
+		# Invalid incoming packet so the unpacker returned None
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
