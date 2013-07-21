@@ -92,10 +92,10 @@ def packet_callback (channel, method, prop, body):
 			if ret == None:
 				# Discard this packet from storage and the streamer
 				raise Exception
-
+		
 		# Convert dict to nice json thingy
 		jsonv = json.dumps(ret)
-		
+
 		# Save in database
 		mi.writeFormatted(ret)
 

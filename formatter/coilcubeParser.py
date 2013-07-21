@@ -28,7 +28,6 @@ class coilcubeParser (parser.parser) :
 			ret['type'] = 'coilcube_raw'
 			# remove the prefix and toggle the bit
 			ret['ccid'] = (meta['addr'] & 0xFFFFFFFFFFFFFFFF) ^ (0x0200000000000000)
-			ret['ccid'] = (meta['addr'] & 0xFFFFFFFFFFFFFFFF)
 			ret['version'] = 1
 			ret['seq_no'] = values[1]
 			ret['counter'] = values[0]
