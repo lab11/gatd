@@ -1,0 +1,89 @@
+<html>
+<head>
+	<script src="js/socket.io-0.8.7.js"></script>
+	<script src="js/jquery-1.7.1.min.js"></script>
+	<script src="js/jsIP.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
+	<title>Coilcube</title>
+
+	<style type="text/css">
+		#body {
+			text-align: center;
+		}
+		h1 {
+			font-family: "helvetica";
+			font-size: 28pt;
+			margin-bottom: 0;
+		}
+		h2 {
+			font-family: "helvetica";
+			font-size: 24pt;
+			margin: 10px 0 10px 0;
+			padding: 0;
+		}
+		#power_meters {
+		}
+		.pm {
+			border: 4px solid black;
+			margin: 10px;
+			padding: 20px;
+			text-align: center;
+			width: 150px;
+		}
+		.pm .ccid {
+			color: #aaa;
+		}
+		.pm .watts {
+			font-size: 18pt;
+		}
+	</style>
+
+
+</head>
+
+<body>
+	<div id="body">
+		<h1>Power Meters</h1>
+		<h2> by Coilcube</h2>
+
+		<div id="power_meters">
+		</div>
+
+	</div>
+
+	<script>
+
+	var socket;
+	var jsIP = require('./jsIP');
+
+
+	function update (data) {
+		$("div#power_meters div#" + data['ccid'] + " span.watts").text(data['watts'] + ' W');
+	}
+
+	var power_meters = {};
+	
+	onload = function() {
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+		socket.on('connect', function (data) {
+			socket.emit('query', {'profile_id': '7aiOPJapXF', 'type': 'coilcube_watts'});
+		});
+
+		socket.on('data', function (data) {
+			if (data['ccid'] in power_meters) {
+				update(data);
+			} else {
+				power_meters[data['ccid']] = 1;
+
+				$("div#power_meters").prepend('<div class="pm" id="' + data['ccid'] + '"> <span class="watts">' + data['watts'] + ' W</span><br /><span class="ccid">' + data['ccid_mac'] + '</span></div>');
+			}
+		});
+
+
+	}
+	</script>
+
+
+</body>
+</html>
+
