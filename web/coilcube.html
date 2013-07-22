@@ -1,7 +1,8 @@
 <html>
 <head>
 	<script src="js/socket.io-0.8.7.js"></script>
-	<script src="js/jquery-1.7.1.min.js"></script>
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
 	<script src="js/jsIP.js"></script>
 	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
 	<title>Coilcube</title>
@@ -28,7 +29,7 @@
 			margin: 10px;
 			padding: 20px;
 			text-align: center;
-			width: 150px;
+			width: 200px;
 		}
 		.pm .ccid {
 			color: #aaa;
@@ -55,10 +56,17 @@
 
 	var socket;
 	var jsIP = require('./jsIP');
+	var box_animate_color = {borderTopColor: '#59b4de',
+	                         borderLeftColor: '#59b4de',
+							 borderRightColor: '#59b4de',
+							 borderBottomColor: '#59b4de'};
 
 
 	function update (data) {
-		$("div#power_meters div#" + data['ccid'] + " span.watts").text(data['watts'] + ' W');
+		watts = data['watts'].toFixed(1);
+		$("#"+data['ccid'] + " span.watts").text(watts + ' W');
+		$("#"+data['ccid']).css('border-color', '#59b4de');
+		$("#"+data['ccid']).animate({'border-color': '#000'}, 1000);
 	}
 
 	var power_meters = {};
@@ -75,7 +83,7 @@
 			} else {
 				power_meters[data['ccid']] = 1;
 
-				$("div#power_meters").prepend('<div class="pm" id="' + data['ccid'] + '"> <span class="watts">' + data['watts'] + ' W</span><br /><span class="ccid">' + data['ccid_mac'] + '</span></div>');
+				$("div#power_meters").prepend('<div class="pm" id="' + data['ccid'] + '"> <span class="watts">' + data['watts'].toFixed(1) + ' W</span><br /><span class="ccid">' + data['ccid_mac'] + '</span></div>');
 			}
 		});
 
