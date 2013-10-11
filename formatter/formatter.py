@@ -123,8 +123,9 @@ def packet_callback (channel, method, prop, body):
 		print "Port: {}".format(meta['port'])
 		print "Time: {}".format(meta['time'])
 		# archive
+		meta['addr'] = str(meta['addr'])
 		mi.writeUnformatted({'meta': meta,
-			                 'data': body[26:]})
+			                 'data': bson.binary.Binary(body[26:], 0)})
 
 	except FE.BadPacket as e:
 		print "BadPacket: " + str(e)
