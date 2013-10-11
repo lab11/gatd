@@ -92,7 +92,7 @@ def packet_callback (channel, method, prop, body):
 			if ret == None:
 				# Discard this packet from storage and the streamer
 				raise Exception
-		
+
 		# Convert dict to nice json thingy
 		jsonv = json.dumps(ret)
 
@@ -124,7 +124,7 @@ def packet_callback (channel, method, prop, body):
 		print "Time: {}".format(meta['time'])
 		# archive
 		mi.writeUnformatted({'meta': meta,
-			                 'data': bson.binary.Binary(body[26:], 0)})
+			                 'data': body[26:]})
 
 	except FE.BadPacket as e:
 		print "BadPacket: " + str(e)
@@ -134,7 +134,7 @@ def packet_callback (channel, method, prop, body):
 
 	except UnicodeDecodeError:
 		pass
-	
+
 	except Exception:
 		pass
 
@@ -143,7 +143,7 @@ def packet_callback (channel, method, prop, body):
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
-	channel.basic_ack(delivery_tag=method.delivery_tag)	
+	channel.basic_ack(delivery_tag=method.delivery_tag)
 
 
 mi = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
