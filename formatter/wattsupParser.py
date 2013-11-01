@@ -12,6 +12,7 @@ class wattsupParser (parser.parser) :
 		ret = {}
 
 		# Parse the JSON blob
+		print(data)
 		vals = json.loads(data[10:])
 
 		ret['wattsupid']    = int(vals['id'][0])
@@ -30,6 +31,7 @@ class wattsupParser (parser.parser) :
 		ret['frequency']    = float(vals['frq'][0])/10.0
 		ret['volt-amps']    = float(vals['va'][0])/10.0
 
+		print("got wattsup: {}".format(ret['wattsupid']))
 
 		ret['address'] = str(meta['addr'])
 		ret['port']    = meta['port']

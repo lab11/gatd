@@ -42,6 +42,7 @@ class profileManager:
 		# Recover saved config files
 		configs = self.db.getConfigs()
 		for c in configs:
+			print("Adding config {}: {}".format(c['name'], c['profile_id']))
 			self._addMapInfo(name=str(c['name']),
 			                 pid=str(c['profile_id']),
 			                 uid=str(c['_id']))
@@ -72,7 +73,6 @@ class profileManager:
 
 	def _getParser (self, parser_name):
 		# Load the python parser
-		print "Adding parser {0}".format(parser_name)
 
 		exec('import ' + parser_name)
 		parser_mod = sys.modules[parser_name]

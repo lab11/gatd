@@ -1,0 +1,63 @@
+<html>
+<head>
+	<script src="js/socket.io-0.8.7.js"></script>
+	<script src="js/jquery-1.7.1.min.js"></script>
+	<script src="js/jsIP.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
+	<title>test</title>
+
+</head>
+
+<body>
+	<h1>a</h1>
+
+	<script>
+
+	var socket;
+	var jsIP = require('./jsIP');
+
+	function display_data (data) {
+		out = "<div>";
+		out += "<span>Address: " + jsIP(parseInt(data['address'])).pureStr() + "</span>";
+		out += "<ul>";
+		for (var key in data) {
+			if (key != 'address' && key != '_id') {
+				if (key == 'timestamp') {
+					title = 'Time';
+					var date = new Date(data[key]);
+					value = date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+				} else {
+					title = key;
+					value = data[key];
+				}
+				out += "<li>" + title + ": " + value + "</li>";
+			}
+		}
+		out += "</ul></div>";
+		return out;
+	}
+
+	onload = function() {
+		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
+		socket.on('connect', function (data) {
+			console.log('yay connected');
+			socket.emit('query', {'profile_id': 'YWUr2G8AZP'});
+		});
+
+		socket.on('data', function (data) {
+		//	console.log("woo");
+			console.log(data);
+		//	socket.emit('my other event', { my: 'data' });
+		//	$("div#stream").append(data["address"] + " " +  data["seq"] + "<br />");
+			$("div#stream").prepend(display_data(data));
+		});
+
+
+	}
+	</script>
+
+
+
+	<div id="stream"></div>
+</body>
+</html>

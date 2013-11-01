@@ -21,6 +21,7 @@ MONGO_PORT  = 19000
 PKT_TYPE_UDP       = 0
 PKT_TYPE_TCP       = 1
 PKT_TYPE_PROCESSED = 2
+PKT_TYPE_HTTP_POST = 3
 
 PKT_HEADER_LEN_UDP = 26
 PKT_HEADER_LEN_TCP = 26
@@ -36,7 +37,9 @@ def unpackPacket (pkt):
 	ptype = struct.unpack('B', pkt[0:1])[0]
 	pkt   = pkt[1:]
 
-	if ptype == PKT_TYPE_UDP or ptype == PKT_TYPE_TCP:
+	if ptype == PKT_TYPE_UDP or \
+	   ptype == PKT_TYPE_TCP or \
+	   ptype == PKT_TYPE_HTTP_POST:
 		if len(pkt) < PKT_HEADER_LEN_UDP:
 			raise FE.BadPacket('Malformed udp/tcp packet.')
 

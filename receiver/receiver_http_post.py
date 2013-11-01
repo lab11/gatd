@@ -15,7 +15,7 @@ HOSTNAME = "localhost"
 RECEIVE_EXCHANGE = "receive_exchange"
 
 MAX_INCOMING_LENGTH = 4096
-PKT_TYPE_HTTP_POST = 2
+PKT_TYPE_HTTP_POST = 3
 
 class myHandler(BaseHTTPRequestHandler):
 	requestline = ''
@@ -26,7 +26,7 @@ class myHandler(BaseHTTPRequestHandler):
 
 		amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(
 			host=HOSTNAME))
-		amqp_chan = self.amqp_conn.channel();
+		amqp_chan = amqp_conn.channel();
 
 		header_str = ''
 		while True:
