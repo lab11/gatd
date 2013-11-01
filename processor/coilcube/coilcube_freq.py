@@ -79,9 +79,9 @@ def process_packet (ch, method, properties, body):
 	print(outpkt)
 
 	ojson = json.dumps(outpkt)
-	ojson = '\x02' + wattjson
+	ojson = '\x02' + ojson
 
-	amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE, body=wattjson,
+	amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE, body=ojson,
 		routing_key='')
 
 
