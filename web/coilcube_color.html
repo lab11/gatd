@@ -90,6 +90,9 @@
 			-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 			-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 		}
+		.box_white {
+			background: #fff !important;
+		}
 
 		.graph {
 			padding: 100px 5px 0 50px;
@@ -161,7 +164,7 @@
 		<div id="graph" class="box_shadow graph graph1"></div>
 		<div id="graph2" class="box_shadow graph graph2"></div>
 
-		<div id="coilcubes" class="box_shadow">
+		<div id="coilcubes" class="box_shadow box_white">
 			<div id="cc_blue" class="coilcube">
 				<img src="images/coilcube_blue.png" />
 			</div>
@@ -344,14 +347,6 @@
 			ctx.lineTo(x + size, y - size);
 		}
 
-
-
-	/*	g = $.grapher($("#graph"), {legend: {show: false, conainer: $("#graph_key")},
-			                        yaxis: {min:0, label:"Power (W)"},
-			                        yaxes: [{}, {position:"right", min:0, max:5, label:"Frequency (Activations/Second)", tickFormatter:y2_format}],
-			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
-			                       }
-			         );*/
 		g = $.grapher($("#graph"), {legend: {show: false, conainer: $("#graph_key")},
 									xaxis: {show:true, width:120000, mode: "time",
 									timezone:"browser", tickFormatter:x_format},
@@ -365,8 +360,6 @@
 			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			                       }
 			         );
-
-
 
 
 		setInterval(function smoothScrol() {
