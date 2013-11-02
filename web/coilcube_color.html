@@ -4,6 +4,10 @@
 	<script src="js/jquery-1.10.2.min.js"></script>
 	<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
 	<script src="js/jsIP.js"></script>
+	<script src="js/flot/jquery.flot-0.8.1.js"></script>
+	<script src="js/flot/jquery.flot.time-0.8.1.js"></script>
+	<script src="js/underscore.js"></script>
+	<script src="js/jquery.grapher.js"></script>
 	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
 	<title>Coilcube</title>
 
@@ -38,6 +42,92 @@
 		.pm .watts {
 			font-size: 18pt;
 		}
+		#coilcubes {
+			width: 1000px;
+			height: 150px;
+			margin: 0 auto 0 auto;
+			text-align: center;
+		}
+		.coilcube {
+			 width: 110px;
+			 height: 150px;
+			 float: left;
+		}
+		.coilcube img {
+			 width: 75px;
+			 position: relative;
+			 top: 25px;
+		}
+		.gkps {
+			top: 55px !important;
+		}
+
+		.box_shadow {
+			border: 1px solid #ddd;
+			background: #fff;
+			background: linear-gradient(#f6f6f6 0, #fff 50px);
+			background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+			background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+			background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+			background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+			box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+			-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+			-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+			-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+			-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+		}
+
+		.graph {
+			padding: 100px 5px 0 50px;
+			margin: 15px auto 30px auto;
+		}
+		.graph1 {
+			width:1000px;
+			height:200px;
+		}
+		.graph2 {
+			width:1000px;
+			height:500px;
+		}
+		.axisLabel {
+			position: absolute;
+			text-align: center;
+			font-size: 12px;
+		}
+		.yaxisLabel {
+			top: 50%;
+			left: 2px;
+			transform: rotate(-90deg);
+			-o-transform: rotate(-90deg);
+			-ms-transform: rotate(-90deg);
+			-moz-transform: rotate(-90deg);
+			-webkit-transform:  rotate(-90deg);
+			transform-origin: 0 0;
+			-o-transform-origin: 0 0;
+			-ms-transform-origin: 0 0;
+			-moz-transform-origin: 0 0;
+			-webkit-transform-origin: 0 0;
+		}
+		.y2axisLabel {
+			top: 10%;
+			left: 998px;
+			width: 400px;
+			transform: rotate(90deg);
+			-o-transform: rotate(90deg);
+			-ms-transform: rotate(90deg);
+			-moz-transform: rotate(90deg);
+			-webkit-transform:  rotate(90deg);
+			transform-origin: 0 0;
+			-o-transform-origin: 0 0;
+			-ms-transform-origin: 0 0;
+			-moz-transform-origin: 0 0;
+			-webkit-transform-origin: 0 0;
+		}
+		.ie7 .yaxisLabel, .ie8 .yaxisLabel {
+			top: 40%;
+			font-size: 36px;
+			filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.0, M12=0.33, M21=-0.33, M22=0.0,sizingMethod='auto expand');
+		}
 	</style>
 
 
@@ -45,16 +135,40 @@
 
 <body>
 	<div id="body">
-		<h1>Power Meters</h1>
-		<h2> by Coilcube</h2>
+		<h1>Monjolo</h1>
 
-		<div>
-			<div id="cc_blue" style="width:300px; height:200px;">
-				<img src="images/coilcube_blue.png" width="100px" />
+		<div id="graph" class="box_shadow graph graph1"></div>
+		<div id="graph2" class="box_shadow graph graph2"></div>
+
+		<div id="coilcubes" class="box_shadow">
+			<div id="cc_blue" class="coilcube">
+				<img src="images/coilcube_blue.png" />
 			</div>
-			<div id="cc_red" style="width:300px; height:200px;">
-				<img src="images/coilcube_red.png" width="100px" />
+			<div id="cc_red" class="coilcube">
+				<img src="images/coilcube_red.png" />
 			</div>
+			<div id="cc_purple" class="coilcube">
+				<img src="images/coilcube_purple.png" />
+			</div>
+			<div id="cc_silver" class="coilcube">
+				<img src="images/coilcube_silver.png" />
+			</div>
+			<div id="cc_yellow" class="coilcube">
+				<img src="images/coilcube_yellow.png" />
+			</div>
+			<div id="cc_orange" class="coilcube">
+				<img src="images/coilcube_orange.png" />
+			</div>
+			<div id="cc_green" class="coilcube">
+				<img src="images/coilcube_green.png" />
+			</div>
+			<div id="cc_pink" class="coilcube">
+				<img src="images/split_core_pink.png" />
+			</div>
+			<div id="cc_teal" class="coilcube">
+				<img src="images/gkps_impluse_teal.png" class="gkps" />
+			</div>
+			<div id="wup"></div>
 		</div>
 
 		<div id="power_meters">
@@ -64,42 +178,152 @@
 
 	<script>
 
-	var socket;
+	var CC_PID = '7aiOPJapXF'
+	var WUP_PID = 'YWUr2G8AZP'
+	var socket_cc, socket_wup;
 	var jsIP = require('./jsIP');
 	var box_animate_color = {borderTopColor: '#59b4de',
 	                         borderLeftColor: '#59b4de',
 							 borderRightColor: '#59b4de',
 							 borderBottomColor: '#59b4de'};
 
-	var color_mapping = {'c0:98:e5:43:4f:f3:68:eb': 'blue',
-	                     'c0:98:e5:43:4f:f3:53:01': 'red',}
+	var node_mapping =  {'c0:98:e5:43:4f:f3:68:eb': 'blue',
+	                     'c0:98:e5:43:4f:f3:53:01': 'red',
+	                     'c0:98:e5:43:4f:f3:70:ed': 'purple',
+	                     'c0:98:e5:43:4f:f3:69:6d': 'silver',
+	                     'c0:98:e5:43:4f:f3:7e:11': 'yellow',
+	                     'c0:98:e5:43:4f:f3:7c:fe': 'orange',
+	                     'c0:98:e5:43:4f:f3:85:7d': 'green',
+	                     'c0:98:e5:49:4d:df:c7:51': 'pink',
+	                     'c0:98:e5:49:4d:df:f8:91': 'teal',
+	                    }
+
+	var color_mapping = {'blue': '#0000FF',
+	                     'red': '#FF0000',
+	                     'purple': '#BC13FE',
+	                     'silver': '#E3E4E5',
+	                     'yellow': '#FFDF00',
+	                     'orange': '#FF8C00',
+	                     'green': '#00FF00',
+	                     'pink': '#FF5CCD',
+	                     'teal': '#18A7B5',
+	                    };
 
 
-	function update (data) {
-		$("#cc_"+color_mapping[data['ccid_mac']]).css('background-color', '#59b4de');
-		$("#cc_"+color_mapping[data['ccid_mac']]).animate({'background-color': '#fff'}, 1000);
+	function update (color) {
+		$("#cc_"+color).css('background-color', '#59b4de');
+		$("#cc_"+color).animate({'background-color': '#fff'}, 1000);
 	}
 
 	var power_meters = {};
 
 	onload = function() {
-		socket = io.connect('inductor.eecs.umich.edu:8080/stream');
-		socket.on('connect', function (data) {
-			socket.emit('query', {'profile_id': '7aiOPJapXF', 'type': 'coilcube_freq'});
+		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
+		socket_cc.on('connect', function (data) {
+			socket_cc.emit('query', {'profile_id': {$in: [CC_PID, WUP_PID]},
+				                     'type': {$or: ['coilcube_freq', '']}});
 		});
 
-		socket.on('data', function (data) {
-			console.log("data");
-			console.log(data['ccid_mac']);
-			console.log(color_mapping[data['ccid_mac']]);
-			if (data['ccid_mac'] in color_mapping) {
-				update(data);
-			} //else {
-			//	power_meters[data['ccid']] = 1;
-//
-//				$("div#power_meters").prepend('<div class="pm" id="' + data['ccid'] + '"> <span class="watts">' + data['watts'].toFixed(1) + ' W</span><br /><span class="ccid">' + data['ccid_mac'] + '</span></div>');
-//			}
+		socket_cc.on('data', function (data) {
+			if (data['profile_id'] == CC_PID) {
+				if (data['ccid_mac'] in node_mapping) {
+					var color = node_mapping[data['ccid_mac']]
+					update(color);
+
+					pd = {}
+					pd[color] = [data['time']-14400000, data['freq']]
+					pdw = {name: '',
+					       data:pd,
+					       color:color_mapping[color],
+					       lines:{show:false},
+					       points:{show:true,
+					               radius:4,
+					               fill:true,
+					               fillColor:color_mapping[color]},
+					   };
+					if (color == "pink") {
+						pdw['points']['symbol'] = cross;
+						pdw['points']['radius'] = 10;
+					}
+					if (color == "teal") {
+						pdw['points']['symbol'] = box;
+						pdw['points']['radius'] = 6;
+					}
+					g2.addData(pdw);
+				//	g.update();
+
+				}
+			} else if (data['profile_id'] == WUP_PID) {
+				pd = {}
+				pd['aggregate'] = [data['time']-14400000, data['watts']]
+				pdw = {name: '', data:pd, color:"#000"};
+				g.addData(pdw);
+			//	g.update();
+
+			}
 		});
+
+		var y2_format = function (num, obj) {
+			if (parseInt(num) == Math.round(num)) {
+				return String(Math.round(num));
+			} else {
+				return '';
+			}
+		}
+
+		function cross(ctx, x, y, radius, shadow) {
+			var size = radius * Math.sqrt(Math.PI) / 2;
+			ctx.moveTo(x - size, y - size);
+			ctx.lineTo(x + size, y + size);
+			ctx.moveTo(x - size, y + size);
+			ctx.lineTo(x + size, y - size);
+		}
+
+		function box(ctx, x, y, radius, shadow) {
+			var size = radius * Math.sqrt(Math.PI) / 2;
+			ctx.moveTo(x - size, y - size);
+			ctx.lineTo(x + size, y - size);
+			ctx.moveTo(x - size, y - size);
+			ctx.lineTo(x - size, y + size);
+			ctx.moveTo(x + size, y + size);
+			ctx.lineTo(x - size, y + size);
+			ctx.moveTo(x + size, y + size);
+			ctx.lineTo(x + size, y - size);
+		}
+
+
+
+	/*	g = $.grapher($("#graph"), {legend: {show: false, conainer: $("#graph_key")},
+			                        yaxis: {min:0, label:"Power (W)"},
+			                        yaxes: [{}, {position:"right", min:0, max:5, label:"Frequency (Activations/Second)", tickFormatter:y2_format}],
+			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+			                       }
+			         );*/
+		g = $.grapher($("#graph"), {legend: {show: false, conainer: $("#graph_key")},
+			                        yaxis: {min:0, label:"Power (W)", max:200},
+			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+			                       }
+			         );
+		g2 = $.grapher($("#graph2"), {legend: {show: false, conainer: $("#graph_key")},
+			                        yaxis: {min:0, label:"Frequency (Activations/Second)", max:4},
+			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+			                       }
+			         );
+
+
+
+
+		setInterval(function smoothScrol() {
+			pd = {}
+			pd['scroll'] = [Date.now()-14400000-185000, 0]
+			pdw = {name: 'scroll', data:pd, color:'rgba(0,0,0,0)'};
+			g.addData(pdw);
+			g.update();
+			g2.addData(pdw);
+			g2.update();
+		}, 40);
+
+
 
 
 	}

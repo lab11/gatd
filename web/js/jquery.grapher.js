@@ -4,8 +4,10 @@
 	var Grapher = function (placeholder, options) {
 		var
 			data       = {},
+			meta       = {},
+			max_x      = 0,
+			width      = 0,
 			num_lines  = 0,
-			num_points = 300,
 			plot,
 			graph = this;
 
@@ -45,35 +47,20 @@
 					if (!_.isArray(data[key_name])) {
 						data[key_name] = [];
 					}
-					if (data[key_name].length == num_points) {
-						// remove the first element
-						data[key_name] = data[key_name].slice(1);
-					}
 
 					data[key_name].push(s[si]);
-				}
 
-			}
-
-/*
-			// d should be an associative array
-			for (xi in d) {
-				d[xi] = _.isArray(d[xi]) ? d[xi].slice() : [d[xi]];
-
-				for (j in d[xi]) {
-					if (_.isArray(data[xi])) {
-						if (data[xi].length == num_points) {
-							// remove the first element
-							data[xi] = data[xi].slice(1);
-						}
-						data[xi].push(d[xi][j]);
-					} else {
-						data[xi] = [d[xi][j]];
+					if (s[si][0] > max_x) {
+						max_x = s[si][0];
 					}
-				}
 
+					meta[key_name] = {color: d[group_i]['color'],
+					                  yaxis: d[group_i]['yaxis'],
+					                  lines: d[group_i]['lines'],
+					                  points: d[group_i]['points'],
+					                 }
+				}
 			}
-			*/
 
 		}
 
@@ -86,6 +73,30 @@
 		}
 
 		function update () {
+
+			// Make sure all data points fit within the width of the
+			// graph.
+			// This method requires the x axis values to be in
+			// increasing order.
+
+			var min = max_x - width;
+			var i;
+			for (key in data) {
+				for(i=0; i<data[key].length; i++) {
+					if (data[key][i][0] >= min) {
+						break;
+					}
+				}
+				if (i > 0) {
+					if (i >= data[key].length) {
+						delete data[key];
+					} else {
+						data[key] = data[key].slice(i);
+					}
+				}
+			}
+
+
 			commitData();
 			plot.setupGrid();
 			plot.draw();
@@ -100,23 +111,43 @@
 					if (_.isArray(data[x][i])) {
 						s.push(data[x][i]);
 					} else {
-						s.push([parseInt(i), data[x][i]]);
+						s.push([parseInt(i), data[x][i], 10]);
 					}
 				}
-				t = {'label': x, 'data': s};
+				t = {'label': x,
+				     'data': s,
+				     'color': meta[x]['color'],
+				     'yaxis': meta[x]['yaxis'],
+				     'lines': meta[x]['lines'],
+				     'points': meta[x]['points'],
+				 };
 				graph_data.push(t);
 			}
 
 			plot.setData(graph_data);
-	//		console.log(graph_data);
 		}
 
+		width = options['xaxis']['width'];
+
 		plot = $.plot(placeholder, [[0,0]], options);
+
+		if (options['yaxis']['label']) {
+			var yaxisLabel = $("<div class='axisLabel yaxisLabel'></div>")
+				.text(options['yaxis']['label'])
+				.appendTo(placeholder);
+			yaxisLabel.css("margin-top", yaxisLabel.width() / 2 - 20);
+		}
+	/*	if (options['yaxes'][1]['label']) {
+			var y2axisLabel = $("<div class='axisLabel y2axisLabel'></div>")
+				.text(options['yaxes'][1]['label'])
+				.appendTo(placeholder);
+			//y2axisLabel.css("margin-top", y2axisLabel.width() / 2 - 50);
+		}*/
+
 	}
 
 	$.grapher = function (placeholder) {
-		var options = arguments[1];
-		var graph_key = (_.has(options, 'graph_key')) ? options['graph_key'] : null;
+		var user_opts = arguments[1];
 
 		var label_format = function (label, b) {
 			// Capitalize and remove underscores
@@ -126,14 +157,19 @@
 			});
 		}
 
+
+
 		var options = {
 			series: {shadowSize: 0},
-		//	yaxis: {min:0, max:100},
-			xaxis: {show:true, width:900000, mode: "time", timeformat: "%h:%M:%S"},
-			legend: {show:true, labelFormatter: label_format, container: graph_key}
+			xaxis: {show:true, width:120000, mode: "time", timeformat: "%I:%M %P"},
+			yaxis: {min:0},
+			//yaxes: user_opts['yaxes'],
+			legend: {show:false, labelFormatter: label_format},
+			colors: user_opts['colors'],
 
 		};
 
+		$.extend(options, user_opts);
 
 
 		var g = new Grapher($(placeholder), options);
