@@ -389,7 +389,6 @@ Licensed under the MIT license.
 
 		var info = this.getTextInfo(layer, text, font, angle, width),
 			positions = info.positions;
-
 		// Tweak the div's position to match the text's alignment
 
 		if (halign == "center") {

@@ -157,11 +157,13 @@
 			});
 		}
 
-
+		function xformatter(val, axis) {
+		    return val.toFixed(axis.tickDecimals);
+		}
 
 		var options = {
 			series: {shadowSize: 0},
-			xaxis: {show:true, width:120000, mode: "time", timeformat: "%I:%M %P"},
+			xaxis: {show:true, width:120000, mode: "time", timeformat: "%I:%M:%S %P"},
 			yaxis: {min:0},
 			//yaxes: user_opts['yaxes'],
 			legend: {show:false, labelFormatter: label_format},
