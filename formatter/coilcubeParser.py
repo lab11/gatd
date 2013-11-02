@@ -1,3 +1,4 @@
+import binascii
 import IPy
 import json
 import struct
@@ -16,7 +17,7 @@ class coilcubeParser (parser.parser) :
 		cc_version = values[10]
 		data = data[11:]
 
-		if cc_version == 1:
+		if cc_version == 1 or cc_version == 2 or cc_version == 3:
 			if len(data) != 2:
 				# not sure what to do
 				print "COILCUBE: Too short!"
@@ -27,16 +28,19 @@ class coilcubeParser (parser.parser) :
 
 			ret['type'] = 'coilcube_raw'
 			# remove the prefix and toggle the bit
-			ret['ccid'] = (meta['addr'] & 0xFFFFFFFFFFFFFFFF) ^ (0x0200000000000000)
+			ret['ccid'] = int((meta['addr'] & 0xFFFFFFFFFFFFFFFF) ^ (0x0200000000000000))
+#			ret['ccid'] = binascii.unhexlify('%016x' % ret['ccid'])
 			ret['version'] = 1
 			ret['seq_no'] = values[1]
 			ret['counter'] = values[0]
-
+		else:
+			print("cc version: {}".format(cc_version))
+			return None
 
 		ret['address'] = str(meta['addr'])
 		ret['port']    = meta['port']
 		ret['time']    = meta['time']
 		ret['public']  = settings['public']
-
+		
 		return ret
 

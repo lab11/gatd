@@ -136,7 +136,8 @@ def packet_callback (channel, method, prop, body):
 	except FE.ParserError as e:
 		print "ParseError: " + str(e)
 
-	except UnicodeDecodeError:
+	except UnicodeDecodeError as e:
+		print(e)
 		pass
 
 	except Exception:
