@@ -40,11 +40,9 @@ def byte_subtract (a, b):
 def process_packet (ch, method, properties, body):
 	# Determine if the incoming packet matches the query from the client
 	pkt = json.loads(body)
-
+	
 	if pkt['type'] != 'coilcube_raw':
 		return
-
-	print(pkt)
 
 	outpkt = {}
 	outpkt['profile_id'] = pkt['profile_id']
