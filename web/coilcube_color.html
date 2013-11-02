@@ -371,8 +371,8 @@
 
 		setInterval(function smoothScrol() {
 			pd = {}
-			pd['scroll'] = [Date.now()-14400000-185000, 0]
-			pdw = {name: 'scroll', data:pd, color:'rgba(0,0,0,0)'};
+			pd['scroll'] = [Date.now()-185000, 0]
+			pdw = {name: 'scroll', data:pd, color:'rgba(0,0,0,100)'};
 			g.addData(pdw);
 			g.update();
 			g2.addData(pdw);
