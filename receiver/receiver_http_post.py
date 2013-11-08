@@ -35,6 +35,7 @@ class myHandler(BaseHTTPRequestHandler):
 			if len(header_str) > 3 and header_str[-4:] == '\r\n\r\n':
 				break
 		headers = header_str.split('\n')
+		length = 0
 		for header in headers:
 			val = header.split(': ')
 			if val[0] == 'Content-Length':
@@ -42,6 +43,9 @@ class myHandler(BaseHTTPRequestHandler):
 			if header[0:4] == 'POST':
 				posts = header.split(" ")
 				post_str = posts[1]
+
+		if length == 0:
+			return
 
 		poststr = self.rfile.read(length)
 		data = urlparse.parse_qs(poststr)
