@@ -42,3 +42,13 @@ data to the server.
 
     host: inductor.eecs.umich.edu
     port: 4002
+
+### HTTP Post
+
+This receiver listens for HTTP POST requests. The URL should look like:
+
+    http://inductor.eecs.umic.edu/<profile_id>?arg1=val1&arg2=val2
+    port: 8081
+
+The `profile_id` as the post file is how the packets are categorized by GATD.
+
