@@ -9,6 +9,7 @@ import urlparse
 LISTEN_HOST = ''
 LISTEN_PORT = 8081
 
+RECEIVE_HOSTNAME = 'localhost'
 RECEIVE_EXCHANGE = "receive_exchange"
 
 PKT_TYPE_HTTP_POST = 3
@@ -19,7 +20,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 		now = int(time.time()*1000)
 
 		amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(
-			host=HOSTNAME))
+			host=RECEIVE_HOSTNAME))
 		amqp_chan = amqp_conn.channel();
 
 		content_len = int(self.headers.getheader('content-length'))
