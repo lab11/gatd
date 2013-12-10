@@ -244,8 +244,11 @@
 	onload = function() {
 		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
 		socket_cc.on('connect', function (data) {
-			socket_cc.emit('query', {'profile_id': {$in: [CC_PID, WUP_PID]},
-				                     'type': {$or: ['coilcube_freq', '']}});
+			socket_cc.emit('query', {'profile_id': {'$in': [CC_PID, WUP_PID]},
+			                         '$or': [{'type': 'coilcube_freq'},
+			                                 {'type': {'$exists': false}}
+			                                ]
+			                         });
 		});
 
 		socket_cc.on('data', function (data) {
