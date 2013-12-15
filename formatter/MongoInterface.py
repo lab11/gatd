@@ -13,11 +13,13 @@ class MongoInterface:
 	TABLE_META        = 'meta'
 
 
-	def __init__(self, host, port):
+	def __init__(self, host, port, username=None, password=None):
 		# Connect to the mongo database
 		try:
-			self.mongo_conn = pymongo.Connection(host=host, port=port)
+			self.mongo_conn = pymongo.MongoClient(host=host, port=port)
 			self.mongo_db   = self.mongo_conn[self.DATABASE]
+			if username:
+				self.mongo_db.authenticate(username, password)
 			self.cur        = None
 
 			self.skip       = 0
