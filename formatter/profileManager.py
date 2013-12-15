@@ -74,8 +74,8 @@ class profileManager:
 	def _getParser (self, parser_name):
 		# Load the python parser
 
-		exec('import ' + parser_name)
-		parser_mod = sys.modules[parser_name]
+		exec('import parsers.{}'.format(parser_name))
+		parser_mod = sys.modules['parsers.{}'.format(parser_name)]
 		parser_n   = getattr(parser_mod, parser_name)
 
 		parser     = parser_n()
