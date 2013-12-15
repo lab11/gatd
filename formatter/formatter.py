@@ -1,6 +1,7 @@
 import archiveCleaner
 import bson.binary
 import FormatterExceptions as FE
+import GatdConfig
 import IPy
 import json
 import MongoInterface
@@ -151,8 +152,8 @@ def packet_callback (channel, method, prop, body):
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
 	channel.basic_ack(delivery_tag=method.delivery_tag)
 
-
-mi = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
+mi = MongoInterface.MongoInterface(host=gatdConfig.getMongoHost(),
+                                   port=gatdConfig.getMongoPort())
 pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
