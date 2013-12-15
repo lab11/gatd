@@ -101,7 +101,10 @@ class MongoInterface:
 		return meta
 
 	def getRawMeta (self, pid):
-		return list(self.mongo_db[self.TABLE_META].find({'profile_id':pid}))
+		metas = self.mongo_db[self.TABLE_META].find({'profile_id':pid})
+		req_key = self.getMetaRequiredKey(pid)
+		metas.sort(req_key, 1)
+		return list(metas)
 
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()

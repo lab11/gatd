@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 import MongoInterface
+import gatdConfig
 
-MONGO_HOST  = 'inductor.eecs.umich.edu'
-MONGO_PORT  = 19000
 
 pids = []
 
-m = MongoInterface.MongoInterface(host=MONGO_HOST, port=MONGO_PORT)
+m = MongoInterface.MongoInterface(host=gatdConfig.getMongoHost(),
+                                  port=gatdConfig.getMongoPort(),
+                                  username=gatdConfig.getMongoUsername(),
+                                  password=gatdConfig.getMongoPassword())
 
 
 configs = m.getConfigs()
