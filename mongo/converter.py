@@ -1,3 +1,8 @@
+# Process unformatted data and insert it (if we know how to process it now)
+# into the formatted table.
+#
+
+
 import sys
 import MongoInterface
 import DataParsers
