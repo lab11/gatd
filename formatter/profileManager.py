@@ -97,6 +97,9 @@ class profileManager:
 		config['parser'] = parser
 		config['dbid']   = dbid
 
+		if pid not in self.configs:
+			print("Adding config {}: {}".format(name, pid))
+		
 		# Save the settings
 		self.configs[pid] = config
 
@@ -121,7 +124,6 @@ class profileManager:
 		except ConfigParser.NoSectionError:
 			pass
 
-		print("Adding config {}: {}".format(name, pid))
 
 
 	# Parse and add a config file to the database if needed
@@ -133,9 +135,9 @@ class profileManager:
 			# Save the config file to a string that we can insert in the
 			# database.
 			str_ptr = StringIO.StringIO()
-			self.configp.write(str_ptr)
+			configp.write(str_ptr)
 
-			name = self.configp.get('main', 'name')
+			name = configp.get('main', 'name')
 			if name in self.names:
 				# Already have this config file, update it
 				pid = self.names[name]
