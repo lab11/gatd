@@ -68,6 +68,11 @@ class MongoInterface:
 			return None
 		return mc['required_key']
 
+	def setMetaRequiredKey (self, pid, req_key):
+		insert = {'profile_id': pid,
+		          'required_key': req_key}
+		self.mongo_db[self.TABLE_META_CONFIG].insert(insert)
+
 	# Get the meta data associated with this packet
 	def getMeta (self, pkt):
 		pid = pkt['profile_id']
@@ -103,8 +108,17 @@ class MongoInterface:
 	def getRawMeta (self, pid):
 		metas = self.mongo_db[self.TABLE_META].find({'profile_id':pid})
 		req_key = self.getMetaRequiredKey(pid)
+		if req_key == None:
+			return []
 		metas.sort(req_key, 1)
 		return list(metas)
+
+	def addMeta (self, pid, req_key, req_key_value, query, additional):
+		insert = {'profile_id': pid,
+		          req_key: req_key_value,
+		          'query': query,
+		          'additional': additional}
+		self.mongo_db[self.TABLE_META].insert(insert)
 
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
