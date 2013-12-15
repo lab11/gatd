@@ -95,6 +95,8 @@ class MongoInterface:
 			except KeyError:
 				pass
 
+		return {}
+
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
 		for i in r:

@@ -99,7 +99,7 @@ class profileManager:
 
 		if pid not in self.configs:
 			print("Adding config {}: {}".format(name, pid))
-		
+
 		# Save the settings
 		self.configs[pid] = config
 
@@ -225,6 +225,9 @@ class profileManager:
 
 		# Require that the profile ID is set
 		r['profile_id'] = pid
+
+		# Add in the meta data
+		r.update(self.db.getMeta(r))
 
 		return r
 
