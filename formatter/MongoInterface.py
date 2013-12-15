@@ -84,6 +84,7 @@ class MongoInterface:
 		metas = self.mongo_db[self.TABLE_META].find({'profile_id':pid,
 		                                             req_key:req_key_value})
 
+		meta = {}
 		for m in metas:
 			try:
 				# Check that the query matches the incoming packet
@@ -91,11 +92,11 @@ class MongoInterface:
 					if pkt[query_key] != m['query'][query_key]:
 						break
 				else:
-					return m['additional']
+					meta.update(m['additional'])
 			except KeyError:
 				pass
 
-		return {}
+		return meta
 
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
