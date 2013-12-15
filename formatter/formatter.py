@@ -141,7 +141,7 @@ def packet_callback (channel, method, prop, body):
 		print(e)
 		pass
 
-	except Exception:
+	except Exception as e:
 		pass
 
 	except TypeError:

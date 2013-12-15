@@ -194,15 +194,15 @@ class profileManager:
 			# Don't recognize this packet
 			raise FE.ParserNotFound("No parser for this packet.")
 
-		configs = self.configs[pid]
-		parser  = config['parser']
+		config = self.configs[pid]
+		parser = config['parser']
 
 		# Create dict of settings that need to get passed to parser
 		psettings = {}
 
 		# Set the public key->value
 		try:
-			if settings['access'] == 'public':
+			if config['access'] == 'public':
 				psettings['public'] = True
 		except KeyError:
 			psettings['public'] = False
