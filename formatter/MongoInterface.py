@@ -98,6 +98,9 @@ class MongoInterface:
 
 		return meta
 
+	def getRawMeta (self, pid):
+		return list(self.mongo_db[self.TABLE_META].find({'profile_id':pid}))
+
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
 		for i in r:
