@@ -53,7 +53,7 @@ def process_packet (ch, method, properties, body):
 
 	# Create a nicely formated ccid
 	# ex: 00:11:22:33:44:55:66:77
-	ccid = '{:0>16x}'.format(pkt['ccid'])
+	ccid = '{:0>16x}'.format(int(pkt['ccid']))
 	outpkt['ccid_mac'] = ':'.join([ccid[i:i+2] for i in range(0, 16, 2)])
 
 	# Calculate watts
