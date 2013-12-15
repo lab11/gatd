@@ -43,8 +43,8 @@ class MongoInterface:
 		config_map = {'name'      : name,
 		              'config'    : config_file,
 		              'profile_id': profile_id}
-		id = self.mongo_db[self.TABLE_CONFIG].save(config_map)
-		return str(id)
+		uid = self.mongo_db[self.TABLE_CONFIG].save(config_map)
+		return str(uid)
 
 	def updateConfig (self, uid, name, config_file, profile_id):
 		config_map = {'_id'       : bson.objectid.ObjectId(uid),

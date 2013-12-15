@@ -2,7 +2,6 @@ import ConfigParser
 import copy
 import FormatterExceptions as FE
 import IPy
-#from pymongo import objectid
 import random
 import string
 import StringIO
@@ -11,29 +10,24 @@ import uuid
 
 class profileManager:
 
-	# Map of package name->[uid, profile_id]
-	# I'm using name as a unique identifier
-	names    = {}
+	# Map of pid->config map
+	# Stores all of the relevant information about each profile, like the parser
+	# and whatnot.
+	configs = {}
 
-	# Map of ip addr->uid
-	addrs    = {}
+	# Map of ip addr->profile_id
+	# Stores the correct profile ID to use given a particular input IP address.
+	addrs   = {}
 
-	# Map of profile id (not uid) -> uid
-	pids     = {}
+	# Map of parser name to pid
+	names   = {}
 
-	# Worthless map because I'm lazy and don't feel like writing this differently
-	info     = {}
-
-	# Map of uid->settings map
-	settings = {}
-
-	# Default settings
-	default  = {'name': None,
-                'parser': None,
-                'access': 'public'
-	           }
-
-	configp  = ConfigParser.ConfigParser()
+	# Default config example
+	default_config  = {'dbid': None,
+	                   'name': None,
+	                   'parser': None,
+	                   'access': 'public'
+	                  }
 
 
 	def __init__ (self, db):
@@ -42,14 +36,11 @@ class profileManager:
 		# Recover saved config files
 		configs = self.db.getConfigs()
 		for c in configs:
-			print("Adding config {}: {}".format(c['name'], c['profile_id']))
-			self._addMapInfo(name=str(c['name']),
-			                 pid=str(c['profile_id']),
-			                 uid=str(c['_id']))
-	#		self._addProfileId(id=c['profile_id'], uid=str(c['_id']))
-			self.configp = ConfigParser.ConfigParser()
-			self.configp.readfp(StringIO.StringIO(str(c['config'])))
-			self._parseConfig()
+			configp = ConfigParser.ConfigParser()
+			configp.readfp(StringIO.StringIO(str(c['config'])))
+			self._parseConfig(configp=configp,
+			                  pid=str(c['profile_id']),
+			                  dbid=str(c['_id']))
 
 	def __str__ (self):
 		out = 'addrs\n'
@@ -57,19 +48,14 @@ class profileManager:
 			out += str(IPy.IP(a)) + ': ' + str(self.addrs[a]) + '\n'
 		return out
 
-	def _addAddr (self, ip_str, uid):
+	def _addAddr (self, ip_str, pid):
 		# Add the IP address to the dict
 		ip = IPy.IP(ip_str, ipversion=6)
-		self.addrs[ip.int()] = uid
-
-	def _addMapInfo (self, name, pid, uid):
-		self.names[name] = [uid, pid]
-		self.pids[pid]   = uid
-		self.info[uid]   = pid
+		self.addrs[ip.int()] = pid
 
 	def _createProfileId (self):
-		id = ''.join(random.choice(string.letters + string.digits) for x in range(10))
-		return id
+		pid = ''.join(random.choice(string.letters + string.digits) for x in range(10))
+		return pid
 
 	def _getParser (self, parser_name):
 		# Load the python parser
@@ -77,82 +63,84 @@ class profileManager:
 		exec('import parsers.{}'.format(parser_name))
 		parser_mod = sys.modules['parsers.{}'.format(parser_name)]
 		parser_n   = getattr(parser_mod, parser_name)
-
+		# Create a parser object to use for parsing matching incoming packets
 		parser     = parser_n()
-
-		# return the parser
 		return parser
 
-	# Add the information in the config file to the stored maps
-	# The config file should be 'known' already, so the uid is known, etc.
-	def _parseConfig (self):
-		try:
-			settings = copy.copy(self.default)
-			main     = self.configp.items('main')
+	# Add (or re-add) the information in the config file to the stored maps
+	def _parseConfig (self, configp, pid, dbid):
+		config = copy.copy(self.default_config)
 
+		try:
+			main = configp.items('main')
 			# Load in the general main settings
 			for item in main:
-				settings[item[0]] = item[1]
+				config[item[0]] = item[1]
 
-	#		if 'name' not in settings or 'parser' not in settings:
-	#			print 'Bad config file'
-	#			return
+		except ConfigParser.NoSectionError:
+			print('ERROR: Unable to find section "main" in the config file.')
+			raise FE.BadConfigFile('Missing main section')
 
-			uid  = self.names[settings['name']][0]
+		try:
+			name = config['name']
 
-	#		if name in self.names:
-				# Already have this config file
-	#			return
-	#		else:
-	#			self.names[name] = uid;
+			# Add a mapping of name to profile id so that when we read in
+			# config files we can match them up.
+			self.names[name] = pid
+		except KeyError:
+			print('ERROR: Unable to find "name" in main section')
+			raise FE.BadConfigFile('Missing name')
 
-			# Get the python filename for this package
-			parser_name        = settings['parser']
-			parser             = self._getParser(parser_name=parser_name)
-			settings['parser'] = parser
+		# Get the python filename for this package
+		parser_name      = config['parser']
+		parser           = self._getParser(parser_name=parser_name)
+		config['parser'] = parser
+		config['dbid']   = dbid
 
-			# Save the settings
-			self.settings[uid] = settings
+		# Save the settings
+		self.configs[pid] = config
 
-			# Clear out the old addresses
-			for ipaddr in self.addrs:
-				if self.addrs[ipaddr] == uid:
-					self.addrs[ipaddr] = None
+		# Clear out the old addresses
+		for ipaddr in self.addrs:
+			if self.addrs[ipaddr] == pid:
+				self.addrs[ipaddr] = None
 
-			# Loop through all sources
+		# Loop through all sources
+		try:
 			index = 0
 			while True:
-				source = self.configp.items('source' + str(index))
-				ip_str = ''
+				source = configp.items('source{}'.format(index))
 				for item in source:
 					if item[0] == 'ipaddress':
-						ip_str = item[1]
+						# Add the IP address to the dict
+						self._addAddr(ip_str=item[1], pid=pid)
 						break
-				# Add the IP address to the dict
-				self._addAddr(ip_str=ip_str, uid=uid)
 
 				index += 1
 
 		except ConfigParser.NoSectionError:
 			pass
 
+		print("Adding config {}: {}".format(name, pid))
 
+
+	# Parse and add a config file to the database if needed
 	def addConfigFile (self, filename):
-		uid          = None
-		self.configp = ConfigParser.ConfigParser()
-
 		try:
-			self.configp.read(filename)
+			configp = ConfigParser.ConfigParser()
+			configp.read(filename)
 
+			# Save the config file to a string that we can insert in the
+			# database.
 			str_ptr = StringIO.StringIO()
 			self.configp.write(str_ptr)
 
 			name = self.configp.get('main', 'name')
 			if name in self.names:
 				# Already have this config file, update it
-				uid = self.names[name][0]
-				pid = self.names[name][1]
-				self.db.updateConfig(uid=uid,
+				pid = self.names[name]
+				dbid = self.configs[pid]['dbid']
+				self.db.updateConfig(uid=dbid,
 				                     name=name,
 				                     config_file=str_ptr.getvalue(),
 				                     profile_id=pid)
@@ -162,25 +150,20 @@ class profileManager:
 				pid = self._createProfileId()
 
 				# Store this configuration to get the unique id
-				uid = self.db.storeConfig(name=name,
-				                          config_file=str_ptr.getvalue(),
-				                          profile_id=pid)
-
-				# Add it to the maps
-				self._addMapInfo(name=name, uid=uid, pid=pid)
+				dbid = self.db.storeConfig(name=name,
+				                           config_file=str_ptr.getvalue(),
+				                           profile_id=pid)
+				self.dbids[dbid] = pid
 
 
 			# Now parse the file
-			self._parseConfig()
+			self._parseConfig(configp=configp, pid=pid, dbid=dbid)
 
 		except ConfigParser.NoSectionError as e:
 			print "Invalid config file. Missing " + str(e) + " in [main]."
 
-	#	except Exception as e:
-	#		print e
-	#		sys.exit(1)
 
-	def getPacketUid (self, addr, data):
+	def getPacketPid (self, addr, data):
 		if addr != None:
 			ip = IPy.IP(addr)
 			if ip.int() in self.addrs:
@@ -188,34 +171,34 @@ class profileManager:
 
 		if len(data) > 10:
 			pid = data[0:10]
-			if pid in self.pids:
-				return self.pids[pid]
+			if pid in self.configs:
+				return pid
 
 		return None
 
 	# Check if an IP address of an incoming packet is recognized or not
 	def isPacketKnown (self, data, meta):
 		addr = meta['addr'] if ('addr' in meta) else None
-		return self.getPacketUid(addr=addr, data=data) != None
+		return self.getPacketPid(addr=addr, data=data) != None
 
 	# Do the parse of the actual data packet
 	# Returns a dict
 	# Raises exception if parser is bad
 	def parsePacket (self, data, meta):
-		addr     = meta['addr'] if ('addr' in meta) else None
-		uid      = self.getPacketUid(addr=addr, data=data)
+		addr = meta['addr'] if ('addr' in meta) else None
+		pid  = self.getPacketPid(addr=addr, data=data)
 
-		if uid == None:
+		if pid == None:
 			# Don't recognize this packet
 			raise FE.ParserNotFound("No parser for this packet.")
 
-		settings = self.settings[uid]
-		parser   = settings['parser']
-		pid      = self.info[uid]
+		configs = self.configs[pid]
+		parser  = config['parser']
 
 		# Create dict of settings that need to get passed to parser
 		psettings = {}
 
+		# Set the public key->value
 		try:
 			if settings['access'] == 'public':
 				psettings['public'] = True
@@ -232,7 +215,7 @@ class profileManager:
 				# Just dump this packet
 				return None
 		except Exception as e:
-			print "Bad Parser: " + str(e)
+			print('Bad Parser: {}'.format(e))
 			r = None
 
 		if type(r) != dict:

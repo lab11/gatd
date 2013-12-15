@@ -10,6 +10,9 @@ class GatdException(Exception):
 class BadPacket(GatdException):
 	pass
 
+class BadParser(GatdException):
+	pass
+
 class ParserError(GatdException):
 	pass
 
