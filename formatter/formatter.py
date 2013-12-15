@@ -65,7 +65,8 @@ def unpackPacket (pkt):
 			data = json.loads(pkt)
 
 			if 'profile_id' not in data:
-				raise FE.BadPacket('"profile_id" key must be in processed data json blob')
+				raise FE.BadPacket('"profile_id" key must be in processed data \
+json blob')
 
 			return (data, None)
 
