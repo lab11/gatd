@@ -1,5 +1,4 @@
 import pymongo
-#import pymongo.objectid
 import time
 import bson
 
@@ -10,6 +9,8 @@ class MongoInterface:
 	TABLE_UNFORMATTED = 'unformatted_archive'
 	TABLE_FORMATTED   = 'formatted_data'
 	TABLE_CONFIG      = 'configuration'
+	TABLE_META_CONFIG = 'meta_config'
+	TABLE_META        = 'meta'
 
 
 	def __init__(self, host, port):
@@ -57,26 +58,88 @@ class MongoInterface:
 		configs = self.mongo_db[self.TABLE_CONFIG].find({})
 		return list(configs)
 
+	# Each profile has its own key that has to be in the data packet in order
+	# to add meta data. This is stored in the TABLE_META_CONFIG table.
+	def getMetaRequiredKey (self, pid):
+		mc = self.mongo_db[self.TABLE_META_CONFIG].find_one({'profile_id':pid})
+		if mc == None:
+			return None
+		return mc['required_key']
+
+	# Get the meta data associated with this packet
+	def getMeta (self, pkt):
+		pid = pkt['profile_id']
+
+		req_key = self.getMetaRequiredKey(pid)
+		if req_key == None:
+			return {}
+
+		try:
+			req_key_value = pkt[req_key]
+		except KeyError:
+			# This packet doesn't have the required key so we skip this
+			return {}
+
+		# Get possible meta values
+		metas = self.mongo_db[self.TABLE_META].find({'profile_id':pid,
+		                                             req_key:req_key_value})
+
+		for m in metas:
+			try:
+				# Check that the query matches the incoming packet
+				for query_key in m['query']:
+					if pkt[query_key] != m['query'][query_key]:
+						break
+				else:
+					return m['additional']
+			except KeyError:
+				pass
+
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
 		for i in r:
 			yield i
 
 	def deleteArchive (self, uid):
-		self.mongo_db[self.TABLE_UNFORMATTED].remove({'_id': pymongo.objectid.ObjectId(uid)})
-
-	"""
-	# Manage Locations
-	def hasLocation (self, address):
-		return self.mongo_db.locations.find({'address':address}).count() > 0
-
-	def addLocation (self, data):
-		address = data['address']
-		self.cur = self.mongo_db.locations.find({'address':address}, {'_id':0, 'address':0, 'timestamp':0}).limit(1).sort('_id', -1)
-		location = self.cur.next()
-		data.update(location)
-		return data"""
+		self.mongo_db[self.TABLE_UNFORMATTED].remove(
+			{'_id': pymongo.objectid.ObjectId(uid)})
 
 	def __del__ (self):
 		self.mongo_conn.close()
+
+
+if __name__ == '__main__':
+	MONGO_HOST  = 'inductor.eecs.umich.edu'
+	MONGO_PORT  = 19000
+	m = MongoInterface(MONGO_HOST, MONGO_PORT)
+	print(m.getMetaRequiredKey("7aiOPJapXF"))
+	print(m.getMetaRequiredKey("abc"))
+
+	print('Test meta')
+	test1 = {'profile_id':'7aiOPJapXF',
+			'ccid':'1',
+			'color':'blue'}
+	test2 = {'profile_id':'7aiOPJapXF',
+			'ccid':'1',
+			'color':'red'}
+	test3 = {'profile_id':'7aiOPJapXF',
+			'ccid':'2',
+			'color':'blue'}
+	test4 = {'profile_id':'7aiOPJapXF',
+			'ccid':'1',
+			'colorer':'blue'}
+	test5 = {'profile_id':'7aiOPJapXF',
+			'ccid':'1',
+			'color':'green'}
+	test6 = {'profile_id':'7aiOPJapXF',
+			'ccid':'1',
+			'color':'green',
+			'type':'new'}
+	print('adding: {}'.format(m.getMeta(test1)))
+	print('adding: {}'.format(m.getMeta(test2)))
+	print('adding: {}'.format(m.getMeta(test3)))
+	print('adding: {}'.format(m.getMeta(test4)))
+	print('adding: {}'.format(m.getMeta(test5)))
+	print('adding: {}'.format(m.getMeta(test6)))
+
 
