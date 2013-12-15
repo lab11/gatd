@@ -1,7 +1,7 @@
 import archiveCleaner
 import bson.binary
 import FormatterExceptions as FE
-import GatdConfig
+import gatdConfig
 import IPy
 import json
 import MongoInterface
@@ -15,9 +15,6 @@ import sys
 RMQ_HOST        = 'inductor.eecs.umich.edu'
 RECEIVE_QUEUE   = 'receive_queue'
 STREAM_EXCHANGE = 'streamer_exchange'
-
-MONGO_HOST  = 'inductor.eecs.umich.edu'
-MONGO_PORT  = 19000
 
 PKT_TYPE_UDP       = 0
 PKT_TYPE_TCP       = 1
