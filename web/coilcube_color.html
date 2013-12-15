@@ -276,7 +276,7 @@
 						pdw['points']['radius'] = 6;
 					}
 					g2.addData(pdw);
-				//	g.update();
+					g2.update();
 
 				}
 			} else if (data['profile_id'] == WUP_PID) {
@@ -284,7 +284,7 @@
 				pd['aggregate'] = [data['time'], data['watts']]
 				pdw = {name: '', data:pd, color:"#000"};
 				g.addData(pdw);
-			//	g.update();
+				g.update();
 
 			}
 		});
@@ -364,15 +364,15 @@
 			         );
 
 
-		setInterval(function smoothScrol() {
-			pd = {}
-			pd['scroll'] = [Date.now()-185000, 0]
-			pdw = {name: 'scroll', data:pd, color:'rgba(0,0,0,0)'};
-			g.addData(pdw);
-			g.update();
-			g2.addData(pdw);
-			g2.update();
-		}, 40);
+	//	setInterval(function smoothScrol() {
+	//		pd = {}
+	//		pd['scroll'] = [Date.now()-185000, 0]
+	//		pdw = {name: 'scroll', data:pd, color:'rgba(0,0,0,0)'};
+	//		g.addData(pdw);
+	//		g.update();
+	//		g2.addData(pdw);
+	//		g2.update();
+	//	}, 40);
 
 
 
