@@ -29,7 +29,10 @@ class coilcubeParser (parser.parser) :
 			ret['type'] = 'coilcube_raw'
 			# remove the prefix and toggle the bit
 			ret['ccid'] = str(int((meta['addr'] & 0xFFFFFFFFFFFFFFFF) ^ (0x0200000000000000)))
-#			ret['ccid'] = binascii.unhexlify('%016x' % ret['ccid'])
+			# Create a nicely formated ccid
+			# ex: 00:11:22:33:44:55:66:77
+			ccid = '{:0>16x}'.format(int(ret['ccid']))
+			ret['ccid_mac'] = ':'.join([ccid[i:i+2] for i in range(0, 16, 2)])
 			ret['version'] = 1
 			ret['seq_no'] = values[1]
 			ret['counter'] = values[0]
@@ -41,6 +44,6 @@ class coilcubeParser (parser.parser) :
 		ret['port']    = meta['port']
 		ret['time']    = meta['time']
 		ret['public']  = settings['public']
-		
+
 		return ret
 

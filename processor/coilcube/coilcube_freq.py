@@ -40,7 +40,7 @@ def byte_subtract (a, b):
 def process_packet (ch, method, properties, body):
 	# Determine if the incoming packet matches the query from the client
 	pkt = json.loads(body)
-	
+
 	if pkt['type'] != 'coilcube_raw':
 		return
 
@@ -49,12 +49,8 @@ def process_packet (ch, method, properties, body):
 	outpkt['public']     = pkt['public']
 	outpkt['time']       = pkt['time']
 	outpkt['ccid']       = pkt['ccid']
+	outpkt['ccid_mac']   = pkt['ccid_mac']
 	outpkt['type']       = 'coilcube_freq'
-
-	# Create a nicely formated ccid
-	# ex: 00:11:22:33:44:55:66:77
-	ccid = '{:0>16x}'.format(int(pkt['ccid']))
-	outpkt['ccid_mac'] = ':'.join([ccid[i:i+2] for i in range(0, 16, 2)])
 
 	# Calculate watts
 	if pkt['ccid'] in coilcubes:
