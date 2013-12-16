@@ -44,23 +44,18 @@ def process_packet (ch, method, properties, body):
 	if pkt['type'] != 'coilcube_raw':
 		return
 
-	outpkt = {}
-	outpkt['profile_id'] = pkt['profile_id']
-	outpkt['public']     = pkt['public']
-	outpkt['time']       = pkt['time']
-	outpkt['ccid']       = pkt['ccid']
-	outpkt['ccid_mac']   = pkt['ccid_mac']
-	outpkt['type']       = 'coilcube_freq'
+	# Change the type
+	pkt['type'] = 'coilcube_freq'
 
 	# Calculate watts
 	if pkt['ccid'] in coilcubes:
-		last_data = coilcubes[pkt['ccid']]
+		last_data  = coilcubes[pkt['ccid']]
 		count_diff = byte_subtract(pkt['counter'], last_data[1]);
-		time_diff = pkt['time'] - last_data[0]
+		time_diff  = pkt['time'] - last_data[0]
 		freq = float(count_diff) / (float(time_diff)/1000.0)
 		freq = round(freq, 2)
 
-		outpkt['freq'] = freq
+		pkt['freq'] = freq
 
 	else:
 		print("first sighting of this cc")
@@ -70,9 +65,11 @@ def process_packet (ch, method, properties, body):
 	coilcubes[pkt['ccid']][1] = pkt['counter']
 	coilcubes[pkt['ccid']][2] = pkt['seq_no']
 
-	print(outpkt)
+	# Now remove the seq no and counter
+	del pkt['counter']
+	del pkt['seq_no']
 
-	ojson = json.dumps(outpkt)
+	ojson = json.dumps(pkt)
 	ojson = '\x02' + ojson
 
 	amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE, body=ojson,
