@@ -72,7 +72,7 @@
 			}
 		}
 
-		function update () {
+		function update (series) {
 
 			// Make sure all data points fit within the width of the
 			// graph.
@@ -89,39 +89,45 @@
 				}
 				if (i > 0) {
 					if (i >= data[key].length) {
+						// Remove all points from this series
 						delete data[key];
 					} else {
+						// Remove all points that are before the beginning of
+						// x axis
 						data[key] = data[key].slice(i);
 					}
 				}
 			}
 
 
-			commitData();
+			commitData(series);
 			plot.setupGrid();
 			plot.draw();
 		}
 
-		function commitData () {
+		function commitData (series) {
+			if (typeof(series) === 'undefined') series = 'all';
 			graph_data = [];
 
 			for (x in data) {
-				s = [];
-				for (i in data[x]) {
-					if (_.isArray(data[x][i])) {
-						s.push(data[x][i]);
-					} else {
-						s.push([parseInt(i), data[x][i], 10]);
+				if (series == 'all' || x == series) {
+					s = [];
+					for (i in data[x]) {
+						if (_.isArray(data[x][i])) {
+							s.push(data[x][i]);
+						} else {
+							s.push([parseInt(i), data[x][i], 10]);
+						}
 					}
+					t = {'label': x,
+					     'data': s,
+					     'color': meta[x]['color'],
+					     'yaxis': meta[x]['yaxis'],
+					     'lines': meta[x]['lines'],
+					     'points': meta[x]['points'],
+					 };
+					graph_data.push(t);
 				}
-				t = {'label': x,
-				     'data': s,
-				     'color': meta[x]['color'],
-				     'yaxis': meta[x]['yaxis'],
-				     'lines': meta[x]['lines'],
-				     'points': meta[x]['points'],
-				 };
-				graph_data.push(t);
 			}
 
 			plot.setData(graph_data);

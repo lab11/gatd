@@ -190,9 +190,11 @@
 	var jsIP = require('./jsIP');
 
 	// Map ccid_mac to hex color string
-	var node_mapping = {}
+	var node_mapping = {};
 
-	var key_map = {}
+	var key_map = {};
+
+	var series = 'all';
 
 	onload = function() {
 		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
@@ -221,7 +223,7 @@
 			               fillColor:color},
 			   };
 			g.addData(pdw);
-			g.update();
+			g.update(series);
 		});
 
 
@@ -276,7 +278,12 @@
 				                     'location': loc,
 				                     'color': color};
 				loc = loc.replace("|", ", ").replace("|", ", ");
-				$("#key_table").append('<tr style="color:' + color + '"><td>'+ccid_mac+'</td><td>'+desc+'</td><td>'+loc+'</td></tr>');
+				ccid = ccid_mac.replace(/[\:]+/g, '');
+				$("#key_table").append('<tr id="'+ccid+'" style="color:' + color + '"><td>'+ccid_mac+'</td><td>'+desc+'</td><td>'+loc+'</td></tr>');
+				$("tr#"+ccid).click(function() {
+					series = ccid_mac;
+					g.update(series);
+				});
 			}
 		}
 
@@ -287,6 +294,10 @@
 			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			                       }
 			         );
+
+		$("th").click(function() {
+			series = 'all';
+		});
 
 
 	}
