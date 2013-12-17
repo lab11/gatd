@@ -97,14 +97,8 @@
 		.graph {
 			padding: 100px 5px 0 50px;
 			margin: 15px auto 30px auto;
-		}
-		.graph1 {
-			width:1000px;
-			height:200px;
-		}
-		.graph2 {
-			width:1000px;
-			height:400px;
+			width:95%;
+			height:500px;
 		}
 		.axisLabel {
 			position: absolute;
@@ -157,7 +151,7 @@
 			font-weight: bold;
 			text-align: left;
 		}
-		.key td {
+		.key td, .key th {
 			padding: 1px 5px 1px 5px;
 		}
 	</style>
@@ -173,11 +167,11 @@
 		</div>
 	</div>
 	<div id="body">
-		<div id="graph" class="box_shadow graph graph2"></div>
+		<div id="graph" class="box_shadow graph"></div>
 		<div id="key" class="box_shadow key">
 			<table id="key_table">
 				<tr>
-					<th>ID</th><th>Description</th><th>Location</th>
+					<th>Index</th><th>ID</th><th>Description</th><th>Location</th>
 				</tr>
 			</table>
 		</div>
@@ -191,6 +185,7 @@
 
 	// Map ccid_mac to hex color string
 	var node_mapping = {};
+	var number_nodes = 0;
 
 	var key_map = {};
 
@@ -279,18 +274,19 @@
 				                     'color': color};
 				loc = loc.replace("|", ", ").replace("|", ", ");
 				ccid = ccid_mac.replace(/[\:]+/g, '');
-				$("#key_table").append('<tr id="'+ccid+'" style="color:' + color + '"><td>'+ccid_mac+'</td><td>'+desc+'</td><td>'+loc+'</td></tr>');
+				$("#key_table").append('<tr id="'+ccid+'" style="color:' + color + '"><td>'+number_nodes+'</td><td>'+ccid_mac+'</td><td>'+desc+'</td><td>'+loc+'</td></tr>');
 				$("tr#"+ccid).click(function() {
 					series = ccid_mac;
 					g.update(series);
 				});
+				number_nodes++;
 			}
 		}
 
 
 		g = $.grapher($("#graph"), {legend: {show: false, conainer: $("#graph_key")},
-									xaxis: {show:true, width:120000, mode: "time", tickFormatter:x_format},
-			                        yaxis: {min:0, label:"Frequency (Activations/Second)", max:3},
+									xaxis: {show:true, width:300000, mode: "time", tickFormatter:x_format},
+			                        yaxis: {min:0, label:"Frequency (Activations/Second)", max:4},
 			                        grid: {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			                       }
 			         );
