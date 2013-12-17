@@ -120,6 +120,10 @@ class MongoInterface:
 		          'additional': additional}
 		self.mongo_db[self.TABLE_META].insert(insert)
 
+	def deleteMeta (self, dbid):
+		self.mongo_db[self.TABLE_META].remove(
+			{'_id': bson.objectid.ObjectId(dbid)})
+
 	def getArchives (self):
 		r = self.mongo_db[self.TABLE_UNFORMATTED].find()
 		for i in r:

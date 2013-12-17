@@ -88,10 +88,19 @@ if midx >= len(metas):
 		break
 
 else:
+	while True:
+		confirm = raw_input('Delete?: ')
+		if confirm == '':
+			continue
+		if 'y' in confirm:
+			m.deleteMeta(metas[midx]['_id'])
+		break
+
+
 	# Update
-	req_key_val = raw_input('{} [{}]: '.format(req_key, metas[midx][req_key]))
-	if req_key_val == '':
-		req_key_val = metas[midx][req_key]
+#	req_key_val = raw_input('{} [{}]: '.format(req_key, metas[midx][req_key]))
+#	if req_key_val == '':
+#		req_key_val = metas[midx][req_key]
 
 
 
