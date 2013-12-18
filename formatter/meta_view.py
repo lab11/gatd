@@ -1,13 +1,37 @@
 #!/usr/bin/env python
 
+import meta_test
 import MongoInterface
 import gatdConfig
+import sys
 
 
-DSTR_T = '[idx] {:<25s} {:<50s} {:<50s}'
-DSTR   = '[{:>3d}] {:<25s} {:<50s} {:<50s}'
+def strip (d):
+	if '' in d:
+		del d['']
 
-DSTR_A = '{:<25s} {:<50s} {:<50s}'
+
+def edit_meta (req_key, req_key_val, query, addit):
+	while True:
+		req_key_val, query, addit = meta_test.edit_meta(req_key,
+		                                                req_key_val,
+		                                                query,
+		                                                addit)
+		strip(query)
+		strip(addit)
+		print('\nMeta Record:')
+		print(DSTR_A.format(req_key, 'QUERY', 'ADDITIONAL'))
+		print(DSTR_A.format(req_key_val, query, addit))
+		choice = raw_input('Continue editing?: ')
+		if choice == '':
+			break
+	return (req_key_val, query, addit)
+
+
+DSTR_T = '[idx] {:<25s} {:<20s} {:<50s}'
+DSTR   = '[{:>3d}] {:<25s} {:<20s} {:<50s}'
+
+DSTR_A = '      {:<25s} {:<20s} {:<50s}'
 
 pids = []
 
@@ -46,28 +70,14 @@ for i, meta in zip(range(len(metas)), metas):
 
 print('[{:>3d}] Add new'.format(i+1))
 
+try:
+	midx = int(raw_input('Index: '))
+except ValueError:
+	sys.exit(0)
 
-midx = int(raw_input('Index: '))
 if midx >= len(metas):
 	# add new
-	req_key_val = raw_input('{}: '.format(req_key))
-	print('QUERY')
-	query = {}
-	while True:
-		k = raw_input('key: ')
-		v = raw_input('val: ')
-		if k == '' or v == '':
-			break
-		query[k] = v
-
-	print('ADDITIONAL')
-	addit = {}
-	while True:
-		k = raw_input('key: ')
-		v = raw_input('val: ')
-		if k == '' or v == '':
-			break
-		addit[k] = v
+	req_key_val, query, addit = edit_meta(req_key, '', {}, {})
 
 	print('\nAdding:\n')
 	print(DSTR_A.format(req_key, 'QUERY', 'ADDITIONAL'))
@@ -88,21 +98,30 @@ if midx >= len(metas):
 		break
 
 else:
-	while True:
-		confirm = raw_input('Delete?: ')
-		if confirm == '':
-			continue
-		if 'y' in confirm:
-			m.deleteMeta(metas[midx]['_id'])
-		break
 
+	meta = metas[midx]
 
-	# Update
-#	req_key_val = raw_input('{} [{}]: '.format(req_key, metas[midx][req_key]))
-#	if req_key_val == '':
-#		req_key_val = metas[midx][req_key]
+	print('\nWorking on:')
+	print(DSTR_A.format(req_key, 'QUERY', 'ADDITIONAL'))
+	print(DSTR_A.format(meta[req_key], meta['query'], meta['additional']))
+	print('')
 
+	confirm = raw_input('Delete?: ')
+	if 'y' in confirm:
+		m.deleteMeta(meta['_id'])
+	else:
+		req_key_val, query, addit = edit_meta(req_key,
+		                                      meta[req_key],
+		                                      meta['query'],
+		                                      meta['additional'])
 
+		m.updateMeta(dbid=meta['_id'],
+		             pid=meta['profile_id'],
+		             req_key=req_key,
+		             req_key_value=req_key_val,
+		             query=query,
+		             additional=addit)
+		print('Updated.')
 
 
 

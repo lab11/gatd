@@ -120,6 +120,14 @@ class MongoInterface:
 		          'additional': additional}
 		self.mongo_db[self.TABLE_META].insert(insert)
 
+	def updateMeta (self, dbid, pid, req_key, req_key_value, query, additional):
+		insert = {'_id':        bson.objectid.ObjectId(dbid),
+		          'profile_id': pid,
+		          req_key:      req_key_value,
+		          'query':      query,
+		          'additional': additional}
+		self.mongo_db[self.TABLE_META].save(insert)
+
 	def deleteMeta (self, dbid):
 		self.mongo_db[self.TABLE_META].remove(
 			{'_id': bson.objectid.ObjectId(dbid)})
