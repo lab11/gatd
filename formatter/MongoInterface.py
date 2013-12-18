@@ -89,7 +89,7 @@ class MongoInterface:
 
 		# Get possible meta values
 		metas = self.mongo_db[self.TABLE_META].find({'profile_id':pid,
-		                                             req_key:req_key_value})
+		                                             req_key:str(req_key_value)})
 
 		meta = {}
 		for m in metas:
