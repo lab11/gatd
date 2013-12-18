@@ -1,0 +1,146 @@
+/* CSS for the webpages of graphs of data from GATD.
+ * @author Brad Campbell <bradjc@umich.edu>
+ */
+
+body {
+	margin: 0;
+	padding: 0;
+}
+#body {
+	text-align: center;
+}
+h1 {
+	font-family: "helvetica";
+	font-size: 28pt;
+	margin-bottom: 0;
+}
+h2 {
+	font-family: "helvetica";
+	font-size: 24pt;
+	margin: 10px 0 10px 0;
+	padding: 0;
+}
+#headerBar {
+	height: 60px;
+	background: #00274c;
+	color: #fff;
+	font-family: Tahoma, Geneva, sans-serif;
+	font-size: 28pt;
+}
+#headerBar div {
+	padding-left:-75px;
+}
+#power_meters {
+}
+.pm {
+	border: 4px solid black;
+	margin: 10px;
+	padding: 20px;
+	text-align: center;
+	width: 200px;
+	float: left;
+}
+.pm .ccid {
+	color: #aaa;
+}
+.pm .watts {
+	font-size: 18pt;
+}
+#coilcubes {
+	width: 1000px;
+	height: 150px;
+	margin: 0 auto 0 auto;
+	text-align: center;
+}
+.coilcube {
+	 width: 110px;
+	 height: 150px;
+	 float: left;
+}
+.coilcube img {
+	 width: 75px;
+	 position: relative;
+	 top: 25px;
+}
+.gkps {
+	top: 55px !important;
+}
+
+.box_shadow {
+	border: 1px solid #ddd;
+	background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.box_white {
+	background: #fff !important;
+}
+
+.graph {
+	padding: 100px 5px 0 50px;
+	margin: 15px auto 30px auto;
+	width:95%;
+	height:500px;
+}
+.axisLabel {
+	position: absolute;
+	text-align: center;
+	font-size: 12px;
+}
+.yaxisLabel {
+	top: 50%;
+	left: 2px;
+	transform: rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-webkit-transform:  rotate(-90deg);
+	transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-ms-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+}
+.y2axisLabel {
+	top: 10%;
+	left: 998px;
+	width: 400px;
+	transform: rotate(90deg);
+	-o-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-webkit-transform:  rotate(90deg);
+	transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-ms-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+}
+.ie7 .yaxisLabel, .ie8 .yaxisLabel {
+	top: 40%;
+	font-size: 36px;
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.0, M12=0.33, M21=-0.33, M22=0.0,sizingMethod='auto expand');
+}
+.flot-tick-label {
+	max-width: 100px !important;
+}
+
+.key {
+	width: 1200px;
+	margin: 15px auto 30px auto;
+}
+.key th {
+	font-weight: bold;
+	text-align: left;
+}
+.key td, .key th {
+	padding: 1px 5px 1px 5px;
+}

@@ -13,16 +13,17 @@
 
 	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
 
-	<title>Monjolo</title>
+	<title>Watts Up? .net</title>
 </head>
 
 <body>
 	<div id="headerBar">
 		<div style="width:1000px; margin:0 auto; text-align:center;">
 			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
-			<div style="float:left; padding:6px 0 0 350px;">Monjolo</div>
+			<div style="float:left; padding:6px 0 0 350px;">Watts Up? .net</div>
 		</div>
 	</div>
+
 	<div id="body">
 		<div id="graph" class="box_shadow graph"></div>
 		<div id="key" class="box_shadow key">
@@ -36,33 +37,33 @@
 
 	<script>
 
-	var CC_PID = '7aiOPJapXF';
-	var socket_cc;
+	var WUP_PID = 'YWUr2G8AZP';
+	var s;
 
 	onload = function() {
-		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
-		socket_cc.on('connect', function (data) {
-			socket_cc.emit('query', {'profile_id': CC_PID,
-			                         'description': {'$exists': true},
-			                         'type': 'coilcube_freq'}
-			              );
+		s = io.connect('inductor.eecs.umich.edu:8080/stream');
+		s.on('connect', function (data) {
+			s.emit('query', {'profile_id': WUP_PID,
+	                         'description': {'$exists': true}}
+			      );
 		});
 
-		socket_cc.on('data', function (data) {
-			var color = get_color(data['ccid_mac'])
+		s.on('data', function (data) {
+			var uid = data['wattsupid'].toString()
+			var color = get_color(uid)
 			add_to_key(g,
-				data['ccid_mac'],
+				uid,
 				data['description'],
 				data['location_str'],
 				color)
-			add_to_graph(g, data['ccid_mac'], data['time'], data['freq'], color);
+			add_to_graph(g, uid, data['time'], data['watts'], color);
 		});
 
 
 		g = $.grapher($("#graph"),
 			{legend: {show: false, conainer: $("#graph_key")},
 			 xaxis:  {show:true, width:300000, mode: "time", tickFormatter:x_format},
-			 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+			 yaxis:  {min:0, label:"Power (watts)", max:250},
 			 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			});
 
