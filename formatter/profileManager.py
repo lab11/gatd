@@ -155,8 +155,8 @@ class profileManager:
 				dbid = self.db.storeConfig(name=name,
 				                           config_file=str_ptr.getvalue(),
 				                           profile_id=pid)
-				self.dbids[dbid] = pid
-
+				self.configs[pid]['dbid'] = dbid
+				self.names[name] = pid
 
 			# Now parse the file
 			self._parseConfig(configp=configp, pid=pid, dbid=dbid)
