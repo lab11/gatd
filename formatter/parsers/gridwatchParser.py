@@ -13,30 +13,19 @@ class gridwatchParser (parser.parser):
 
 		# Parse the JSON blob
 		vals = json.loads(data[10:])
+		
+		ret['phone_id']   = vals['id'][0]
+		ret['event_type'] = vals['event_type'][0]
+		ret['latitude']   = float(vals['latitude'][0])
+		ret['longitude']  = float(vals['longitude'][0])
+		ret['phone_type'] = vals['phone_type'][0]
+		ret['os']         = vals['os'][0]
+		ret['os_version'] = vals['os_version'][0]
+		ret['network']    = vals['network'][0]
 
-		print(vals)
-
-		return None
-
-		ret['wattsupid']    = int(vals['id'][0])
-		ret['watts']        = float(vals['w'][0])/10.0
-		ret['volts']        = float(vals['v'][0])/10.0
-		ret['amps']         = float(vals['a'][0])/10.0
-		ret['watt-hours']   = float(vals['wh'][0])/10.0
-		ret['max watts']    = float(vals['wmx'][0])/10.0
-		ret['max volts']    = float(vals['vmx'][0])/10.0
-		ret['max amps']     = float(vals['amx'][0])/10.0
-		ret['min watts']    = float(vals['wmi'][0])/10.0
-		ret['min volts']    = float(vals['vmi'][0])/10.0
-		ret['min amps']     = float(vals['ami'][0])/10.0
-		ret['power factor'] = float(vals['pf'][0])
-		ret['power cycle']  = float(vals['pcy'][0])
-		ret['frequency']    = float(vals['frq'][0])/10.0
-		ret['volt-amps']    = float(vals['va'][0])/10.0
-
-		ret['address'] = str(meta['addr'])
-		ret['port']    = meta['port']
-		ret['time']    = meta['time']
-		ret['public']  = settings['public']
+		ret['address']    = str(meta['addr'])
+		ret['port']       = meta['port']
+		ret['time']       = int(vals['time'][0]) # Use the timestamp from the phone
+		ret['public']     = settings['public']
 
 		return ret
