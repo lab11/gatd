@@ -2,6 +2,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 import IPy
 import json
 import pika
+import string
 import struct
 import time
 import urlparse
@@ -26,6 +27,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 		content_len = int(self.headers.getheader('content-length'))
 		post_body   = self.rfile.read(content_len)
 		data        = urlparse.parse_qs(post_body)
+		profile_id  = string.strip(self.path, '/')
 
 		# Get the IPv6 address in integer form
 		try:
@@ -43,7 +45,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 			port,
 			now)
 
-		amqp_pkt += self.path + json.dumps(data)
+		amqp_pkt += profile_id + json.dumps(data)
 
 		print(amqp_pkt)
 
