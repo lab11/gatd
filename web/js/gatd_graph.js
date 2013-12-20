@@ -72,8 +72,8 @@ function get_random_color() {
 function add_to_key (graph, uid, desc, loc, color) {
 	if (!(uid in key_map)) {
 		key_map[uid] = {'description': desc,
-		                     'location': loc,
-		                     'color': color};
+		                'location': loc,
+		                'color': color};
 		loc = loc.replace(/[\|]+/g, ", ").replace("|", ", ");
 		uid_stripped = uid.replace(/[^a-zA-Z0-9]/g, '');
 		$("#key_table").append('<tr id="'+uid_stripped+'" style="color:'
