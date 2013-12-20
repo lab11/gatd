@@ -142,5 +142,6 @@ h2 {
 	text-align: left;
 }
 .key td, .key th {
-	padding: 1px 5px 1px 5px;
+	padding: 0px 5px 0px 5px;
+	font-size: 8pt;
 }
