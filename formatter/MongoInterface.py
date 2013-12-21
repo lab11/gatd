@@ -5,12 +5,13 @@ import bson
 
 class MongoInterface:
 
-	DATABASE          = 'getallthedata'
-	TABLE_UNFORMATTED = 'unformatted_archive'
-	TABLE_FORMATTED   = 'formatted_data'
-	TABLE_CONFIG      = 'configuration'
-	TABLE_META_CONFIG = 'meta_config'
-	TABLE_META        = 'meta'
+	DATABASE            = 'getallthedata'
+	TABLE_UNFORMATTED   = 'unformatted_archive'
+	TABLE_FORMATTED     = 'formatted_data'
+	TABLE_FORMATTED_CAP = 'formatted_data_capped'
+	TABLE_CONFIG        = 'configuration'
+	TABLE_META_CONFIG   = 'meta_config'
+	TABLE_META          = 'meta'
 
 
 	def __init__(self, host, port, username=None, password=None):
@@ -36,9 +37,11 @@ class MongoInterface:
 			print oe
 
 	# Write data to the formatted data table
+	# Also send it to the capped table that we use for streaming.
 	def writeFormatted (self, to_write):
 		try:
 			self.mongo_db[self.TABLE_FORMATTED].save(to_write)
+			self.mongo_db[self.TABLE_FORMATTED_CAP].save(to_write)
 		except OverflowError as oe:
 			print oe
 
