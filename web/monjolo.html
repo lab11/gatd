@@ -40,7 +40,7 @@
 	var socket_cc;
 
 	onload = function() {
-		socket_cc = io.connect('inductor.eecs.umich.edu:8080/stream');
+		socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
 		socket_cc.on('connect', function (data) {
 			socket_cc.emit('query', {'profile_id': CC_PID,
 			                         'description': {'$exists': true},
