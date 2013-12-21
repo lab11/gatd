@@ -5,6 +5,7 @@ import bson
 
 class MongoInterface:
 
+	DATABASE            = 'getallthedata'
 	TABLE_FORMATTED_CAP = 'formatted_data_capped'
 
 
@@ -23,10 +24,22 @@ class MongoInterface:
 
 	def get (self, query):
 
+		# Trial period:
+		# Let's just use this capped collection for everything cause why not
+		# try.
+		# time is the milliseconds in the past from now to start getting
+		# data from.
+		now = int(round(time.time() * 1000))
+		if 'time' in query:
+			start = now - query['time']
+		else:
+			start = now
+		query['time'] = {'$gt': start}
+
 		# We are only streaming out of the tailable capped collection
 		# Make sure we only get packets from now onward
-		now = int(round(time.time() * 1000))
-		query['time'] = {'$gt': now}
+	#	now = int(round(time.time() * 1000))
+	#	query['time'] = {'$gt': now}
 
 		cursor = self.mongo_db[self.TABLE_FORMATTED_CAP].find(query,
 			tailable=True,
