@@ -52,6 +52,8 @@ This example will start 5 minutes in the past:
     sockio.emit('query', {'profile_id': MY_PROFILE,
 	                      'time': 300000});
 
+Usage:
+
     host: inductor.eecs.umich.edu:8082
     namespace: /stream
 
