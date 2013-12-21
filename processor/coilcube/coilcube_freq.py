@@ -1,25 +1,17 @@
-import glob
-import os
-import sys
-import traceback
-import time
-import struct
-import socket
-import threading
-import SocketServer
-import pika
 import json
+import os
+import pika
 import struct
+import sys
 
-# Hostname to connect to for rabbitmq queue
-HOSTNAME = "inductor.eecs.umich.edu"
+sys.path.append(os.path.abspath('../../config'))
+import gatdConfig
 
-STREAM_EXCHANGE = "streamer_exchange"
-RECEIVE_EXCHANGE = "receive_exchange"
 
 PROFILE = "7aiOPJapXF"
 
-amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOSTNAME))
+amqp_conn = pika.BlockingConnection(
+            pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
 amqp_chan = amqp_conn.channel()
 
 keys = {}
@@ -70,18 +62,21 @@ def process_packet (ch, method, properties, body):
 	del pkt['seq_no']
 
 	ojson = json.dumps(pkt)
-	ojson = '\x02' + ojson
+	ojson = struct.pack('B', gatdConfig.pkt.TYPE_PROCESSED) + ojson
 
-	amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE, body=ojson,
-		routing_key='')
+	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.xch_receive,
+	                        body=ojson,
+	                        routing_key='')
 
 
 
 # Setup a queue to get the necessary stream
 strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
-amqp_chan.queue_bind(exchange=STREAM_EXCHANGE,
-	queue=strm_queue.method.queue, arguments=keys)
-amqp_chan.basic_consume(process_packet,	queue=strm_queue.method.queue, no_ack=True)
+amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+                     queue=strm_queue.method.queue,
+                     arguments=keys)
+amqp_chan.basic_consume(process_packet,
+                        queue=strm_queue.method.queue,
+                        no_ack=True)
 amqp_chan.start_consuming()
-
 
