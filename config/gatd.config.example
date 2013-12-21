@@ -3,3 +3,36 @@ host: localhost
 port: 27017
 username: uname
 password: pword
+database: getallthedata
+col_formatted:        formatted_data
+col_formatted_capped: formatted_data_capped
+col_unformatted:      unformatted_archive
+col_config:           configuration
+col_meta_config:      meta_config
+col_meta:             meta
+col_gateway:          gateway
+
+[receiver]
+port_udp:       4001
+port_tcp:       4002
+port_http_post: 8081
+
+[socketio]
+stream_prefix: /stream
+port_node:   8080
+port_python: 8082
+
+[rabbitmq]
+host: localhost
+q_receive:   receive_queue
+xch_stream:  streamer_exchange
+xch_receive: receive_exchange
+
+
+# Packets moving to the formatter
+[pkt]
+header_len:     26
+type_udp:       0
+type_tcp:       1
+type_processed: 2
+type_http_post: 3
