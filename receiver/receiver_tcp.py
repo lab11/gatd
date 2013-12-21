@@ -1,29 +1,24 @@
-import sys
-import traceback
-import time
-import struct
-import socket
-import threading
-import SocketServer
-import pika
-import json
-import struct
 import IPy
+import json
+import os
+import pika
+import socket
+import SocketServer
+import struct
+import sys
+import time
 
-HOST = "::"
-TCP_RECEIVE_PORT = 4002
+sys.path.append(os.path.abspath('../../config'))
+import gatdConfig
 
-HOSTNAME = "localhost"
-RECEIVE_EXCHANGE = "receive_exchange"
 
 MAX_INCOMING_LENGTH = 4096
-PKT_TYPE_TCP = 1
 
 class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
 	def setup (self):
-		self.amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(
-			host=HOSTNAME))
+		self.amqp_conn = pika.BlockingConnection(
+		                 pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
 		self.amqp_chan = self.amqp_conn.channel();
 
 	def handle (self):
@@ -38,7 +33,7 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 			current_time = int(round(time.time()*1000))
 
 			amqp_pkt = struct.pack("!BQQHQ",
-				PKT_TYPE_TCP,
+				gatdConfig.pkt.TYPE_TCP,
 				addr>>(64*8),
 				addr,
 				port,
@@ -46,8 +41,9 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
 			amqp_pkt += data
 
-			self.amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE,
-				body=amqp_pkt, routing_key='')
+			self.amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
+			                             body=amqp_pkt,
+			                             routing_key='')
 
 	def finish (self):
 		if self.amqp_chan.is_open:
@@ -63,5 +59,6 @@ class ThreadedTCPServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
 
 # Run the receiver
-server = ThreadedTCPServer((HOST, TCP_RECEIVE_PORT), ThreadedTCPRequestHandler)
+server = ThreadedTCPServer(("::", gatdConfig.receive.PORT_TCP),
+                           ThreadedTCPRequestHandler)
 server.serve_forever()
