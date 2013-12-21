@@ -16,14 +16,14 @@ class socketioManager(object):
 	def __call__(self, environ, start_response):
 		socketio.socketio_manage(environ, {'/stream': socketioStreamer});
 
-class socketioStreamer(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastMixin):
+class socketioStreamer(socketio.namespace.BaseNamespace):
 	def on_query(self, msg):
 		self.m = MongoInterface.MongoInterface(host=gatdConfig.getMongoHost(),
                    port=gatdConfig.getMongoPort(),
                    username=gatdConfig.getMongoUsername(),
                    password=gatdConfig.getMongoPassword())
 		for r in self.m.get(msg):
-			self.broadcast_event('data', r)
+			self.emit('data', r)
 
 
 socketio.server.SocketIOServer(('0.0.0.0', SOCKETIO_PYTHON_PORT),
