@@ -36,6 +36,26 @@ streamers.
 This streamer uses socket.io to funnel data from the server to a browser. This
 is the best approach if the client is a webpage.
 
+    host: inductor.eecs.umich.edu:8080
+    namespace: /stream
+
+### Socket.io Version 2
+
+This also uses socket.io, but the server is written in python and it supports
+"streaming from the past". Basically instead of just streaming from when the
+client connects and into the future, this server can stream data from a point
+in the past. To do this, add the `time` key to the query with the value
+as the number of milliseconds in the past to stream from.
+
+This example will start 5 minutes in the past:
+
+    sockio.emit('query', {'profile_id': MY_PROFILE,
+	                      'time': 300000});
+
+    host: inductor.eecs.umich.edu:8082
+    namespace: /stream
+
+
 ### TCP
 
 For a more basic interface, a client can simply create a TCP connection
