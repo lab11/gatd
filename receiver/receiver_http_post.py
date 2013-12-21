@@ -7,21 +7,17 @@ import struct
 import time
 import urlparse
 
-LISTEN_HOST = ''
-LISTEN_PORT = 8081
+sys.path.append(os.path.abspath('../../config'))
+import gatdConfig
 
-RECEIVE_HOSTNAME = 'localhost'
-RECEIVE_EXCHANGE = "receive_exchange"
-
-PKT_TYPE_HTTP_POST = 3
 
 class gatdPostHandler (BaseHTTPRequestHandler):
 
 	def do_POST(self):
 		now = int(time.time()*1000)
 
-		amqp_conn = pika.BlockingConnection(pika.ConnectionParameters(
-			host=RECEIVE_HOSTNAME))
+		amqp_conn = pika.BlockingConnection(
+		            pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
 		amqp_chan = amqp_conn.channel();
 
 		content_len = int(self.headers.getheader('content-length'))
@@ -39,7 +35,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 		port = self.client_address[1]
 
 		amqp_pkt = struct.pack("!BQQHQ",
-			PKT_TYPE_HTTP_POST,
+			gatdConfig.pkt.TYPE_PROCESSED,
 			addr>>(64*8),
 			addr,
 			port,
@@ -49,8 +45,9 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 
 		print(amqp_pkt)
 
-		amqp_chan.basic_publish(exchange=RECEIVE_EXCHANGE, body=amqp_pkt,
-			routing_key='')
+		amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
+		                        body=amqp_pkt,
+		                        routing_key='')
 
 		self.send_response(200)
 		self.send_header('Content-type','text/html')
@@ -64,7 +61,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 
 try:
 	# Create a web server and define the handler to manage the incoming request
-	server = HTTPServer((LISTEN_HOST, LISTEN_PORT), gatdPostHandler)
+	server = HTTPServer(('', gatdConfig.receiver.PORT_HTTP_POST), gatdPostHandler)
 
 	# Wait forever for incoming HTTP requests
 	server.serve_forever()
