@@ -1,28 +1,18 @@
-import archiveCleaner
 import bson.binary
-import FormatterExceptions as FE
-import gatdConfig
 import IPy
 import json
-import MongoInterface
 import os
-import profileManager
 import pika
-import RabbitInterface
 import struct
 import sys
 
-RMQ_HOST        = 'inductor.eecs.umich.edu'
-RECEIVE_QUEUE   = 'receive_queue'
-STREAM_EXCHANGE = 'streamer_exchange'
+import archiveCleaner
+import FormatterExceptions as FE
+sys.path.append(os.path.abspath('../config'))
+import gatdConfig
+import MongoInterface
+import profileManager
 
-PKT_TYPE_UDP       = 0
-PKT_TYPE_TCP       = 1
-PKT_TYPE_PROCESSED = 2
-PKT_TYPE_HTTP_POST = 3
-
-PKT_HEADER_LEN_UDP = 26
-PKT_HEADER_LEN_TCP = 26
 
 # Unpack the packet from the receiver/querier
 # Returns tuple(data string, meta info dict)
@@ -35,19 +25,19 @@ def unpackPacket (pkt):
 	ptype = struct.unpack('B', pkt[0:1])[0]
 	pkt   = pkt[1:]
 
-	if ptype == PKT_TYPE_UDP or \
-	   ptype == PKT_TYPE_TCP or \
-	   ptype == PKT_TYPE_HTTP_POST:
-		if len(pkt) < PKT_HEADER_LEN_UDP:
-			raise FE.BadPacket('Malformed udp/tcp packet.')
+	if ptype in [gatdConfig.pkt.TYPE_UDP,
+	             gatdConfig.pkt.TYPE_TCP,
+	             gatdConfig.pkt.TYPE_HTTP_POST]:
+		if len(pkt) < gatdConfig.pkt.HEADER_LEN:
+			raise FE.BadPacket('Packet header too short.')
 
-		record  = struct.unpack('>QQHQ', pkt[0:PKT_HEADER_LEN_UDP])
+		record  = struct.unpack('>QQHQ', pkt[0:gatdConfig.pkt.HEADER_LEN])
 		addr    = int('0x{:0>16x}{:0>16x}'.format(*record[0:2]), 16)
 		port    = record[2]
 		time    = record[3]
-		if len(pkt) > PKT_HEADER_LEN_UDP:
-			data = struct.unpack('>%is' % (len(pkt)-PKT_HEADER_LEN_UDP),
-			                     pkt[PKT_HEADER_LEN_UDP:])[0]
+		if len(pkt) > gatdConfig.pkt.HEADER_LEN:
+			data = struct.unpack('>%is' % (len(pkt)-gatdConfig.pkt.HEADER_LEN),
+			                     pkt[gatdConfig.pkt.HEADER_LEN:])[0]
 		else:
 			data = ''
 
@@ -58,7 +48,7 @@ def unpackPacket (pkt):
 
 		return (data, meta)
 
-	elif ptype == PKT_TYPE_PROCESSED:
+	elif ptype == gatdConfig.pkt.TYPE_PROCESSED:
 		try:
 			data = json.loads(pkt)
 
@@ -75,11 +65,10 @@ json blob')
 
 	return None
 
-
+# Called each time a packet comes in from the RabbitMQ queue
 def packet_callback (channel, method, prop, body):
 
 	try:
-
 		# Parse out the fields from the receiver
 		data, meta = unpackPacket(body)
 
@@ -149,27 +138,30 @@ def packet_callback (channel, method, prop, body):
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
 	channel.basic_ack(delivery_tag=method.delivery_tag)
 
-mi = MongoInterface.MongoInterface(host=gatdConfig.getMongoHost(),
-                                   port=gatdConfig.getMongoPort())
+mi = MongoInterface.MongoInterface()
 pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(host=RMQ_HOST))
+connection = pika.BlockingConnection(
+				pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
 channel = connection.channel()
 
 # Create the exchange for the streaming packets.
 # Let the queues be created by the streamers. If there are no streamers
 # running, then the messages will just be dropped and that is OK.
-channel.exchange_declare(exchange=STREAM_EXCHANGE, exchange_type='headers',
+channel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+                         exchange_type='headers',
                          durable=True)
 
 # Read in all config files
-for root, dirs, files in os.walk('.'):
+for root, dirs, files in os.walk('./configs'):
 	for f in files:
 		name, ext = os.path.splitext(f)
 		if ext == '.config':
 			pm.addConfigFile(root + '/' + f)
 
-channel.basic_consume(packet_callback, queue=RECEIVE_QUEUE, no_ack=False)
+channel.basic_consume(packet_callback,
+                      queue=gatdConfig.rabbitmq.Q_RECEIVE,
+                      no_ack=False)
 channel.start_consuming()
 

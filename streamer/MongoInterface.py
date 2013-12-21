@@ -1,26 +1,27 @@
+import os
 import pymongo
+import sys
 import time
-import bson
 
+sys.path.append(os.path.abspath('../config'))
+import gatdConfig
 
 class MongoInterface:
 
-	DATABASE            = 'getallthedata'
-	TABLE_FORMATTED_CAP = 'formatted_data_capped'
-
-
-	def __init__(self, host, port, username=None, password=None):
+	def __init__(self):
 		# Connect to the mongo database
 		try:
-			self.mongo_conn = pymongo.MongoClient(host=host, port=port)
-			self.mongo_db   = self.mongo_conn[self.DATABASE]
-			if username:
-				self.mongo_db.authenticate(username, password)
+			self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
+			                                      port=gatdConfig.mongo.PORT)
+			self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
+			if gatdConfig.mongo.USERNAME:
+				self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
+				                           gatdConfig.mongo.USERNAME)
 			self.stop = False
 
-		except pymongo.errors.ConnectionFailure as e_cf:
+		except pymongo.errors.ConnectionFailure:
 			print "Could not connect. Check the host and port."
-			exit(1)
+			sys.exit(1)
 
 	def get (self, query):
 
@@ -41,7 +42,7 @@ class MongoInterface:
 	#	now = int(round(time.time() * 1000))
 	#	query['time'] = {'$gt': now}
 
-		cursor = self.mongo_db[self.TABLE_FORMATTED_CAP].find(query,
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(query,
 			tailable=True,
 			await_data=True)
 		while cursor.alive and not self.stop:
@@ -55,9 +56,3 @@ class MongoInterface:
 
 	def __del__ (self):
 		self.mongo_conn.close()
-
-
-if __name__ == '__main__':
-	MONGO_HOST  = 'inductor.eecs.umich.edu'
-	MONGO_PORT  = 19000
-	m = MongoInterface(MONGO_HOST, MONGO_PORT)

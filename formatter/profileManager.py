@@ -1,12 +1,13 @@
 import ConfigParser
 import copy
-import FormatterExceptions as FE
 import IPy
 import random
 import string
 import StringIO
 import sys
 import uuid
+
+import FormatterExceptions as FE
 
 class profileManager:
 
