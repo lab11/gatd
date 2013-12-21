@@ -5,6 +5,11 @@ var number_nodes = 0;
 
 var key_map = {};
 
+// Keep track of the last time we updated the graph to avoid
+// doing it too often.
+var last_update = 0;
+var MIN_INTERVAL_MS = 1000;
+
 var series = 'all';
 
 function add_to_graph(graph, uid, x, y, color) {
@@ -20,9 +25,19 @@ function add_to_graph(graph, uid, x, y, color) {
 	               fillColor:color},
 	   };
 	graph.addData(pdw);
-	graph.update(series);
+	if (should_update()) {
+		graph.update(series);
+	}
 }
 
+function should_update () {
+	var now = new Date().getTime();
+	if (now - MIN_INTERVAL_MS > last_update) {
+		last_update = now;
+		return true;
+	}
+	return false;
+}
 
 function x_format(val, axis) {
 	d = new Date(val);
