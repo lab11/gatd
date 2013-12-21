@@ -44,7 +44,8 @@
 		socket_cc.on('connect', function (data) {
 			socket_cc.emit('query', {'profile_id': CC_PID,
 			                         'description': {'$exists': true},
-			                         'type': 'coilcube_freq'}
+			                         'type': 'coilcube_freq',
+			                         'time': 300000}
 			              );
 		});
 
