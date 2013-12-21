@@ -25,7 +25,7 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 			self.emit('data', r)
 
 
-socketio.server.SocketIOServer(('0.0.0.0', gatdConfig.socketio.PYTHON_PORT),
+socketio.server.SocketIOServer(('0.0.0.0', gatdConfig.socketio.PORT_PYTHON),
                                socketioManager(),
                                resource='socket.io',
                                policy_server=False
