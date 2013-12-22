@@ -141,10 +141,9 @@ class MongoInterface:
 		ret = {}
 		query = {'prefix': str(prefix)}
 		gateway = self.mongo_db[gatdConfig.mongo.COL_GATEWAY].find(query)
-		for g in gatway:
+		for g in gateway:
 			if 'additional' in g:
 				ret.update(g['additional'])
-		print ret
 		return ret
 
 

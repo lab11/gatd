@@ -102,8 +102,10 @@ def packet_callback (channel, method, prop, body):
 		props = pika.spec.BasicProperties(headers=headers)
 
 		# Send to streamer
-		channel.basic_publish(exchange=STREAM_EXCHANGE, body=jsonv,
-		                      properties=props, routing_key='')
+		channel.basic_publish(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+		                      body=jsonv,
+		                      properties=props,
+							  routing_key='')
 
 
 	except FE.ParserNotFound as e:
@@ -129,6 +131,7 @@ def packet_callback (channel, method, prop, body):
 		pass
 
 	except Exception as e:
+		print(e)
 		pass
 
 	except TypeError:
