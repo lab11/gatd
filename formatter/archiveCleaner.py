@@ -1,6 +1,3 @@
-
-
-
 # Runs through the archive table and checks if any
 #  archived records can now be parsed
 

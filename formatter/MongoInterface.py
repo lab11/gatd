@@ -107,6 +107,8 @@ class MongoInterface:
 		return meta
 
 	def getRawMeta (self, pid):
+		'''Return a list of dicts of all of the meta items in the collection
+		for a given profile id'''
 		metas = self.mongo_db[gatdConfig.mongo.COL_META].find({'profile_id':pid})
 		req_key = self.getMetaRequiredKey(pid)
 		if req_key == None:
@@ -132,6 +134,19 @@ class MongoInterface:
 	def deleteMeta (self, dbid):
 		self.mongo_db[gatdConfig.mongo.COL_META].remove(
 			{'_id': bson.objectid.ObjectId(dbid)})
+
+	def getGatewayKeys (self, prefix):
+		'''Return the key,value pairs that should be added to a packet that
+		came though a gateway with this prefix (string).'''
+		ret = {}
+		query = {'prefix': str(prefix)}
+		gateway = self.mongo_db[gatdConfig.mongo.COL_GATEWAY].find(query)
+		for g in gatway:
+			if 'additional' in g:
+				ret.update(g['additional'])
+		print ret
+		return ret
+
 
 	def getArchives (self):
 		r = self.mongo_db[gatdConfig.mongo.COL_UNFORMATTED].find()

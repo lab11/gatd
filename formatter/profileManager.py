@@ -230,6 +230,9 @@ class profileManager:
 		# Add in the meta data
 		r.update(self.db.getMeta(r))
 
+		# Add in the gateway data
+		r.update(self.db.getGatewayKeys(addr >> 64))
+
 		return r
 
 
