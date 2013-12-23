@@ -1,4 +1,5 @@
 import bson
+import IPy
 import os
 import pymongo
 import sys
@@ -137,7 +138,7 @@ class MongoInterface:
 
 	def getGatewayKeys (self, prefix):
 		'''Return the key,value pairs that should be added to a packet that
-		came though a gateway with this prefix (string).'''
+		came though a gateway with this prefix.'''
 		ret = {}
 		query = {'prefix': str(prefix)}
 		gateway = self.mongo_db[gatdConfig.mongo.COL_GATEWAY].find(query)
@@ -145,6 +146,37 @@ class MongoInterface:
 			if 'additional' in g:
 				ret.update(g['additional'])
 		return ret
+
+	def getRawGatewayKeys (self):
+		gws = self.mongo_db[gatdConfig.mongo.COL_GATEWAY].find()
+		gws.sort('prefix_cidr', 1)
+		return list(gws)
+
+	def addGatewayKeys (self, prefix, additional):
+		'''Add a prefix for a gateway and associated additional keys to the
+		collection.
+
+		prefix: 64 bit number representing the upper 64 bits of the IP addr
+		additional: dict of key,values to add to incoming packets'''
+		prefix_ip = IPy.IP(prefix<<64)
+		prefix_str = '{}/64'.format(prefix_ip)
+		insert = {'prefix':      str(prefix),
+		          'prefix_cidr': prefix_str,
+		          'additional':  additional}
+		self.mongo_db[gatdConfig.mongo.COL_GATEWAY].insert(insert)
+
+	def updateGatewayKeys (self, dbid, prefix, additional):
+		'''Same as addGatewayKeys but update an existing record'''
+		prefix_str = '{}/64'.format(IPy.IP(prefix<<64))
+		update = {'_id':         bson.objectid.ObjectId(dbid),
+		          'prefix':      str(prefix),
+		          'prefix_cidr': prefix_str,
+		          'additional':  additional}
+		self.mongo_db[gatdConfig.mongo.COL_GATEWAY].save(update)
+
+	def deleteGatewayKeys (self, dbid):
+		self.mongo_db[gatdConfig.mongo.COL_GATEWAY].remove(
+			{'_id': bson.objectid.ObjectId(dbid)})
 
 
 	def getArchives (self):
