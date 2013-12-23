@@ -16,6 +16,11 @@ def edit_gateway (prefix, addit):
 	while True:
 		prefix, addit = meta_test.edit_gateway_key(prefix, addit)
 		strip(addit)
+		for a in addit:
+			try:
+				addit[a] = eval(addit[a])
+			except Exception:
+				pass
 		print('\nGateway Record:')
 		print(DSTR_A.format('PREFIX', 'ADDITIONAL'))
 		print(DSTR_A.format(prefix, addit))
