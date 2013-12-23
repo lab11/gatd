@@ -87,7 +87,14 @@ h2 {
 .graph {
 	padding: 100px 5px 0 50px;
 	margin: 15px auto 30px auto;
-	width:95%;
+	width:70%;
+	height:500px;
+}
+
+.graphmap {
+	padding: 100px 5px 0 50px;
+	margin: 30px;
+	width:65%;
 	height:500px;
 }
 .axisLabel {
@@ -132,7 +139,12 @@ h2 {
 .flot-tick-label {
 	max-width: 100px !important;
 }
-
+.map {
+	padding: 100px 5px 0 50px;
+	margin: 30px;
+	width:20%;
+	height:400px;
+}
 .key {
 	width: 1200px;
 	margin: 15px auto 30px auto;

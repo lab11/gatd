@@ -1,5 +1,6 @@
 <html>
 <head>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js"></script>
 	<script src="js/socket.io-0.8.7.js"></script>
 	<script src="js/jquery-1.10.2.min.js"></script>
 	<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
@@ -12,6 +13,7 @@
 	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
 
 	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
 
 	<title>Monjolo</title>
 </head>
@@ -24,8 +26,11 @@
 		</div>
 	</div>
 	<div id="body">
-		<div id="graph" class="box_shadow graph"></div>
-		<div id="key" class="box_shadow key">
+		<div>
+			<div id="graph" style="float:left" class="box_shadow graphmap"></div>
+			<div id="map" style="float:left" class="map"></div>
+		</div>
+		<div id="key" class="box_shadow key" style="float:left;">
 			<table id="key_table">
 				<tr>
 					<th>Index</th><th>ID</th><th>Description</th><th>Location</th>
@@ -56,6 +61,12 @@
 				data['description'],
 				data['location_str'],
 				color)
+			if ('location_gateway_wgs84' in data) {
+				add_to_map(map,
+					data['ccid_mac'],
+					data['location_gateway_wgs84'],
+					color);
+			}
 			add_to_graph(g, data['ccid_mac'], data['time'], data['freq'], color);
 		});
 
@@ -66,6 +77,13 @@
 			 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
 			 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
 			});
+
+		map = L.map('map').setView([42.281389, -83.748333], 13);
+
+		// add an OpenStreetMap tile layer
+		L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+		    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
 
 		$("th").click(function() {
 			series = 'all';

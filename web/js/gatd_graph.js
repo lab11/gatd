@@ -4,6 +4,7 @@ var node_mapping = {};
 var number_nodes = 0;
 
 var key_map = {};
+var keys_in_map = {};
 
 // Keep track of the last time we updated the graph to avoid
 // doing it too often.
@@ -100,6 +101,21 @@ function add_to_key (graph, uid, desc, loc, color) {
 			graph.update(series);
 		});
 		number_nodes++;
+	}
+}
+
+function add_to_map (map, uid, loc, color) {
+	if (!(uid in keys_in_map)) {
+		keys_in_map[uid] = {'location': loc, 'color': color};
+		uid_stripped = uid.replace(/[^a-zA-Z0-9]/g, '');
+		jitter_x = Math.random() * (0.0005) - 0.00025;
+		jitter_y = Math.random() * (0.0005) - 0.00025;
+		map_loc = [loc[0]+jitter_x, loc[1]+jitter_y]
+		L.circle(map_loc, 30, {
+			color: color,
+			fillColor: color,
+			fillOpacity: 1
+		}).addTo(map).bindPopup(uid);
 	}
 }
 
