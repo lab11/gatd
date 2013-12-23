@@ -87,7 +87,10 @@ else:
 	if 'y' in confirm:
 		m.deleteGatewayKey(gw['_id'])
 	else:
-		prefix, addit = edit_gateway(gw['prefix_cidr'], gw['additional'])
+		addit = {}
+		for a in gw['additional']:
+			addit[a] = str(gw['additional'][a])
+		prefix, addit = edit_gateway(gw['prefix_cidr'], addit)
 
 		m.updateGatewayKeys(dbid=gw['_id'],
 		                   prefix=IPy.IP(prefix).int() >> 64,
