@@ -2,7 +2,6 @@
 
 import meta_test
 import MongoInterface
-import gatdConfig
 import sys
 
 
@@ -35,10 +34,7 @@ DSTR_A = '      {:<25s} {:<20s} {:<50s}'
 
 pids = []
 
-m = MongoInterface.MongoInterface(host=gatdConfig.getMongoHost(),
-                                  port=gatdConfig.getMongoPort(),
-                                  username=gatdConfig.getMongoUsername(),
-                                  password=gatdConfig.getMongoPassword())
+m = MongoInterface.MongoInterface()
 
 
 configs = m.getConfigs()
