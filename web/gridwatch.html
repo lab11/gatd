@@ -56,9 +56,10 @@
 		    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(map);
 
-		s = io.connect('inductor.eecs.umich.edu:8080/stream');
+		s = io.connect('inductor.eecs.umich.edu:8082/stream');
 		s.on('connect', function (data) {
-			s.emit('query', {'profile_id': GW_PID}
+			s.emit('query', {'profile_id': GW_PID,
+			                 'time': 1209600000}
 			      );
 		});
 
