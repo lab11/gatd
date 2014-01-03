@@ -11,13 +11,14 @@
 
 
 import ConfigParser
+import os
 import sys
 
 class BaseConfigSection (object):
 	pass
 
 config = ConfigParser.ConfigParser()
-config.read('../config/gatd.config')
+config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'gatd.config'))
 
 for section in config.sections():
 	attrs = dict(config.items(section))
