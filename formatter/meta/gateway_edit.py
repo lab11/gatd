@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 import IPy
-
-import meta_test
-import MongoInterface
+import os
 import sys
+
+sys.path.append(os.path.abspath('../'))
+sys.path.append(os.path.abspath('../../config'))
+import MongoInterface
+
+import edit_item
 
 
 def strip (d):
@@ -14,7 +18,7 @@ def strip (d):
 
 def edit_gateway (prefix, addit):
 	while True:
-		prefix, addit = meta_test.edit_gateway_key(prefix, addit)
+		prefix, addit = edit_item.edit_gateway_key(prefix, addit)
 		strip(addit)
 		for a in addit:
 			try:

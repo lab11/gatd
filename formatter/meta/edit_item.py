@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-
 import urwid
 
 
@@ -55,7 +52,8 @@ class ConversationListBox(urwid.ListBox):
 	def addStrSection (self, name, key, value):
 		req = []
 		req.append(urwid.Text(('title', name.upper())))
-		req.append(urwid.Edit(('title', u"  {}: ".format(key)), edit_text=value))
+		req.append(urwid.Edit(('title', u"  {}: ".format(key)),
+		                      edit_text=value))
 		req.append(urwid.Divider())
 		return urwid.Pile(req)
 

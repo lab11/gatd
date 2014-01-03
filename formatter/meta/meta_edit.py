@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-import meta_test
-import MongoInterface
+import os
 import sys
 
+sys.path.append(os.path.abspath('../'))
+sys.path.append(os.path.abspath('../../config'))
+import MongoInterface
+
+import edit_item
 
 def strip (d):
 	if '' in d:
@@ -12,7 +16,7 @@ def strip (d):
 
 def edit_meta (req_key, req_key_val, query, addit):
 	while True:
-		req_key_val, query, addit = meta_test.edit_meta(req_key,
+		req_key_val, query, addit = edit_item.edit_meta(req_key,
 		                                                req_key_val,
 		                                                query,
 		                                                addit)
