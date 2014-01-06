@@ -19,11 +19,11 @@ class gridwatchParser (parser.parser):
 		ret['phone_id']    = vals['id'][0]
 		ret['latitude']    = float(vals['latitude'][0])
 		ret['longitude']   = float(vals['longitude'][0])
-		ret['phone_type']  = vals.get('phone_type', ('unknown'))[0]
+		ret['phone_type']  = vals.get('phone_type', tuple('unknown'))[0]
 		ret['os']          = vals['os'][0]
-		ret['os_version']  = vals.get('os_version', ('unknown'))[0]
-		ret['app_version'] = vals.get('app_version', ('unknown'))[0]
-		ret['network']     = vals.get('network', ('unknown'))[0]
+		ret['os_version']  = vals.get('os_version', tuple('unknown'))[0]
+		ret['app_version'] = vals.get('app_version', tuple('unknown'))[0]
+		ret['network']     = vals.get('network', tuple('unknown'))[0]
 
 		if ret['os'] == 'android' and ret['os_version'] == 'unknown':
 			# This older version of android used event types that were
