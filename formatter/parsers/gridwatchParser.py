@@ -15,8 +15,6 @@ class gridwatchParser (parser.parser):
 		# Parse the JSON blob
 		vals = json.loads(data[10:])
 
-		print(vals)
-
 		# Get values that should be present across all devices and versions
 		ret['phone_id']    = vals['id'][0]
 		ret['latitude']    = float(vals['latitude'][0])
@@ -60,7 +58,5 @@ class gridwatchParser (parser.parser):
 		ret['port']       = meta['port']
 		ret['time']       = int(vals['time'][0]) # Use the timestamp from the phone
 		ret['public']     = settings['public']
-
-		print(ret)
 
 		return ret
