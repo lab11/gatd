@@ -48,6 +48,14 @@ class gridwatchParser (parser.parser):
 			if 'moved' in vals:
 				ret['moved'] = vals['moved'][0].lower() == 'true'
 
+		# Determine if this might correspond to a power outage
+		if ret['event_type'] == 'unplugged':
+			if 'moved' in ret:
+				if ret['moved']:
+					ret['power_on'] = True
+				else:
+					ret['power_on'] = False
+
 		ret['address']    = str(meta['addr'])
 		ret['port']       = meta['port']
 		ret['time']       = int(vals['time'][0]) # Use the timestamp from the phone
