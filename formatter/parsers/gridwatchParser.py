@@ -49,40 +49,99 @@ class gridwatchParser (parser.parser):
 
 		# Handle changes in location
 		if ret['os'] == u'android' and app_ver < semver.Version('0.2.3'):
-			ret['latitude']   = float(vals['latitude'][0])
-			ret['longitude']  = float(vals['longitude'][0])
-			ret['accuracy']   = -1.0
-		else:
+			ret['latitude']  = float(vals['latitude'][0])
+			ret['longitude'] = float(vals['longitude'][0])
+			ret['accuracy']  = -1.0
+			ret['altitude']  = 0.0
+			ret['loc_time']  = 0
+			ret['speed']     = 0.0
+		elif ret['os'] == 'android' and app_ver == semver.Version('0.2.3'):
+			ret['altitude'] = 0.0
+			ret['loc_time'] = 0
+			ret['speed']    = 0.0
 			if 'gps_latitude' in vals:
-				ret['gps_latitude'] = float(vals['gps_latitude'][0])
+				ret['gps_latitude']  = float(vals['gps_latitude'][0])
 				ret['gps_longitude'] = float(vals['gps_longitude'][0])
-				ret['gps_accuracy'] = float(vals['gps_accuracy'][0])
+				ret['gps_accuracy']  = float(vals['gps_accuracy'][0])
 			if 'network_latitude' in vals:
-				ret['network_latitude'] = float(vals['network_latitude'][0])
+				ret['network_latitude']  = float(vals['network_latitude'][0])
 				ret['network_longitude'] = float(vals['network_longitude'][0])
-				ret['network_accuracy'] = float(vals['network_accuracy'][0])
-			
+				ret['network_accuracy']  = float(vals['network_accuracy'][0])
+
 			if 'gps_latitude' in ret and 'network_latitude' in ret:
 				if ret['gps_accuracy'] < ret['network_accuracy']:
-					ret['latitude'] = ret['gps_latitude']
+					ret['latitude']  = ret['gps_latitude']
 					ret['longitude'] = ret['gps_longitude']
-					ret['accuracy'] = ret['gps_accuracy']
+					ret['accuracy']  = ret['gps_accuracy']
 				else:
-					ret['latitude'] = ret['network_latitude']
+					ret['latitude']  = ret['network_latitude']
 					ret['longitude'] = ret['network_longitude']
-					ret['accuracy'] = ret['network_accuracy']
+					ret['accuracy']  = ret['network_accuracy']
 			elif 'gps_latitude' in ret:
-				ret['latitude'] = ret['gps_latitude']
+				ret['latitude']  = ret['gps_latitude']
 				ret['longitude'] = ret['gps_longitude']
-				ret['accuracy'] = ret['gps_accuracy']
+				ret['accuracy']  = ret['gps_accuracy']
 			elif 'network_latitude' in ret:
-				ret['latitude'] = ret['network_latitude']
+				ret['latitude']  = ret['network_latitude']
 				ret['longitude'] = ret['network_longitude']
-				ret['accuracy'] = ret['network_accuracy']
+				ret['accuracy']  = ret['network_accuracy']
 			else:
-				ret['latitude'] = -1.0
+				ret['latitude']  = -1.0
 				ret['longitude'] = -1.0
-				ret['accuracy'] = -1.0
+				ret['accuracy']  = -1.0
+		else:
+			if 'gps_latitude' in vals:
+				ret['gps_latitude']  = float(vals['gps_latitude'][0])
+				ret['gps_longitude'] = float(vals['gps_longitude'][0])
+				ret['gps_accuracy']  = float(vals['gps_accuracy'][0])
+				ret['gps_altitude']  = float(vals['gps_altitude'][0])
+				ret['gps_time']      = vals['gps_time'][0]
+				ret['gps_speed']     = float(vals['gps_speed'][0])
+			if 'network_latitude' in vals:
+				ret['network_latitude']  = float(vals['network_latitude'][0])
+				ret['network_longitude'] = float(vals['network_longitude'][0])
+				ret['network_accuracy']  = float(vals['network_accuracy'][0])
+				ret['network_altitude']  = float(vals['network_altitude'][0])
+				ret['network_time']      = vals['network_time'][0]
+				ret['network_speed']     = float(vals['network_speed'][0])
+
+			if 'gps_latitude' in ret and 'network_latitude' in ret:
+				if ret['gps_accuracy'] < ret['network_accuracy']:
+					ret['latitude']  = ret['gps_latitude']
+					ret['longitude'] = ret['gps_longitude']
+					ret['accuracy']  = ret['gps_accuracy']
+					ret['altitude']  = ret['gps_altitude']
+					ret['loc_time']  = ret['gps_time']
+					ret['speed']     = ret['gps_speed']
+				else:
+					ret['latitude']  = ret['network_latitude']
+					ret['longitude'] = ret['network_longitude']
+					ret['accuracy']  = ret['network_accuracy']
+					ret['altitude']  = ret['network_altitude']
+					ret['loc_time']  = ret['network_time']
+					ret['speed']     = ret['network_speed']
+			elif 'gps_latitude' in ret:
+				ret['latitude']  = ret['gps_latitude']
+				ret['longitude'] = ret['gps_longitude']
+				ret['accuracy']  = ret['gps_accuracy']
+				ret['altitude']  = ret['gps_altitude']
+				ret['loc_time']  = ret['gps_time']
+				ret['speed']     = ret['gps_speed']
+			elif 'network_latitude' in ret:
+				ret['latitude']  = ret['network_latitude']
+				ret['longitude'] = ret['network_longitude']
+				ret['accuracy']  = ret['network_accuracy']
+				ret['altitude']  = ret['network_altitude']
+				ret['loc_time']  = ret['network_time']
+				ret['speed']     = ret['network_speed']
+			else:
+				ret['latitude']  = -1.0
+				ret['longitude'] = -1.0
+				ret['accuracy']  = -1.0
+				ret['altitude']  = 0.0
+				ret['loc_time']  = 0
+				ret['speed']     = 0.0
+
 
 		# Determine if this might correspond to a power outage
 		if ret['event_type'] == 'unplugged':
