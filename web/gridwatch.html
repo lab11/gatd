@@ -64,20 +64,22 @@
 		});
 
 		s.on('data', function (data) {
-			if (data['event_type'] == "unplugged_still") {
-				// Detected a possible power outage
-				L.circle([data['latitude'], data['longitude']], 50, {
-					color: 'red',
-					fillColor: '#f03',
-					fillOpacity: 0.5
-				}).addTo(map).bindPopup(data['phone_id']);
+			if ('power_on' in data) {
+				if (!data['power_on']) {
+					// Detected a possible power outage
+					L.circle([data['latitude'], data['longitude']], 50, {
+						color: 'red',
+						fillColor: '#f03',
+						fillOpacity: 0.5
+					}).addTo(map).bindPopup(data['phone_id']);
 
-			} else if (data['event_type'] == "unplugged_moved") {
-				L.circle([data['latitude'], data['longitude']], 50, {
-					color: 'green',
-					fillColor: '#00ff00',
-					fillOpacity: 0.5
-				}).addTo(map).bindPopup(data['phone_id']);
+				} else {
+					L.circle([data['latitude'], data['longitude']], 50, {
+						color: 'green',
+						fillColor: '#00ff00',
+						fillOpacity: 0.5
+					}).addTo(map).bindPopup(data['phone_id']);
+				}
 			}
 		});
 	}
