@@ -2,7 +2,7 @@ import IPy
 import json
 import struct
 import parser
-#import semantic_version as semver
+import semantic_version as semver
 
 class gridwatchParser (parser.parser):
 
@@ -17,15 +17,19 @@ class gridwatchParser (parser.parser):
 
 		# Get values that should be present across all devices and versions
 		ret['phone_id']    = vals['id'][0]
-		ret['latitude']    = float(vals['latitude'][0])
-		ret['longitude']   = float(vals['longitude'][0])
 		ret['phone_type']  = vals.get('phone_type', (u'unknown',))[0]
 		ret['os']          = vals['os'][0]
 		ret['os_version']  = vals.get('os_version', (u'unknown',))[0]
 		ret['app_version'] = vals.get('app_version', (u'unknown',))[0]
 		ret['network']     = vals.get('network', (u'unknown',))[0]
 
-		if ret['os'] == u'android' and ret['app_version'] == u'unknown':
+		if ret['app_version'] == u'unknown':
+			app_ver = semver.Version('0.0.0')
+		else:
+			app_ver = semver.Version(ret['app_version'], partial=True)
+
+		# Handle the events and movement items
+		if ret['os'] == u'android' and app_ver == semver.Version('0.0.0'):
 			# This older version of android used event types that were
 			# more descriptive than they are now. Translate those to what we
 			# use now.
@@ -38,13 +42,47 @@ class gridwatchParser (parser.parser):
 				ret['moved'] = False
 			elif event == 'plugged':
 				ret['event_type'] = 'plugged'
-
 		else:
-			# This is all newer versions but could be extended to separate out
-			# specific versions/oses if things change
 			ret['event_type'] = vals['event_type'][0]
 			if 'moved' in vals:
 				ret['moved'] = vals['moved'][0].lower() == 'true'
+
+		# Handle changes in location
+		if ret['os'] == u'android' and app_ver < semver.Version('0.2.3'):
+			ret['latitude']   = float(vals['latitude'][0])
+			ret['longitude']  = float(vals['longitude'][0])
+			ret['accuracy']   = -1.0
+		else:
+			if 'gps_latitude' in vals:
+				ret['gps_latitude'] = float(vals['gps_latitude'][0])
+				ret['gps_longitude'] = float(vals['gps_longitude'][0])
+				ret['gps_accuracy'] = float(vals['gps_accuracy'][0])
+			if 'network_latitude' in vals:
+				ret['network_latitude'] = float(vals['network_latitude'][0])
+				ret['network_longitude'] = float(vals['network_longitude'][0])
+				ret['network_accuracy'] = float(vals['network_accuracy'][0])
+			
+			if 'gps_latitude' in ret and 'network_latitude' in ret:
+				if ret['gps_accuracy'] < ret['network_accuracy']:
+					ret['latitude'] = ret['gps_latitude']
+					ret['longitude'] = ret['gps_longitude']
+					ret['accuracy'] = ret['gps_accuracy']
+				else:
+					ret['latitude'] = ret['network_latitude']
+					ret['longitude'] = ret['network_longitude']
+					ret['accuracy'] = ret['network_accuracy']
+			elif 'gps_latitude' in ret:
+				ret['latitude'] = ret['gps_latitude']
+				ret['longitude'] = ret['gps_longitude']
+				ret['accuracy'] = ret['gps_accuracy']
+			elif 'network_latitude' in ret:
+				ret['latitude'] = ret['network_latitude']
+				ret['longitude'] = ret['network_longitude']
+				ret['accuracy'] = ret['network_accuracy']
+			else:
+				ret['latitude'] = -1.0
+				ret['longitude'] = -1.0
+				ret['accuracy'] = -1.0
 
 		# Determine if this might correspond to a power outage
 		if ret['event_type'] == 'unplugged':
