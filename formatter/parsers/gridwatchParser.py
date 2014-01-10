@@ -54,7 +54,11 @@ class gridwatchParser (parser.parser):
 			ret['accuracy']  = -1.0
 			ret['altitude']  = 0.0
 			ret['loc_time']  = 0
+			ret['speed']     = 0.0
 		elif ret['os'] == 'android' and app_ver == semver.Version('0.2.3'):
+			ret['altitude'] = 0.0
+			ret['loc_time'] = 0
+			ret['speed']    = 0.0
 			if 'gps_latitude' in vals:
 				ret['gps_latitude']  = float(vals['gps_latitude'][0])
 				ret['gps_longitude'] = float(vals['gps_longitude'][0])
