@@ -85,23 +85,63 @@ function get_random_color() {
 	return color;
 }
 
-function add_to_key (graph, uid, desc, loc, color) {
+function add_to_key (graph, uid, desc, loc, freq, color) {
+	uid_stripped = uid.replace(/[^a-zA-Z0-9]/g, '');
+	freq = parseFloat(freq);
 	if (!(uid in key_map)) {
+		// First packet from this device, need to add new row
+
+		// Add this device to the map of known devices
 		key_map[uid] = {'description': desc,
 		                'location': loc,
 		                'color': color};
+
+		// Insert into the table in sorted order
 		loc = loc.replace(/[\|]+/g, ", ").replace("|", ", ");
-		uid_stripped = uid.replace(/[^a-zA-Z0-9]/g, '');
-		$("#key_table").append('<tr id="'+uid_stripped+'" style="color:'
+		var new_row = $('<tr id="'+uid_stripped+'" style="color:'
 								+ color + '"><td>'+number_nodes+'</td><td>'
 								+uid+'</td><td>'+desc+'</td><td>'
-								+loc+'</td></tr>');
+								+loc+'</td><td id="'+uid_stripped+'_freq" '
+								+'style="text-align: right">'+freq+'</td></tr>');
+		var trs = $("#key_table_tbody").children("tr");
+		var inserted = false;
+		trs.each(function(index,row) {
+			var f = $(row).children("td").last().text();
+			if (freq > parseFloat(f)) {
+				new_row.insertBefore(row);
+				inserted = true;
+				return false;
+			}
+		});
+		if (!inserted) {
+			$("#key_table_tbody").append(new_row);
+		}
+
+		// Add a click handler to only show this device
 		$("tr#"+uid_stripped).click(function() {
 			series = uid;
 			graph.update(series);
 		});
+
+		// Track the number of devices ("ID" column)
 		number_nodes++;
+	} else {
+		// Only need to update the frequency cell
+		$("#"+uid_stripped+"_freq").html(freq);
+
+		// Now swap rows until this one is in the right place
+		var this_row = $("#"+uid_stripped);
+		while (parseFloat(this_row.prev().children("td").last().text()) < freq)
+			$(this_row).prev().before($(this_row));
+		while (parseFloat(this_row.next().children("td").last().text()) > freq)
+			$(this_row).next().after($(this_row));
 	}
+}
+
+function fixup_index() {
+	$("#key_table_tbody").children("tr").each(function(index,row) {
+		$(row).children("td").first().html(index);
+	});
 }
 
 function add_to_map (map, uid, loc, color) {

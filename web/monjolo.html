@@ -32,9 +32,14 @@
 		</div>
 		<div id="key" class="box_shadow key" style="float:left;">
 			<table id="key_table">
-				<tr>
-					<th>Index</th><th>ID</th><th>Description</th><th>Location</th>
-				</tr>
+				<thead><tr>
+						<th>Index</th>
+						<th>ID</th>
+						<th>Description</th>
+						<th>Location</th>
+						<th data-sort="float">Last Frequency</th>
+				</tr></thead>
+				<tbody id="key_table_tbody"></tbody>
 			</table>
 		</div>
 	</div>
@@ -60,7 +65,9 @@
 				data['ccid_mac'],
 				data['description'],
 				data['location_str'],
-				color)
+				data['freq'],
+				color);
+			fixup_index();
 			if ('location_gateway_wgs84' in data) {
 				add_to_map(map,
 					data['ccid_mac'],
