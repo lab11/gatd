@@ -48,6 +48,17 @@
 	var GW_PID = 'HthZRrHnlC';
 	var s;
 
+	function get_popup (data) {
+		var p = "Phone ID: " + data['phone_id'] + "<br />";
+		if ('owner' in data) {
+			p += "Owner: " + data['owner'] + "<br />";
+		}
+		if ('accuracy' in data && data['accuracy'] > -1) {
+			p += "Accuracy: " + data['accuracy'] + " meters<br />";
+		}
+		return p;
+	}
+
 	onload = function() {
 		map = L.map('map').setView([42.281389, -83.748333], 13);
 
@@ -71,14 +82,14 @@
 						color: 'red',
 						fillColor: '#f03',
 						fillOpacity: 0.5
-					}).addTo(map).bindPopup(data['phone_id']);
+					}).addTo(map).bindPopup(get_popup(data));
 
 				} else {
 					L.circle([data['latitude'], data['longitude']], 50, {
 						color: 'green',
 						fillColor: '#00ff00',
 						fillOpacity: 0.5
-					}).addTo(map).bindPopup(data['phone_id']);
+					}).addTo(map).bindPopup(get_popup(data));
 				}
 			}
 		});

@@ -67,7 +67,7 @@ class gridwatchParser (parser.parser):
 				ret['network_latitude']  = float(vals['network_latitude'][0])
 				ret['network_longitude'] = float(vals['network_longitude'][0])
 				ret['network_accuracy']  = float(vals['network_accuracy'][0])
-			
+
 			if 'gps_latitude' in ret and 'network_latitude' in ret:
 				if ret['gps_accuracy'] < ret['network_accuracy']:
 					ret['latitude']  = ret['gps_latitude']
@@ -104,7 +104,7 @@ class gridwatchParser (parser.parser):
 				ret['network_altitude']  = float(vals['network_altitude'][0])
 				ret['network_time']      = vals['network_time'][0]
 				ret['network_speed']     = float(vals['network_speed'][0])
-			
+
 			if 'gps_latitude' in ret and 'network_latitude' in ret:
 				if ret['gps_accuracy'] < ret['network_accuracy']:
 					ret['latitude']  = ret['gps_latitude']
