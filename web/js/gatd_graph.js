@@ -8,12 +8,13 @@ var keys_in_map = {};
 
 // Keep track of the last time we updated the graph to avoid
 // doing it too often.
-var last_update = 0;
+var last_update = {};
 var MIN_INTERVAL_MS = 1000;
 
 var series = 'all';
 
-function add_to_graph(graph, uid, x, y, color) {
+function add_to_graph(graph, uid, x, y, color, radius) {
+	if(typeof(radius)==='undefined') radius = 4;
 	pd = {}
 	pd[uid] = [x, y]
 	pdw = {name: '',
@@ -21,22 +22,28 @@ function add_to_graph(graph, uid, x, y, color) {
 	       color:color,
 	       lines:{show:true},
 	       points:{show:true,
-	               radius:4,
+	               radius:radius,
 	               fill:true,
 	               fillColor:color},
 	   };
 	graph.addData(pdw);
-	if (should_update()) {
+	if (should_update(graph)) {
 		graph.update(series);
 	}
 }
 
-function should_update () {
+function should_update (graph) {
 	var now = new Date().getTime();
-	if (now - MIN_INTERVAL_MS > last_update) {
-		last_update = now;
+
+	if (!(graph.__uniqueid in last_update)) {
+		last_update[graph.__uniqueid] = 0;
+	}
+
+	if (now - MIN_INTERVAL_MS > last_update[graph.__uniqueid]) {
+		last_update[graph.__uniqueid] = now;
 		return true;
 	}
+	console.log(last_update);
 	return false;
 }
 
