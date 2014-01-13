@@ -91,6 +91,13 @@ h2 {
 	height:500px;
 }
 
+.graph_short {
+	padding: 100px 5px 0 50px;
+	margin: 15px auto 30px auto;
+	width:70%;
+	height:300px;
+}
+
 .graphmap {
 	padding: 100px 5px 0 50px;
 	margin: 30px;
@@ -146,14 +153,17 @@ h2 {
 	height:400px;
 }
 .key {
-	width: 65%;
-	margin: auto 30px;
+	width: 70%;
+	margin: 30px auto;
 }
-.key th {
+#key_table {
+	width: 100%;
+}
+#key_table th {
 	font-weight: bold;
 	text-align: left;
 }
-.key td, .key th {
+#key_table td, #key_table th {
 	padding: 0px 5px 0px 5px;
-	font-size: 8pt;
+	font-size: 9pt;
 }

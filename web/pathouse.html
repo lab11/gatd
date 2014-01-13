@@ -25,17 +25,17 @@
 	</div>
 	<div id="body">
 		<div>
-			<div id="graph1" class="box_shadow graph graph1"></div>
-			<div id="graph2" class="box_shadow graph graph2"></div>
+			<div id="graph1" class="box_shadow graph graph_short graph1"></div>
+			<div id="graph2" class="box_shadow graph graph_short graph2"></div>
 		</div>
 		<div id="key" class="box_shadow key">
 			<table id="key_table">
 				<thead><tr>
-						<th>Index</th>
-						<th>ID</th>
-						<th>Description</th>
-						<th>Location</th>
-						<th>Last Frequency</th>
+						<th style="width:10%;">Index</th>
+						<th style="width:20%;">ID</th>
+						<th style="width:30%;">Description</th>
+						<th style="width:30%;">Location</th>
+						<th style="width:10%;">Last Frequency</th>
 				</tr></thead>
 				<tbody id="key_table_tbody"></tbody>
 			</table>
@@ -70,9 +70,9 @@
 		});
 
 		socket.on('data', function (data) {
-			var color = get_color(data['description'])
+			var color = get_color(data['ccid_mac'])
 			if (data['profile_id'] == CC_PID) {
-				add_to_key(g2,
+				add_to_key(undefined,
 					data['ccid_mac'],
 					data['description'],
 					data['location_str'],
@@ -81,6 +81,12 @@
 				fixup_index();
 				add_to_graph(g2, data['ccid_mac'], data['time'], data['freq'], color);
 			} else if (data['profile_id'] == WUP_PID) {
+				add_to_key(undefined,
+					data['ccid_mac'],
+					data['description'],
+					data['location_str'],
+					-1,
+					color);
 				add_to_graph(g1, data['wattsupid'], data['time'], data['watts'], color, 1);
 			}
 		});

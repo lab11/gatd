@@ -43,7 +43,6 @@ function should_update (graph) {
 		last_update[graph.__uniqueid] = now;
 		return true;
 	}
-	console.log(last_update);
 	return false;
 }
 
@@ -124,15 +123,21 @@ function add_to_key (graph, uid, desc, loc, freq, color) {
 			$("#key_table_tbody").append(new_row);
 		}
 
-		// Add a click handler to only show this device
-		$("tr#"+uid_stripped).click(function() {
-			series = uid;
-			graph.update(series);
-		});
+		// If we want to be able to hide lines in the graph then there will be
+		// a graph argument passed
+		if (!(typeof(graph)==='undefined')) {
+			// Add a click handler to only show this device
+			$("tr#"+uid_stripped).click(function() {
+				series = uid;
+				graph.update(series);
+			});
+		}
 
 		// Track the number of devices ("ID" column)
 		number_nodes++;
-	} else {
+
+	// If the frequency is greater than -1 then update the row
+	} else if (freq > -1.0) {
 		// Only need to update the frequency cell
 		$("#"+uid_stripped+"_freq").html(freq);
 
