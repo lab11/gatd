@@ -6,8 +6,10 @@ import string
 import struct
 import time
 import urlparse
+import os
+import sys
 
-sys.path.append(os.path.abspath('../../config'))
+sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
 
@@ -35,7 +37,7 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 		port = self.client_address[1]
 
 		amqp_pkt = struct.pack("!BQQHQ",
-			gatdConfig.pkt.TYPE_PROCESSED,
+			gatdConfig.pkt.TYPE_HTTP_POST,
 			addr>>(64*8),
 			addr,
 			port,
