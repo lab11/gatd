@@ -80,6 +80,7 @@ class ConversationListBox(urwid.ListBox):
 		k = None
 
 		i = 1
+		self.values = []
 		for ce in self.contained_elements:
 
 			if ce == 'str':
