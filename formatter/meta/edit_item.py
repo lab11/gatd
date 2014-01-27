@@ -63,7 +63,7 @@ class ConversationListBox(urwid.ListBox):
 		for k in kv:
 			section.append(urwid.Edit(('title', u"  key: "), edit_text=k))
 			section.append(urwid.Edit(('title', u"  val: "), edit_text=kv[k]))
-		section.append(MyButton('add new additional', self.addNewKeyValue))
+		section.append(MyButton('add new {}'.format(name), self.addNewKeyValue))
 		section.append(urwid.Divider())
 		return urwid.Pile(section)
 
