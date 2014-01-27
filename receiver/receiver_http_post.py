@@ -1,4 +1,7 @@
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+#!/usr/bin/env python
+
+import BaseHTTPServer
+import SocketServer
 import IPy
 import json
 import pika
@@ -13,7 +16,7 @@ sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
 
-class gatdPostHandler (BaseHTTPRequestHandler):
+class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def do_POST(self):
 		now = int(time.time()*1000)
@@ -61,9 +64,15 @@ class gatdPostHandler (BaseHTTPRequestHandler):
 	def log_message(self, format, *args):
 		return
 
+class ForkingHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
+	def finish_request(self, request, client_address):
+		request.settimeout(30)
+		# "super" can not be used because BaseServer is not created from object
+		BaseHTTPServer.HTTPServer.finish_request(self, request, client_address)
+
 try:
 	# Create a web server and define the handler to manage the incoming request
-	server = HTTPServer(('', gatdConfig.receiver.PORT_HTTP_POST), gatdPostHandler)
+	server = ForkingHTTPServer(('', gatdConfig.receiver.PORT_HTTP_POST), gatdPostHandler)
 
 	# Wait forever for incoming HTTP requests
 	server.serve_forever()
