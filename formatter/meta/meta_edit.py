@@ -13,6 +13,24 @@ def strip (d):
 	if '' in d:
 		del d['']
 
+def confirm (prompt, default=False):
+	default_chr = 'y' if default else 'n'
+
+	while True:
+		resp = raw_input('{} [{}]: '.format(prompt, default_chr)).strip().lower()
+
+		# If nothing was entered then just return whatever is the default
+		if not resp:
+			return default
+
+		if resp in ['y', 'ye', 'yes', 'true']:
+			return True
+		elif resp in ['n', 'no', 'false']:
+			return False
+
+		print('Bad response. Try again.')
+
+
 
 def edit_meta (req_key, req_key_val, query, addit):
 	while True:
@@ -25,8 +43,7 @@ def edit_meta (req_key, req_key_val, query, addit):
 		print('\nMeta Record:')
 		print(DSTR_A.format(req_key, 'QUERY', 'ADDITIONAL'))
 		print(DSTR_A.format(req_key_val, query, addit))
-		choice = raw_input('Continue editing?: ')
-		if choice == '':
+		if not confirm('Continue editing?'):
 			break
 	return (req_key_val, query, addit)
 
@@ -84,18 +101,12 @@ if midx >= len(metas):
 	print(DSTR_A.format(req_key_val, query, addit))
 	print('')
 
-	while True:
-		confirm = raw_input('Add it?: ')
-		if confirm == '':
-			continue
-		if 'y' in confirm:
-			#add it
-			m.addMeta(pid=pids[cidx],
-			          req_key=req_key,
-			          req_key_value=req_key_val,
-			          query=query,
-			          additional=addit)
-		break
+	if confirm('Add it?', True):
+		m.addMeta(pid=pids[cidx],
+		          req_key=req_key,
+		          req_key_value=req_key_val,
+		          query=query,
+		          additional=addit)
 
 else:
 
@@ -106,8 +117,7 @@ else:
 	print(DSTR_A.format(meta[req_key], meta['query'], meta['additional']))
 	print('')
 
-	confirm = raw_input('Delete?: ')
-	if 'y' in confirm:
+	if confirm('Delete?', False):
 		m.deleteMeta(meta['_id'])
 	else:
 		req_key_val, query, addit = edit_meta(req_key,
