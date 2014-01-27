@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<h1>a</h1>
+	<h1>Real-time monitor of shed commits</h1>
 
 	<script>
 
@@ -21,9 +21,9 @@
 		out += "<span>Address: " + jsIP(parseInt(data['address'])).pureStr() + "</span>";
 		out += "<ul>";
 		for (var key in data) {
-			if (key != 'address' && key != '_id') {
-				if (key == 'timestamp') {
-					title = 'Time';
+			if (key != 'address' && key != '_id' && key != 'profile_id') {
+				if (key == 'time') {
+					title = 'time';
 					var date = new Date(data[key]);
 					value = date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 				} else {
