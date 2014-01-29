@@ -17,7 +17,7 @@ class coilcubeParser (parser.parser) :
 		cc_version = values[10]
 		data = data[11:]
 
-		if cc_version == 1 or cc_version == 2 or cc_version == 3:
+		if cc_version == 1 or cc_version == 2 or cc_version == 3 or cc_version == 4:
 			if len(data) != 2:
 				# not sure what to do
 				print "COILCUBE: Too short!"
@@ -33,7 +33,7 @@ class coilcubeParser (parser.parser) :
 			# ex: 00:11:22:33:44:55:66:77
 			ccid = '{:0>16x}'.format(int(ret['ccid']))
 			ret['ccid_mac'] = ':'.join([ccid[i:i+2] for i in range(0, 16, 2)])
-			ret['version'] = 1
+			ret['version'] = cc_version
 			ret['seq_no'] = values[1]
 			ret['counter'] = values[0]
 		else:
