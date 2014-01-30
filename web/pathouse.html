@@ -51,6 +51,7 @@
 	var location_str2 = 'USA|Michigan|Ann Arbor|1885 Fuller|Living Room';
 	var location_str3 = 'USA|Michigan|Ann Arbor|1885 Fuller|Porch';
 	var location_str4 = 'USA|Michigan|Ann Arbor|1885 Fuller|Dining Room';
+	var location_str5 = 'USA|Michigan|Ann Arbor|1885 Fuller|Laundry Room';
 
 	onload = function() {
 		socket = io.connect('inductor.eecs.umich.edu:8082/stream');
@@ -60,7 +61,8 @@
 			                      'location_str': {'$in': [location_str1,
 			                                               location_str2,
 			                                               location_str3,
-			                                               location_str4]},
+			                                               location_str4,
+			                                               location_str5]},
 			                    //  'type': {'$or': [{'$in': ['coilcube_freq']},
 			                    //                   {'$exists': false}]},
 			                      '$or': [{'type': 'coilcube_freq'},
