@@ -7,7 +7,6 @@ import sys
 sys.path.append(os.path.abspath('../../config'))
 import gatdConfig
 
-
 PROFILE = "7aiOPJapXF"
 
 amqp_conn = pika.BlockingConnection(
@@ -45,12 +44,12 @@ def process_packet (ch, method, properties, body):
 		count_diff = byte_subtract(pkt['counter'], last_data[1]);
 		time_diff  = pkt['time'] - last_data[0]
 		freq = float(count_diff) / (float(time_diff)/1000.0)
-		freq = round(freq, 2)
+		freq = round(freq, 4)
 
 		pkt['freq'] = freq
 
 	else:
-		print("first sighting of this cc")
+		print("first sighting of this cc: {}".format(pkt['ccid_mac']))
 		coilcubes[pkt['ccid']] = [0]*3
 
 	coilcubes[pkt['ccid']][0] = pkt['time']
@@ -64,7 +63,7 @@ def process_packet (ch, method, properties, body):
 	ojson = json.dumps(pkt)
 	ojson = struct.pack('B', gatdConfig.pkt.TYPE_PROCESSED) + ojson
 
-	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.xch_receive,
+	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
 	                        body=ojson,
 	                        routing_key='')
 
