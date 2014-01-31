@@ -1,0 +1,89 @@
+<html>
+<head>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js"></script>
+	<script src="js/socket.io-0.8.7.js"></script>
+	<script src="js/jquery-1.10.2.min.js"></script>
+	<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+	<script src="js/jsIP.js"></script>
+	<script src="js/flot/jquery.flot-0.8.1.js"></script>
+	<script src="js/flot/jquery.flot.time-0.8.1.js"></script>
+	<script src="js/underscore.js"></script>
+	<script src="js/jquery.grapher.js"></script>
+	<script src="js/gatd_graph.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='misc/WebSocketMain.swf'</script>
+
+	<link href="css/gatd_graph.css" media="all" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
+
+	<title>Monjolo - Refrigerators</title>
+</head>
+
+<body>
+	<div id="headerBar">
+		<div style="width:1000px; margin:0 auto; text-align:center;">
+			<div style="float:left"><img src="images/BlockM-rball.png" height="50px" style="margin-top:5px;" /></div>
+			<div style="float:left; padding:6px 0 0 350px;">Monjolo - Refrigerators</div>
+		</div>
+	</div>
+	<div id="body">
+		<div>
+			<div id="graph" class="box_shadow graph"></div>
+		</div>
+		<div id="key" class="box_shadow key">
+			<table id="key_table">
+				<thead><tr>
+						<th>Index</th>
+						<th>ID</th>
+						<th>Description</th>
+						<th>Location</th>
+						<th>Last Frequency</th>
+				</tr></thead>
+				<tbody id="key_table_tbody"></tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+
+	var CC_PID = '7aiOPJapXF';
+	var socket_cc;
+
+	onload = function() {
+		socket_cc = io.connect('inductor.eecs.umich.edu:8082/stream');
+		socket_cc.on('connect', function (data) {
+			socket_cc.emit('query', {'profile_id': CC_PID,
+			                         '$or': [{'description': {'$regex': '.*fridge.*', '$options': 'i'}},
+			                                 {'description': {'$regex': '.*refrigerator.*', '$options': 'i'}}],
+			                         'type': 'coilcube_freq',
+			                         'time': 7200000}
+			              );
+		});
+
+		socket_cc.on('data', function (data) {
+			var color = get_color(data['ccid_mac'])
+			add_to_key(g,
+				data['ccid_mac'],
+				data['description'],
+				data['location_str'],
+				data['freq'],
+				color);
+			fixup_index();
+			add_to_graph(g, data['ccid_mac'], data['time'], data['freq'], color);
+		});
+
+		g = $.grapher($("#graph"),
+			{legend: {show: false, conainer: $("#graph_key")},
+			 xaxis:  {show:true, width:7200000, mode: "time", tickFormatter:x_format},
+			 yaxis:  {min:0, label:"Frequency (Activations/Second)", max:4},
+			 grid:   {margin: {top: 8, bottom: 20, left: 25, right: 25}},
+			});
+
+		$("th").click(function() {
+			series = 'all';
+		});
+	}
+	</script>
+
+
+</body>
+</html>
