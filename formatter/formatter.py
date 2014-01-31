@@ -7,6 +7,7 @@ import struct
 import sys
 
 import archiveCleaner
+import Deduplicator
 import FormatterExceptions as FE
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
@@ -40,6 +41,11 @@ def unpackPacket (pkt):
 			                     pkt[gatdConfig.pkt.HEADER_LEN:])[0]
 		else:
 			data = ''
+
+		# Check if the packet is a duplicate
+		duplicate = dd.check(port=port, addr=addr, data=data, time=time)
+		if duplicate:
+			return None
 
 		meta = {}
 		meta['addr'] = addr
@@ -141,6 +147,7 @@ def packet_callback (channel, method, prop, body):
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
 	channel.basic_ack(delivery_tag=method.delivery_tag)
 
+dd = Deduplicator.Deduplicator()
 mi = MongoInterface.MongoInterface()
 pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
