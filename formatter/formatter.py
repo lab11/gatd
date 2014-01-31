@@ -46,6 +46,7 @@ def unpackPacket (pkt):
 		# Check if the packet is a duplicate
 		duplicate = dd.check(port=port, addr=laddr, data=data, time=time)
 		if duplicate:
+#			print('bad packet')
 			raise FE.BadPacket('Duplicate packet')
 
 		meta = {}
@@ -146,7 +147,13 @@ def packet_callback (channel, method, prop, body):
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it
-	channel.basic_ack(delivery_tag=method.delivery_tag)
+	try:
+		channel.basic_ack(delivery_tag=method.delivery_tag)
+	except pika.exceptions.ChannelClosed:
+		print('Cannot ack, channel closed.')
+		print(ret)
+		print(data)
+		sys.exit(1)
 
 dd = Deduplicator.Deduplicator()
 mi = MongoInterface.MongoInterface()

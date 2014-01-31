@@ -16,7 +16,7 @@ class MongoInterface:
 			self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
 			if gatdConfig.mongo.USERNAME:
 				self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
-				                           gatdConfig.mongo.USERNAME)
+				                           gatdConfig.mongo.PASSWORD)
 			self.stop = False
 
 		except pymongo.errors.ConnectionFailure:
@@ -42,7 +42,7 @@ class MongoInterface:
 	#	now = int(round(time.time() * 1000))
 	#	query['time'] = {'$gt': now}
 
-		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(query,
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(query,
 			tailable=True,
 			await_data=True)
 		while cursor.alive and not self.stop:

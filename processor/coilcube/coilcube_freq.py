@@ -43,6 +43,8 @@ def process_packet (ch, method, properties, body):
 		last_data  = coilcubes[pkt['ccid']]
 		count_diff = byte_subtract(pkt['counter'], last_data[1]);
 		time_diff  = pkt['time'] - last_data[0]
+		if time_diff == 0:
+			return
 		freq = float(count_diff) / (float(time_diff)/1000.0)
 		freq = round(freq, 4)
 
