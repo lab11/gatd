@@ -34,6 +34,7 @@ def unpackPacket (pkt):
 
 		record  = struct.unpack('>QQHQ', pkt[0:gatdConfig.pkt.HEADER_LEN])
 		addr    = int('0x{:0>16x}{:0>16x}'.format(*record[0:2]), 16)
+		laddr   = int('0x{:0>16x}'.format(record[1]), 16)
 		port    = record[2]
 		time    = record[3]
 		if len(pkt) > gatdConfig.pkt.HEADER_LEN:
@@ -43,7 +44,7 @@ def unpackPacket (pkt):
 			data = ''
 
 		# Check if the packet is a duplicate
-		duplicate = dd.check(port=port, addr=addr, data=data, time=time)
+		duplicate = dd.check(port=port, addr=laddr, data=data, time=time)
 		if duplicate:
 			return None
 
