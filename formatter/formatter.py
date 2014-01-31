@@ -46,7 +46,7 @@ def unpackPacket (pkt):
 		# Check if the packet is a duplicate
 		duplicate = dd.check(port=port, addr=laddr, data=data, time=time)
 		if duplicate:
-			return None
+			raise FE.BadPacket('Duplicate packet')
 
 		meta = {}
 		meta['addr'] = addr
@@ -77,12 +77,7 @@ def packet_callback (channel, method, prop, body):
 
 	try:
 		# Parse out the fields from the receiver
-		unpacked = unpackPacket(body)
-		if unpacked == None:
-			raise FE.BadPacket('Packet could not be unpacked or was duplicate')
-
-		data = unpacked[0]
-		meta = unpacked[1]
+		data, meta = unpackPacket(body)
 
 		if meta == None:
 			# This is a processed packet that has already been through
