@@ -77,7 +77,12 @@ def packet_callback (channel, method, prop, body):
 
 	try:
 		# Parse out the fields from the receiver
-		data, meta = unpackPacket(body)
+		unpacked = unpackPacket(body)
+		if unpacked == None:
+			raise FE.BadPacket('Packet could not be unpacked or was duplicate')
+
+		data = unpacked[0]
+		meta = unpacked[1]
 
 		if meta == None:
 			# This is a processed packet that has already been through
