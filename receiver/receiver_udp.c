@@ -46,7 +46,10 @@ amqp_connection_state_t amqp_connect () {
 		exit(1);
 	}
 
-	amqp_ret = amqp_login(amqp_conn, "/", 0, AMQP_DEFAULT_FRAME_SIZE, 0,
+	amqp_ret = amqp_login(amqp_conn, "/", 0,
+	                      //AMQP_DEFAULT_FRAME_SIZE,
+						  131072,
+						  0,
 	                      AMQP_SASL_METHOD_PLAIN, RABBITMQ_USERNAME,
 						  RABBITMQ_PASSWORD);
 	die_on_amqp_error(amqp_ret, "Logging in");

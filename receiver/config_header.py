@@ -64,7 +64,7 @@ for section in config.sections():
 				var_value = '{}'.format(v)
 				var_type = 'int'
 
-		line = 'extern const {vtype} {name} = {value};\n'.format(vtype=var_type,
+		line = 'const {vtype} {name} = {value};\n'.format(vtype=var_type,
 			name=var_name.upper(), value=var_value);
 
 		HEADER_FILE += line
