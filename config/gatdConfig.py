@@ -23,7 +23,7 @@ config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'gatd.conf
 for section in config.sections():
 	attrs = dict(config.items(section))
 
-	# Convert integers to intergers
+	# Convert integers to integers
 	for attr in attrs:
 		try:
 			attrs[attr] = int(attrs[attr])
