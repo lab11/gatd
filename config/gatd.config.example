@@ -24,6 +24,9 @@ port_python: 8082
 
 [rabbitmq]
 host: localhost
+port: 1234
+username: guest
+password: guest
 q_receive:   receive_queue
 xch_stream:  streamer_exchange
 xch_receive: receive_exchange
