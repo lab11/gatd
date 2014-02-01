@@ -31,12 +31,21 @@ Available Receivers
 ### UDP
 
 To use this receiver simply send UDP packets to the server. The entire body
-of the UDP packet will be stored.
+of the UDP packet will be stored. The port that GATD listens on for
+UDP packets is set in `gatd.config`.
+
+The UDP listener records the IPv6 address of the source (this will work
+for IPv4 devices as well), the source port, and the time when the packet
+was received.
 
 ### TCP
 
 To use this receiver simply create a TCP connection to the server and send
 data to the server.
+
+This receiver is not particularly well implemented currently and requires
+sufficient time between data being sent over the connection to ensure
+separate packets are decoded properly.
 
 ### HTTP Post
 
@@ -46,3 +55,4 @@ This receiver listens for HTTP POST requests. The URL should look like:
 
 The `profile_id` as the post file is how the packets are categorized by GATD.
 
+GATD will automatically convert the URL string into JSON.
