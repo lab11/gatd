@@ -77,7 +77,8 @@ function x_format(val, axis) {
 
 function get_color (uid) {
 	if (!(uid in node_mapping)) {
-		node_mapping[uid] = get_random_color();
+		//node_mapping[uid] = get_random_color();
+		node_mapping[uid] = get_next_distinguishable_color();
 	}
 	return node_mapping[uid];
 }
@@ -89,6 +90,57 @@ function get_random_color() {
 		color += letters[Math.round(Math.random() * 15)];
 	}
 	return color;
+}
+
+function gcd(a, b) {
+	if (!b) {
+		return a;
+	} else {
+		return gcd(b, a % b);
+	}
+}
+
+function get_next_0_1() {
+	// We want to get 0 and 1 once, but then only the divisions inside of them.
+	// The algorithm has to track two parameters, so we use their initialization to handle
+	// the 0 and 1 case, after which we simply traverse the space
+	if ( typeof get_next_0_1.numerator == 'undefined' ) {
+		get_next_0_1.numerator = 0;
+		return 0.0;
+	}
+	if ( typeof get_next_0_1.denominator == 'undefined' ) {
+		get_next_0_1.denominator = 2;
+		return 1.0;
+	}
+
+	get_next_0_1.numerator++;
+	if (get_next_0_1.numerator == get_next_0_1.denominator) {
+		get_next_0_1.numerator = 1;
+		get_next_0_1.denominator *= 2;
+	} else {
+		// Ensure we don't duplicate steps (e.g. 3/6 == 1/2)
+		// This will never overrun since gcd(N, N-1) == 1
+		while (gcd(get_next_0_1.numerator, get_next_0_1.denominator) != 1) {
+			get_next_0_1.numerator++;
+		}
+	}
+
+	return get_next_0_1.numerator / get_next_0_1.denominator;
+}
+
+// Based on the pricinple described in:
+//  http://stackoverflow.com/questions/3135169/randomly-generate-unique-colors/3135216#3135216
+// but using the HSL colorspace as it better spreads out the resulting colors
+function get_next_distinguishable_color() {
+	var linear = get_next_0_1();
+	var H = (linear * 360) % 360;
+	var S = (linear * 360 * 100) % 100;
+	var L = (linear * 360 * 100 * 50) % 50 + 25;
+	S = 100 - S;
+	L = 50;
+	var color_str = 'hsl(' + H + ',' + S + '%,' + L + '%)';
+	//console.log("linear: " + linear + " " + color_str);
+	return color_str;
 }
 
 function add_to_key (graph, uid, desc, loc, freq, color) {
