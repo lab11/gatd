@@ -1,0 +1,22 @@
+{
+  "name": "gatd",
+  "version": "0.1.0",
+  "homepage": "https://github.com/bradjc/gatd",
+  "authors": [
+    "Brad Campbell <bradjc5@gmail.com>"
+  ],
+  "description": "Versatile data collection service that supports real time streaming and data archival.",
+  "main": "?",
+  "keywords": [
+    "data"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "flot": ">= 0.8.2",
+	"jquery": ">= 1.10.2",
+	"socket.io": ">= 0.8.7",
+	"underscore": ">= 1.5.2",
+	"jsIP": ">= 0.1.0"
+  }
+}
