@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import BaseHTTPServer
 import SocketServer
@@ -48,18 +48,16 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
 		amqp_pkt += profile_id + json.dumps(data)
 
-		print(amqp_pkt)
-
 		amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
 		                        body=amqp_pkt,
 		                        routing_key='')
 
 		self.send_response(200)
-		self.send_header('Content-type','text/html')
-		self.end_headers()
-		# Send the html message
-		self.wfile.write("[0]")
-		return
+	#	self.send_header('Content-type','text/html')
+	#	self.end_headers()
+	#	# Send the html message
+	#	self.wfile.write("[0]")
+	#	return
 
 	def log_message(self, format, *args):
 		return
@@ -72,7 +70,8 @@ class ForkingHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
 
 try:
 	# Create a web server and define the handler to manage the incoming request
-	server = ForkingHTTPServer(('', gatdConfig.receiver.PORT_HTTP_POST), gatdPostHandler)
+	server = ForkingHTTPServer(('', gatdConfig.receiver.PORT_HTTP_POST),
+	                           gatdPostHandler)
 
 	# Wait forever for incoming HTTP requests
 	server.serve_forever()

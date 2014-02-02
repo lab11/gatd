@@ -1,9 +1,9 @@
 [mongo]
-host: localhost
-port: 27017
-username: uname
-password: pword
-database: getallthedata
+host:                 localhost
+port:                 27017
+username:             uname
+password:             pword
+database:             getallthedata
 col_formatted:        formatted_data
 col_formatted_capped: formatted_data_capped
 col_unformatted:      unformatted_archive
@@ -19,11 +19,14 @@ port_http_post: 8081
 
 [socketio]
 stream_prefix: /stream
-port_node:   8080
-port_python: 8082
+port_node:     8080
+port_python:   8082
 
 [rabbitmq]
-host: localhost
+host:        localhost
+port:        1234
+username:    guest
+password:    guest
 q_receive:   receive_queue
 xch_stream:  streamer_exchange
 xch_receive: receive_exchange

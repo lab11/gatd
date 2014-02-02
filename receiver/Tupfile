@@ -1,6 +1,9 @@
-!cc = |> gcc -Wall -Werror -O2 -lrabbitmq -c %f -o %o |>
+!cc = |> gcc -Wall -Werror -O2 -c %f -o %o |>
 
-: foreach *.c |> !cc |> %B.o {objs}
+: |> ln -s ../config/gatd.config %o |> gatd.config {lns}
+: gatd.config | {lns} |> ./config_header.py -i %f -o %o |> gatd_config.h {headers}
+
+: foreach *.c | {headers} |> !cc |> %B.o {objs}
 : {objs} |> gcc %f -lrabbitmq -o %o |> receiver-udp
 
 .gitignore

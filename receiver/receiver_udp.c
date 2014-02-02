@@ -9,20 +9,15 @@
 #include <amqp.h>
 #include <amqp_framing.h>
 #include <amqp_tcp_socket.h>
-#include "utils.h"
 
+#include "gatd_config.h"
+#include "utils.h"
 #include "receiver.h"
 #include "receiver_udp.h"
 
 // Global constants
-const char           amqp_hostname[]    = "localhost";
-const int            amqp_port          = 5672;
-const char           amqp_username[]    = "guest";
-const char           amqp_password[]    = "guest";
 const amqp_channel_t amqp_channel       = 1;
-const amqp_bytes_t   amqp_exchange      = {16, "receive_exchange"};
 const amqp_bytes_t   amqp_exchange_type = {6, "fanout"};
-const amqp_bytes_t   amqp_queue         = {13, "receive_queue"};
 const amqp_bytes_t   amqp_routing_key   = {0, "\0"};
 const amqp_table_t   amqp_table_null    = {0, NULL};
 const amqp_boolean_t amqp_false         = 0;
@@ -45,31 +40,35 @@ amqp_connection_state_t amqp_connect () {
 		exit(1);
 	}
 
-	result = amqp_socket_open(amqp_socket, amqp_hostname, amqp_port);
+	result = amqp_socket_open(amqp_socket, RABBITMQ_HOST, RABBITMQ_PORT);
 	if (result) {
 		fprintf(stderr, "Could not open amqp socket.\n");
 		exit(1);
 	}
 
-	amqp_ret = amqp_login(amqp_conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN,
-	                      amqp_username, amqp_password);
+	amqp_ret = amqp_login(amqp_conn, "/", 0,
+	                      //AMQP_DEFAULT_FRAME_SIZE,
+						  131072,
+						  0,
+	                      AMQP_SASL_METHOD_PLAIN, RABBITMQ_USERNAME,
+						  RABBITMQ_PASSWORD);
 	die_on_amqp_error(amqp_ret, "Logging in");
 	amqp_channel_open(amqp_conn, amqp_channel);
 	amqp_ret = amqp_get_rpc_reply(amqp_conn);
 	die_on_amqp_error(amqp_ret, "Opening channel");
 
 	// Make sure the receiver exchange exists
-	amqp_exchange_declare(amqp_conn, amqp_channel, amqp_exchange,
+	amqp_exchange_declare(amqp_conn, amqp_channel, RABBITMQ_XCH_RECEIVE,
 	                      amqp_exchange_type, amqp_false, amqp_true,
 	                      amqp_table_null);
 
 	// Make sure there is a queue bound to the exchange to receive the packets
-	amqp_queue_declare(amqp_conn, amqp_channel, amqp_queue, amqp_false,
+	amqp_queue_declare(amqp_conn, amqp_channel, RABBITMQ_Q_RECEIVE, amqp_false,
 	                   amqp_true, amqp_false, amqp_false, amqp_table_null);
 
 	// Bind the receive queue to the receive exchange
-	amqp_queue_bind(amqp_conn, amqp_channel, amqp_queue, amqp_exchange,
-	                amqp_routing_key, amqp_table_null);
+	amqp_queue_bind(amqp_conn, amqp_channel, RABBITMQ_Q_RECEIVE,
+	                RABBITMQ_XCH_RECEIVE, amqp_routing_key, amqp_table_null);
 
 	return amqp_conn;
 }
@@ -123,7 +122,7 @@ int main (int argc, char** argv) {
 	// Bind the socket to the correct port on all interfaces
 	recv_addr.sin6_family = AF_INET6;
 	recv_addr.sin6_addr   = recv_ipv6_addr;
-	recv_addr.sin6_port   = htons(UDP_RECEIVE_PORT);
+	recv_addr.sin6_port   = htons(RECEIVER_PORT_UDP);
 
 	ret = bind(socket_world, (struct sockaddr*) &recv_addr, sizeof(recv_addr));
 
@@ -164,7 +163,7 @@ int main (int argc, char** argv) {
 			// Publish
 			ret = amqp_basic_publish(amqp_conn,
 			                         amqp_channel,
-			                         amqp_exchange,
+			                         RABBITMQ_XCH_RECEIVE,
 			                         amqp_routing_key,
 			                         0,
 			                         0,
