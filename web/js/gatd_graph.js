@@ -106,11 +106,8 @@ function get_next_0_1() {
 	// the 0 and 1 case, after which we simply traverse the space
 	if ( typeof get_next_0_1.numerator == 'undefined' ) {
 		get_next_0_1.numerator = 0;
-		return 0.0;
-	}
-	if ( typeof get_next_0_1.denominator == 'undefined' ) {
 		get_next_0_1.denominator = 2;
-		return 1.0;
+		return 0.0;
 	}
 
 	get_next_0_1.numerator++;
