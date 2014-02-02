@@ -10,7 +10,13 @@ import gatdConfig
 PROFILE = "7aiOPJapXF"
 
 amqp_conn = pika.BlockingConnection(
-            pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
+            	pika.ConnectionParameters(
+            		host=gatdConfig.rabbitmq.HOST,
+            		port=gatdConfig.rabbitmq.PORT,
+            		credentials=pika.PlainCredentials(
+            			gatdConfig.rabbitmq.USERNAME,
+            			gatdConfig.rabbitmq.PASSWORD)
+            	))
 amqp_chan = amqp_conn.channel()
 
 keys = {}
@@ -32,13 +38,20 @@ def process_packet (ch, method, properties, body):
 	# Determine if the incoming packet matches the query from the client
 	pkt = json.loads(body)
 
-	if pkt['type'] != 'coilcube_raw':
+	if 'type' not in pkt or pkt['type'] != 'coilcube_raw':
+		return
+
+	# Make sure the keys we need are in the packet
+	if 'ccid' not in pkt or
+	   'ccid_mac' not in pkt or
+	   'counter' not in pkt or
+	   'seq_no' not in pkt:
 		return
 
 	# Change the type
 	pkt['type'] = 'coilcube_freq'
 
-	# Calculate watts
+	# Calculate the frequency
 	if pkt['ccid'] in coilcubes:
 		last_data  = coilcubes[pkt['ccid']]
 		count_diff = byte_subtract(pkt['counter'], last_data[1]);
