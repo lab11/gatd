@@ -1,36 +1,37 @@
+var fs   = require('fs');
 var net  = require('net');
 var http = require('http');
 var amqp = require('amqp');
 var __   = require('underscore');
-var jsIP = require('jsIP');
 var qe   = require('query-engine');
+var ini  = require('simple-ini');
 
-RMQ_HOST = 'inductor.eecs.umich.edu';
+var config = new ini(function() {
+                       return fs.readFileSync('../config/gatd.config', 'utf-8');
+                    }, {'delimiter': ':', 'comments': '#', 'ignoreWhitespace': true});
 
-// Connect the socket.io socket to port 8080
-var io = require('socket.io').listen(8080);
-
+// Connect the socket.io socket to the correct port
+var io = require('socket.io').listen(parseInt(config.socketio.port_node));
 
 var clients = {};
 
-
 // AMQP
-var amqp_conn = amqp.createConnection({host: RMQ_HOST});
+var amqp_conn = amqp.createConnection({host: config.rabbitmq.host,
+                                       port: parseInt(config.rabbitmq.port),
+                                       login: config.rabbitmq.username,
+                                       password: config.rabbitmq.password,
+                                       authMechanism: 'AMQPLAIN'});
 amqp_conn.on('ready', function () {
 	var q = amqp_conn.queue('', {exclusive:true}, function () {
-		q.bind('streamer_exchange', '');
+		q.bind(config.rabbitmq.xch_stream, '');
 	});
 	q.subscribe(function (message) {
 
 		jmsg = JSON.parse(message.data);
 
 		access = __.has(jmsg, 'public') && jmsg['public'] == true;
-console.log(jmsg);
 
-		//	console.log(jmsg);
-		sockets = __.keys(clients);
-
-		for (var sid in clients) {
+		for (var sid in __.keys(clients)) {
 			s = clients[sid]['socket'];
 
 			if (__.has(clients[sid], 'qe')) {
@@ -45,8 +46,6 @@ console.log(jmsg);
 				if (result.length == 0) {
 					continue;
 				}
-
-				console.log('got item');
 
 				// See if this socket has access
 				if (!access) {
@@ -63,8 +62,6 @@ console.log(jmsg);
 
 				// If we get here the query matches and we have access
 				s.emit('data', result[0]);
-
-
 			}
 
 		}
@@ -73,11 +70,10 @@ console.log(jmsg);
 });
 
 // Main block for handling stream requests
-var stream = io.of('/stream').on('connection', function (socket) {
+var stream = io.of(config.socketio.stream_prefix).on('connection', function (socket) {
 
 	// Wait for configuration packet to begin
 	socket.on('query', function (query, msg) {
-		console.log(query);
 
 		if (!__.has(clients, socket['id'])) {
 			clients[socket['id']] = {};
@@ -120,4 +116,3 @@ var stream = io.of('/stream').on('connection', function (socket) {
 	});
 
 });
-

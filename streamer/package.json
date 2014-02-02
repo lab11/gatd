@@ -1,0 +1,30 @@
+{
+  "name": "gatd-streamer",
+  "version": "0.1.0",
+  "description": "Real time data streaming for GATD.",
+  "main": "streamer_socketio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/lab11/gatd"
+  },
+  "keywords": [
+    "data",
+    "streaming"
+  ],
+  "author": "Brad Campbell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lab11/gatd/issues"
+  },
+  "homepage": "https://github.com/lab11/gatd",
+  "dependencies": {
+    "amqp": ">= 0.1.8",
+    "underscore": ">= 1.5.2",
+    "query-engine": ">= 1.5.7",
+    "simple-ini": ">= 1.0.3",
+    "socket.io": ">= 0.9.16"
+  }
+}
