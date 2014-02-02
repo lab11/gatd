@@ -1,29 +1,25 @@
+import os
 import sys
-import traceback
-import time
 import struct
 import socket
-import threading
 import SocketServer
 import pika
 import json
 import struct
 
-# Hostname to connect to for rabbitmq queue
-HOSTNAME = "inductor.eecs.umich.edu"
-
-STREAM_EXCHANGE = "streamer_exchange"
-
-# Bind to localhost on the given port
-HOST = "::"
-PORT = 22500
+sys.path.append(os.path.abspath('../config'))
+import gatdConfig
 
 class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
 	# When a client connects setup a channel to the rabbitmq server
 	def setup (self):
 		self.amqp_conn = pika.BlockingConnection(
-			pika.ConnectionParameters(host=HOSTNAME))
+			pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST,
+			                          port=gatdConfig.rabbitmq.PORT,
+			                          credentials=pika.PlainCredentials(
+			                          	gatdConfig.rabbitmq.USERNAME,
+			                          	gatdConfig.rabbitmq.PASSWORD)))
 		self.amqp_chan = self.amqp_conn.channel();
 
 	def handle (self):
@@ -39,7 +35,7 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 			return
 
 		# Take the query and create the first pass filter by telling the
-		# stream exchange that we only want packets that have certain keys in 
+		# stream exchange that we only want packets that have certain keys in
 		# them.
 		# We can do better if the query wants a specific profile because the
 		# profile is included in the headers.
@@ -50,7 +46,7 @@ class ThreadedTCPRequestHandler (SocketServer.BaseRequestHandler):
 
 		# Setup a queue to get the necessary stream
 		result = self.amqp_chan.queue_declare(exclusive=True, auto_delete=True)
-		self.amqp_chan.queue_bind(exchange=STREAM_EXCHANGE,
+		self.amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
 			queue=result.method.queue, arguments=keys)
 		self.amqp_chan.basic_consume(self.process_packet,
 			queue=result.method.queue, no_ack=True)
@@ -83,5 +79,5 @@ class ThreadedTCPServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
 
 # Run the server
-server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+server = ThreadedTCPServer(('::', gatdConfig.streamer.PORT_TCP), ThreadedTCPRequestHandler)
 server.serve_forever()

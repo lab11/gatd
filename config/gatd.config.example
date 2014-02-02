@@ -31,6 +31,8 @@ q_receive:   receive_queue
 xch_stream:  streamer_exchange
 xch_receive: receive_exchange
 
+[streamer]
+port_tcp: 7999
 
 # Packets moving to the formatter
 [pkt]
