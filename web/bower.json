@@ -15,8 +15,10 @@
   "dependencies": {
     "flot": ">= 0.8.2",
 	"jquery": ">= 1.10.2",
-	"socket.io": ">= 0.8.7",
+	"jquery.ui": ">= 1.10.4",
+	"socket.io-client": ">= 0.8.7",
 	"underscore": ">= 1.5.2",
-	"jsIP": ">= 0.1.0"
+	"jsIP": ">= 0.1.0",
+	"leaflet": ">= 0.7.1"
   }
 }
