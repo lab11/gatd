@@ -55,9 +55,69 @@ Implementation
 The current version of GATD is a research oriented implementation designed
 for speed of development and experimentability rather than performance.
 Most modules are written in Python, although due to the loose, modular approach
-some are written in Node and C as well.
+some are written in Node.js and C as well.
 
 GATD uses RabbitMQ for the inter-module queues and MongoDB for data storage.
+
+### Requirements
+
+- Python 2.7.*
+  - pika
+  - IPy
+  - pymongo
+  - socketio
+- MongoDB
+- RabbitMQ
+  - rabbitmq-c
+- Node.js
+  - npm
+  - amqp
+  - underscrore
+  - query-engine
+  - simple-ini
+  - socket.io
+  - forever
+
+
+Installation
+------------
+
+1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
+[RabbitMQ Server](http://www.rabbitmq.com/download.html), and
+[Node.js](http://nodejs.org/download/).
+2. Configure MongoDB using the template config file in the `mongo` folder.
+TODO: elaborate
+3. Configure RabbitMQ using the template config file in the `rabbitmq` folder.
+TODO: elaborate
+4. Set up Python environment
+```bash
+sudo pip2 install virtualenv
+virtualenv .
+source ./bin/activate
+pip2 install pika IPy pymongo socketio
+```
+5. Install `rabbitmq-c` library for compiling the UDP receiver.
+```bash
+git clone git://github.com/alanxz/rabbitmq-c.git
+cd rabbitmq-c
+git submodule init
+git submodule update
+autoreconf -i
+./configure
+make
+sudo make install
+```
+6. Install the Node.js dependencies
+```bash
+cd streamer
+sudo npm install -g forever
+npm install
+```
+
+
+
+
+
 
 
 
