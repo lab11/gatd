@@ -86,7 +86,26 @@ Installation
 [RabbitMQ Server](http://www.rabbitmq.com/download.html), and
 [Node.js](http://nodejs.org/download/).
 2. Configure MongoDB using the template config file in the `mongo` folder.
-TODO: elaborate
+  1. Copy the config file to `/etc/mongodb.conf`.
+
+        ```
+        sudo cp gatd/mongo/mongodb.conf /etc/mongodb.conf
+        ```
+
+  2. Edit the config file with the port you want to use.
+  3. Create a directory for the database.
+
+        ```
+        sudo mkdir -p /data/mongodb
+        sudo chown mongodb:mongodb /data/mongodb
+        ```
+        
+  4. Start the MongoDB daemon.
+
+        ```
+        sudo service mongodb start
+        ```
+
 3. Configure RabbitMQ using the template config file in the `rabbitmq` folder.
 TODO: elaborate
 4. Set up Python environment
