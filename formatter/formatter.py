@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import bson.binary
 import IPy
 import json
