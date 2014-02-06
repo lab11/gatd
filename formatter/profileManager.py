@@ -55,12 +55,10 @@ class profileManager:
 
 				if dbinfo:
 					profile_id = dbinfo['profile_id']
-					print('got db info {}'.format(profile_id))
 				else:
 					# Create a profile id and save it
 					profile_id = self._createProfileId()
 					db.storeConfig(parser_name, profile_id)
-					print('added to db')
 
 				# Store all of the info in the dicts in this instance
 				config = copy.copy(self.default_config)
@@ -75,7 +73,8 @@ class profileManager:
 				print('Added profile {} with parser {}'.format(profile_id,
 					parser_name))
 
-			except Exception as e:
+			except TypeError as typee:
+				# Skip error with trying to import __init__.py
 				pass
 
 	def __str__ (self):

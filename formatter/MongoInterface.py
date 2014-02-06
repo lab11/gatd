@@ -44,7 +44,7 @@ class MongoInterface:
 			print oe
 
 	def storeConfig (self, parser_name, profile_id):
-		config_map = {'parser_name': name,
+		config_map = {'parser_name': parser_name,
 		              'profile_id' : profile_id}
 		uid = self.mongo_db[gatdConfig.mongo.COL_CONFIG].save(config_map)
 		return str(uid)
