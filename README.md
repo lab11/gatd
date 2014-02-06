@@ -199,7 +199,13 @@ It also seems that you need to set the library directory after this. Add the fol
     cd mongo
     ./init_mongo.py
     ````
-
+10. Run GATD
+  1. Start the receivers
+  
+        ```
+        cd receiver
+        ./run_receiver.sh
+        ```
 
 
 
