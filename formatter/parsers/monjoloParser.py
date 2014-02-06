@@ -4,7 +4,11 @@ import json
 import struct
 import parser
 
-class coilcubeParser (parser.parser) :
+class monjoloParser (parser.parser):
+
+	# Parameters for this profile
+	name = 'Coilcube'
+	access = 'public'
 
 	def __init__ (self):
 		pass

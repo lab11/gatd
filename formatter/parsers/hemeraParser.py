@@ -5,12 +5,14 @@ import parser
 
 class hemeraParser (parser.parser) :
 
+	source_addrs = ['2001:470:1f11:131a:8226:33eb:3455:36de']
+
 	def __init__ (self):
 		pass
 
 	def parse (self, data, meta, extra, settings):
 		ret = {}
-		
+
 		if len(data) == 11:
 			values = struct.unpack("!HHHHBH", data);
 		elif len(data) == 9:
@@ -27,7 +29,7 @@ class hemeraParser (parser.parser) :
 			ret['battery'] = values[5]
 		ret['public']          = settings['public']
 
-		print ret		
+		print ret
 
 		return ret
 

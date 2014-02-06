@@ -43,23 +43,15 @@ class MongoInterface:
 		except OverflowError as oe:
 			print oe
 
-	def storeConfig (self, name, config_file, profile_id):
-		config_map = {'name'      : name,
-		              'config'    : config_file,
-		              'profile_id': profile_id}
+	def storeConfig (self, parser_name, profile_id):
+		config_map = {'parser_name': name,
+		              'profile_id' : profile_id}
 		uid = self.mongo_db[gatdConfig.mongo.COL_CONFIG].save(config_map)
 		return str(uid)
 
-	def updateConfig (self, uid, name, config_file, profile_id):
-		config_map = {'_id'       : bson.objectid.ObjectId(uid),
-		              'name'      : name,
-		              'config'    : config_file,
-		              'profile_id': profile_id}
-		self.mongo_db[gatdConfig.mongo.COL_CONFIG].save(config_map)
-
-	def getConfigs (self):
-		configs = self.mongo_db[gatdConfig.mongo.COL_CONFIG].find({})
-		return list(configs)
+	def getConfigByParser (self, parser_name):
+		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
+			{'parser_name': parser_name})
 
 	# Each profile has its own key that has to be in the data packet in order
 	# to add meta data. This is stored in the TABLE_META_CONFIG table.

@@ -171,13 +171,6 @@ channel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_STREAM,
                          exchange_type='headers',
                          durable=True)
 
-# Read in all config files
-for root, dirs, files in os.walk('./configs'):
-	for f in files:
-		name, ext = os.path.splitext(f)
-		if ext == '.config':
-			pm.addConfigFile(root + '/' + f)
-
 channel.basic_consume(packet_callback,
                       queue=gatdConfig.rabbitmq.Q_RECEIVE,
                       no_ack=False)

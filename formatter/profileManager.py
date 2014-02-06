@@ -1,5 +1,6 @@
 import ConfigParser
 import copy
+import glob
 import IPy
 import random
 import string
@@ -20,12 +21,8 @@ class profileManager:
 	# Stores the correct profile ID to use given a particular input IP address.
 	addrs   = {}
 
-	# Map of parser name to pid
-	names   = {}
-
 	# Default config example
-	default_config  = {'dbid': None,
-	                   'name': None,
+	default_config  = {'name': None,
 	                   'parser': None,
 	                   'access': 'public'
 	                  }
@@ -34,14 +31,46 @@ class profileManager:
 	def __init__ (self, db):
 		self.db = db
 
-		# Recover saved config files
-		configs = self.db.getConfigs()
-		for c in configs:
-			configp = ConfigParser.ConfigParser()
-			configp.readfp(StringIO.StringIO(str(c['config'])))
-			self._parseConfig(configp=configp,
-			                  pid=str(c['profile_id']),
-			                  dbid=str(c['_id']))
+		# Load all parsers in and update any information in the database
+		parsers = glob.glob('parsers/*.py')
+		for parser_file in parsers:
+			try:
+				parser_name = os.path.splitext(os.path.basename(parser_file))[0]
+				parser = self._getParser(self, parser_name)
+
+				profile_name = ''
+				access = 'public'
+				source_addrs = []
+
+				if hasattr(parser, 'name'):
+					profile_name = parser.name
+				if hasattr(parser, 'access'):
+					access = parser.access
+				if hasattr(parser, 'source_addrs'):
+					source_addrs = parser.source_addrs
+
+				# Check if we already know about this parser
+				dbinfo = db.getConfigByParser(parser_name)
+
+				if dbinfo:
+					profile_id = dbinfo['profile_id']
+				else:
+					# Create a profile id and save it
+					profile_id = self._createProfileId()
+					db.storeConfig(parser_name, profile_id)
+
+				# Store all of the info in the dicts in this instance
+				config = copy.copy(self.default_config)
+				config['name'] = profile_name
+				config['parser'] = parser
+				config['access'] = access
+				configs[profile_id] = config
+
+				for source_addr in source_addrs:
+					addrs[source_addr] = profile_id
+
+			except Exception as e:
+				print(e)
 
 	def __str__ (self):
 		out = 'addrs\n'
@@ -67,104 +96,6 @@ class profileManager:
 		# Create a parser object to use for parsing matching incoming packets
 		parser     = parser_n()
 		return parser
-
-	# Add (or re-add) the information in the config file to the stored maps
-	def _parseConfig (self, configp, pid, dbid):
-		config = copy.copy(self.default_config)
-
-		try:
-			main = configp.items('main')
-			# Load in the general main settings
-			for item in main:
-				config[item[0]] = item[1]
-
-		except ConfigParser.NoSectionError:
-			print('ERROR: Unable to find section "main" in the config file.')
-			raise FE.BadConfigFile('Missing main section')
-
-		try:
-			name = config['name']
-
-			# Add a mapping of name to profile id so that when we read in
-			# config files we can match them up.
-			self.names[name] = pid
-		except KeyError:
-			print('ERROR: Unable to find "name" in main section')
-			raise FE.BadConfigFile('Missing name')
-
-		# Get the python filename for this package
-		parser_name      = config['parser']
-		parser           = self._getParser(parser_name=parser_name)
-		config['parser'] = parser
-		config['dbid']   = dbid
-
-		if pid not in self.configs:
-			print("Adding config {}: {}".format(name, pid))
-
-		# Save the settings
-		self.configs[pid] = config
-
-		# Clear out the old addresses
-		for ipaddr in self.addrs:
-			if self.addrs[ipaddr] == pid:
-				self.addrs[ipaddr] = None
-
-		# Loop through all sources
-		try:
-			index = 0
-			while True:
-				source = configp.items('source{}'.format(index))
-				for item in source:
-					if item[0] == 'ipaddress':
-						# Add the IP address to the dict
-						self._addAddr(ip_str=item[1], pid=pid)
-						break
-
-				index += 1
-
-		except ConfigParser.NoSectionError:
-			pass
-
-
-
-	# Parse and add a config file to the database if needed
-	def addConfigFile (self, filename):
-		try:
-			configp = ConfigParser.ConfigParser()
-			configp.read(filename)
-
-			# Save the config file to a string that we can insert in the
-			# database.
-			str_ptr = StringIO.StringIO()
-			configp.write(str_ptr)
-
-			name = configp.get('main', 'name')
-			if name in self.names:
-				# Already have this config file, update it
-				pid = self.names[name]
-				dbid = self.configs[pid]['dbid']
-				self.db.updateConfig(uid=dbid,
-				                     name=name,
-				                     config_file=str_ptr.getvalue(),
-				                     profile_id=pid)
-
-			else:
-				# Get unique ID for this profile
-				pid = self._createProfileId()
-
-				# Store this configuration to get the unique id
-				dbid = self.db.storeConfig(name=name,
-				                           config_file=str_ptr.getvalue(),
-				                           profile_id=pid)
-				self.configs[pid]['dbid'] = dbid
-				self.names[name] = pid
-
-			# Now parse the file
-			self._parseConfig(configp=configp, pid=pid, dbid=dbid)
-
-		except ConfigParser.NoSectionError as e:
-			print "Invalid config file. Missing " + str(e) + " in [main]."
-
 
 	def getPacketPid (self, addr, data):
 		if addr != None:
@@ -234,5 +165,3 @@ class profileManager:
 		r.update(self.db.getGatewayKeys(addr >> 64))
 
 		return r
-
-

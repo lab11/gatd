@@ -2,7 +2,7 @@ import IPy
 import json
 import struct
 
-class weatherParser () :
+class weatherParser ():
 
 	def __init__ (self):
 		pass
