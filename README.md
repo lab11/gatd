@@ -165,7 +165,7 @@ in the next steps are reflected in this file.
     cd /opt/gatd
     virtualenv .
     source ./bin/activate
-    pip2 install pika IPy pymongo socketio-client
+    pip2 install pika IPy pymongo socketio-client semantic_version
     ```
     
 5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
