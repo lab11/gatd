@@ -156,7 +156,13 @@ pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
 connection = pika.BlockingConnection(
-				pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
+				pika.ConnectionParameters(
+					host=gatdConfig.rabbitmq.HOST,
+					port=gatdConfig.rabbitmq.PORT,
+					credentials=pika.PlainCredentials(
+						gatdConfig.rabbitmq.USERNAME,
+						gatdConfig.rabbitmq.PASSWORD)
+			))
 channel = connection.channel()
 
 # Create the exchange for the streaming packets.
