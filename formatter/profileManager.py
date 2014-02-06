@@ -74,10 +74,7 @@ class profileManager:
 					self.addrs[source_addr] = profile_id
 
 			except Exception as e:
-				print(e)
-
-		print(self.addrs)
-		print(self.configs)
+				pass
 
 	def __str__ (self):
 		out = 'addrs\n'
