@@ -170,6 +170,11 @@ in the next steps are reflected in this file.
     
 5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
 Use the cmake install directions that end up with the library installed.
+It also seems that you need to set the library directory after this. Add the following to `.bashrc`:
+
+    ```
+    export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    ```
 
 6. Install [tup](http://gittup.org/tup/), a software build tool.
 
