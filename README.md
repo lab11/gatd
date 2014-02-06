@@ -104,6 +104,13 @@ The following instructions are for Ubuntu.
     sudo usermod -a -G gatd <username>
     ```
     
+2. Copy the example GATD config file and set the necessary values. You will want to make sure any passwords set
+in the next steps are reflected in this file.
+
+    ```
+    cd gatd/config
+    cp gatd.config.example gatd.config
+    ```
 
 2. Configure MongoDB using the template config file in the `mongo` folder.
   1. Copy the config file to `/etc/mongodb.conf`.
@@ -165,6 +172,13 @@ The following instructions are for Ubuntu.
 Use the cmake install directions that end up with the library installed.
 
 6. Install [tup](http://gittup.org/tup/), a software build tool.
+
+7. Compile the receiver.
+
+    ```
+    cd receiver
+    tup
+    ```
 
 6. Install the Node.js dependencies
 ```bash
