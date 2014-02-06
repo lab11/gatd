@@ -180,13 +180,20 @@ Use the cmake install directions that end up with the library installed.
     tup
     ```
 
-6. Install the Node.js dependencies
-```bash
-cd streamer
-sudo npm install -g forever
-npm install
-```
+8. Install the Node.js dependencies
 
+    ```bash
+    cd streamer
+    sudo npm install -g forever
+    npm install
+    ```
+
+9. Setup the database in MongoDB.
+
+    ```
+    cd mongo
+    ./init_mongo.py
+    ````
 
 
 
