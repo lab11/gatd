@@ -35,7 +35,6 @@ class profileManager:
 		# Load all parsers in and update any information in the database
 		parsers = glob.glob('parsers/*.py')
 		for parser_file in parsers:
-			print('working on {}'.format(parser_file))
 			try:
 				parser_name = os.path.splitext(os.path.basename(parser_file))[0]
 				parser = self._getParser(parser_name)
@@ -72,6 +71,9 @@ class profileManager:
 
 				for source_addr in source_addrs:
 					self.addrs[source_addr] = profile_id
+
+				print('Added profile {} with parser {}'.format(profile_id,
+					parser_name))
 
 			except Exception as e:
 				pass
