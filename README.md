@@ -106,8 +106,25 @@ Installation
         sudo service mongodb start
         ```
 
-3. Configure RabbitMQ using the template config file in the `rabbitmq` folder.
-TODO: elaborate
+3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
+  1. Copy the config files to `/etc/rabbitmq`.
+
+        sudo cp gatd/rabbitmq/rabbitmq* /etc/rabbitmq
+  
+  2. Edit `rabbitmq-gatd.config` with the port you want to use.
+  3. Restart the rabbitmq server.
+  
+        sudo rabbitmqctrl stop
+        sudo service rabbitmq-server start
+
+  4. Delete the default rabbitmq user, create a GATD user, and set permissions.
+  
+        sudo rabbitmqctl delete_user guest
+        sudo rabbitmqctl add_user gatd <password>
+        sudo rabbitmqctl set_user_tags gatd administrator
+        sudo rabbitmqctl set_permissions -p / gatd ".*" ".*" ".*"
+
+
 4. Set up Python environment
 ```bash
 sudo pip2 install virtualenv
