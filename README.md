@@ -91,7 +91,7 @@ The following instructions are for Ubuntu.
 2. Install dependencies
 
     ```
-    sudo apt-get install python-pip git vim python-dev
+    sudo apt-get install python-pip git vim python-dev cmake libssl-dev
     ```
     
 2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
@@ -161,17 +161,11 @@ The following instructions are for Ubuntu.
     pip2 install pika IPy pymongo socketio-client
     ```
     
-5. Install `rabbitmq-c` library for compiling the UDP receiver.
-```bash
-git clone git://github.com/alanxz/rabbitmq-c.git
-cd rabbitmq-c
-git submodule init
-git submodule update
-autoreconf -i
-./configure
-make
-sudo make install
-```
+5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
+Use the cmake install directions that end up with the library installed.
+
+6. Install [tup](http://gittup.org/tup/), a software build tool.
+
 6. Install the Node.js dependencies
 ```bash
 cd streamer
