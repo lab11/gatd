@@ -33,6 +33,10 @@ argparser.add_argument('-o', '--output', help='Output file name',
 args = argparser.parse_args()
 
 
+if not os.path.exists(args.input):
+	print('Input config file not found.')
+	sys.exit(1)
+
 config = ConfigParser.ConfigParser()
 config.read(args.input)
 
