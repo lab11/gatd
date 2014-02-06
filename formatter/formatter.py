@@ -46,7 +46,6 @@ def unpackPacket (pkt):
 		# Check if the packet is a duplicate
 		duplicate = dd.check(port=port, addr=laddr, data=data, time=time)
 		if duplicate:
-#			print('bad packet')
 			raise FE.BadPacket('Duplicate packet')
 
 		meta = {}
@@ -140,10 +139,6 @@ def packet_callback (channel, method, prop, body):
 
 	except Exception as e:
 		print(e)
-		pass
-
-	except TypeError:
-		# Invalid incoming packet so the unpacker returned None
 		pass
 
 	# Ack the packet from the receiver so rabbitmq doesn't try to re-send it

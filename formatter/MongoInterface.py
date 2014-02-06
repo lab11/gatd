@@ -182,38 +182,3 @@ class MongoInterface:
 
 	def __del__ (self):
 		self.mongo_conn.close()
-
-
-if __name__ == '__main__':
-	m = MongoInterface()
-	print(m.getMetaRequiredKey("7aiOPJapXF"))
-	print(m.getMetaRequiredKey("abc"))
-
-	print('Test meta')
-	test1 = {'profile_id':'7aiOPJapXF',
-			'ccid':'1',
-			'color':'blue'}
-	test2 = {'profile_id':'7aiOPJapXF',
-			'ccid':'1',
-			'color':'red'}
-	test3 = {'profile_id':'7aiOPJapXF',
-			'ccid':'2',
-			'color':'blue'}
-	test4 = {'profile_id':'7aiOPJapXF',
-			'ccid':'1',
-			'colorer':'blue'}
-	test5 = {'profile_id':'7aiOPJapXF',
-			'ccid':'1',
-			'color':'green'}
-	test6 = {'profile_id':'7aiOPJapXF',
-			'ccid':'1',
-			'color':'green',
-			'type':'new'}
-	print('adding: {}'.format(m.getMeta(test1)))
-	print('adding: {}'.format(m.getMeta(test2)))
-	print('adding: {}'.format(m.getMeta(test3)))
-	print('adding: {}'.format(m.getMeta(test4)))
-	print('adding: {}'.format(m.getMeta(test5)))
-	print('adding: {}'.format(m.getMeta(test6)))
-
-

@@ -1,4 +1,4 @@
-
+# Exceptions used in GATD
 
 class GatdException(Exception):
 	def __init__(self, value):

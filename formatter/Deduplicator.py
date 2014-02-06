@@ -1,4 +1,3 @@
-
 #
 # Returns true if the packet is unique, false if it is a duplicate
 #
@@ -21,7 +20,7 @@ class Deduplicator (object):
 		duplicate = False
 
 		key = '{}{}{}'.format(port, addr, data)
-		
+
 		# Retrieve the last time this data was seen, or 0 if this is the first
 		# time
 		previous_time = self.packet_hashes.setdefault(key, 0)
@@ -34,5 +33,3 @@ class Deduplicator (object):
 		self.packet_hashes[key] = time
 
 		return duplicate
-
-
