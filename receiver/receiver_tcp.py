@@ -10,7 +10,7 @@ import struct
 import sys
 import time
 
-sys.path.append(os.path.abspath('../../config'))
+sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
 
@@ -61,6 +61,6 @@ class ThreadedTCPServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
 
 # Run the receiver
-server = ThreadedTCPServer(("::", gatdConfig.receive.PORT_TCP),
+server = ThreadedTCPServer(("::", gatdConfig.receiver.PORT_TCP),
                            ThreadedTCPRequestHandler)
 server.serve_forever()
