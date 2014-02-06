@@ -82,9 +82,29 @@ GATD uses RabbitMQ for the inter-module queues and MongoDB for data storage.
 Installation
 ------------
 
+The following instructions are for Ubuntu.
+
 1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
 [RabbitMQ Server](http://www.rabbitmq.com/download.html), and
 [Node.js](http://nodejs.org/download/).
+
+2. Install dependencies
+
+    ```
+    sudo apt-get install python-pip git vim python-dev
+    ```
+    
+2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
+
+    ```
+    sudo adduser gatd
+    cd /opt
+    sudo clone https://github.com/lab11/gatd.git
+    sudo chown gatd:gatd gatd
+    sudo usermod -a -G gatd <username>
+    ```
+    
+
 2. Configure MongoDB using the template config file in the `mongo` folder.
   1. Copy the config file to `/etc/mongodb.conf`.
 
@@ -132,12 +152,15 @@ Installation
 
 
 4. Set up Python environment
-```bash
-sudo pip2 install virtualenv
-virtualenv .
-source ./bin/activate
-pip2 install pika IPy pymongo socketio
-```
+
+    ```bash
+    sudo pip2 install virtualenv
+    cd /opt/gatd
+    virtualenv .
+    source ./bin/activate
+    pip2 install pika IPy pymongo socketio-client
+    ```
+    
 5. Install `rabbitmq-c` library for compiling the UDP receiver.
 ```bash
 git clone git://github.com/alanxz/rabbitmq-c.git
