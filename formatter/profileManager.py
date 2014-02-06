@@ -5,6 +5,7 @@ import IPy
 import random
 import string
 import StringIO
+import os
 import sys
 import uuid
 
@@ -34,9 +35,10 @@ class profileManager:
 		# Load all parsers in and update any information in the database
 		parsers = glob.glob('parsers/*.py')
 		for parser_file in parsers:
+			print('working on {}'.format(parser_file))
 			try:
 				parser_name = os.path.splitext(os.path.basename(parser_file))[0]
-				parser = self._getParser(self, parser_name)
+				parser = self._getParser(parser_name)
 
 				profile_name = ''
 				access = 'public'
@@ -54,23 +56,28 @@ class profileManager:
 
 				if dbinfo:
 					profile_id = dbinfo['profile_id']
+					print('got db info {}'.format(profile_id))
 				else:
 					# Create a profile id and save it
 					profile_id = self._createProfileId()
 					db.storeConfig(parser_name, profile_id)
+					print('added to db')
 
 				# Store all of the info in the dicts in this instance
 				config = copy.copy(self.default_config)
 				config['name'] = profile_name
 				config['parser'] = parser
 				config['access'] = access
-				configs[profile_id] = config
+				self.configs[profile_id] = config
 
 				for source_addr in source_addrs:
-					addrs[source_addr] = profile_id
+					self.addrs[source_addr] = profile_id
 
 			except Exception as e:
 				print(e)
+
+		print(self.addrs)
+		print(self.configs)
 
 	def __str__ (self):
 		out = 'addrs\n'
