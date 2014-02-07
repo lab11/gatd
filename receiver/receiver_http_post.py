@@ -32,7 +32,6 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
 		content_len = int(self.headers.getheader('content-length'))
 		post_body   = self.rfile.read(content_len)
-		headers     = self.headers.getheaders()
 		profile_id  = string.strip(self.path, '/')
 
 		# Get the IPv6 address in integer form
@@ -52,7 +51,7 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 			now)
 
 		pkt = {'data':    post_body,
-		       'headers': headers}
+		       'headers': str(self.headers)}
 
 		amqp_pkt += profile_id + json.dumps(pkt)
 
