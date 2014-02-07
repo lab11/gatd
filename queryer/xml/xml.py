@@ -1,10 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import apscheduler.scheduler
 import ConfigParser as configparser
 import glob
 import IPy
 import json
 import os
+import pika
 import requests
 import socket
 import struct
