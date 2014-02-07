@@ -200,12 +200,27 @@ It also seems that you need to set the library directory after this. Add the fol
     ./init_mongo.py
     ````
 10. Run GATD
-  1. Start the receivers
+  1. Start the receivers.
   
         ```
         cd receiver
         ./run_receiver.sh
         ```
+
+  2. Run the formatter.
+    
+        ```
+        cd formatter
+        ./run_formatter.sh
+        ```
+
+  3. Run the streamers.
+   
+        ```
+        cd streamer
+        ./run_streamer.sh
+        ```
+
 
 
 
