@@ -22,7 +22,13 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 		now = int(time.time()*1000)
 
 		amqp_conn = pika.BlockingConnection(
-		            pika.ConnectionParameters(host=gatdConfig.rabbitmq.HOST))
+						pika.ConnectionParameters(
+							host=gatdConfig.rabbitmq.HOST,
+							port=gatdConfig.rabbitmq.PORT,
+							credentials=pika.PlainCredentials(
+								gatdConfig.rabbitmq.USERNAME,
+								gatdConfig.rabbitmq.PASSWORD)
+					))
 		amqp_chan = amqp_conn.channel();
 
 		content_len = int(self.headers.getheader('content-length'))
