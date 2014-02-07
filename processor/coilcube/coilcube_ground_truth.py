@@ -37,6 +37,10 @@ def process_packet (ch, method, properties, body):
 			wattsup[pkt['ccid_mac']] = pkt
 
 	elif pkt['profile_id'] == MON_PROFILE:
+		if (not 'type' in pkt) or (pkt['type'] != 'coilcube_freq'):
+			# Only operate on coilcube_freq packets
+			return
+
 		if pkt['ccid_mac'] in wattsup:
 			newest_data = wattsup[pkt['ccid_mac']]
 			pkt['ground_truth_watts'] = newest_data['watts']
