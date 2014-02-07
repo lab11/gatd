@@ -39,7 +39,7 @@ def getXML (url, profile_id):
 		j = json.dumps({'profile_id': profile_id,
 		                'xml':        r.text,
 		                'time':       now,
-		                'port':       urlparsed.port,
+		                'port':       urlparsed.port or 80,
 		                'ip_address': addr})
 
 		pkt = ojson = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + j

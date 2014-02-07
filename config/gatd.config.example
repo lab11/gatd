@@ -41,3 +41,4 @@ type_udp:       0
 type_tcp:       1
 type_processed: 2
 type_http_post: 3
+type_queried:   4

@@ -69,6 +69,22 @@ json blob')
 
 		except ValueError as e:
 			raise FE.BadPacket("Processed packet not JSON.")
+
+	elif ptype == gatdConfig.pkt.TYPE_QUERIED:
+		try:
+			data = json.loads(pkt)
+			meta = {}
+			meta['addr'] = data['ip_address']
+			meta['port'] = data['port']
+			meta['time'] = data['time']
+
+			return (data['profile_id']+data['xml'], meta)
+
+		except ValueError as e:
+			raise FE.BadPacket("Queried packet not JSON.")
+		except KeyError: as e:
+			raise FE.BadPacket("Queried packet missing keys.")
+
 	else:
 		raise FE.BadPacket('Invalid type of packet')
 
