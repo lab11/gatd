@@ -1,0 +1,7 @@
+IPy>=0.81
+gevent>=1.0
+gevent-socketio>=0.3.6
+pika>=0.9.13
+pymongo>=2.6.3
+semantic-version>=2.2.2
+socketIO-client>=0.5.3
