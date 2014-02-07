@@ -78,11 +78,11 @@ json blob')
 			meta['port'] = data['port']
 			meta['time'] = data['time']
 
-			return (data['profile_id']+data['xml'], meta)
+			return (str(data['profile_id'])+data['xml'], meta)
 
 		except ValueError as e:
 			raise FE.BadPacket("Queried packet not JSON.")
-		except KeyError: as e:
+		except KeyError as e:
 			raise FE.BadPacket("Queried packet missing keys.")
 
 	else:
