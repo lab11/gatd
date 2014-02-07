@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 from gevent import monkey; monkey.patch_all()
 
 import sys
