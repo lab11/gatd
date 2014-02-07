@@ -3,6 +3,7 @@ import json
 import struct
 import parser
 import semantic_version as semver
+import urlparse
 
 class gridwatchParser (parser.parser):
 
@@ -13,7 +14,9 @@ class gridwatchParser (parser.parser):
 		ret = {}
 
 		# Parse the JSON blob
-		vals = json.loads(data[10:])
+		post = json.loads(data[10:])
+
+		vals = urlparse.parse_qs(post['data'])
 
 		# Get values that should be present across all devices and versions
 		ret['phone_id']    = vals['id'][0]

@@ -8,7 +8,6 @@ import pika
 import string
 import struct
 import time
-import urlparse
 import os
 import sys
 
@@ -33,7 +32,7 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
 		content_len = int(self.headers.getheader('content-length'))
 		post_body   = self.rfile.read(content_len)
-		data        = urlparse.parse_qs(post_body)
+		headers     = self.headers.getheaders()
 		profile_id  = string.strip(self.path, '/')
 
 		# Get the IPv6 address in integer form
@@ -52,18 +51,16 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 			port,
 			now)
 
-		amqp_pkt += profile_id + json.dumps(data)
+		pkt = {'data':    post_body,
+		       'headers': headers}
+
+		amqp_pkt += profile_id + json.dumps(pkt)
 
 		amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
 		                        body=amqp_pkt,
 		                        routing_key='')
 
 		self.send_response(200)
-	#	self.send_header('Content-type','text/html')
-	#	self.end_headers()
-	#	# Send the html message
-	#	self.wfile.write("[0]")
-	#	return
 
 	def log_message(self, format, *args):
 		return

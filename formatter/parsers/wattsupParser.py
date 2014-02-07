@@ -2,6 +2,7 @@ import IPy
 import json
 import struct
 import parser
+import urlparse
 
 class wattsupParser (parser.parser) :
 
@@ -12,7 +13,9 @@ class wattsupParser (parser.parser) :
 		ret = {}
 
 		# Parse the JSON blob
-		vals = json.loads(data[10:])
+		post = json.loads(data[10:])
+
+		vals = urlparse.parse_qs(post['data'])
 
 		ret['wattsupid']    = int(vals['id'][0])
 		ret['watts']        = float(vals['w'][0])/10.0
