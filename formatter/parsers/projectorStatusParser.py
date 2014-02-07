@@ -22,11 +22,9 @@ class projectorStatusParser (parser.parser):
 		try:
 			xml = ET.fromstring(data[10:])
 
-			ret['status']     = status[int(xml.find('pjPowermd').text)]
-			ret['source']     = sources[int(xml.find('pjsrc').text)]
+			ret['status']     = self.status[int(xml.find('pjPowermd').text)]
+			ret['source']     = self.sources[int(xml.find('pjsrc').text)]
 			ret['bulb_hours'] = int(xml.find('pjLamphr').text)
-
-			print(ret)
 
 		except Exception as e:
 			return None
