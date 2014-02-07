@@ -21,7 +21,7 @@ amqp_conn = pika.BlockingConnection(
 amqp_chan = amqp_conn.channel()
 
 keys = {}
-keys['profile_id'] = PROFILE
+keys['profile_id'] = WUP_PROFILE
 keys['x-match'] = "all"
 
 # dict of location->{wattsupid->watts}
@@ -38,8 +38,8 @@ def process_packet (ch, method, properties, body):
 		return
 
 	# Make sure the keys we need are in the packet
-	if 'location_str' not in pkt or
-	   'watts' not in pkt
+	if 'location_str' not in pkt or \
+	   'watts' not in pkt:
 		return
 
 	opkt = {}
@@ -51,6 +51,8 @@ def process_packet (ch, method, properties, body):
 	location_fields = pkt['location_str'].split('|')
 	agg_location = '|'.join(location_fields[0:-1])
 	opkt['location_str'] = agg_location
+	opkt['description'] = 'Aggregate from Watts Up? at {}' \
+		.format(', '.join(location_fields[0:-1]))
 
 	location_watts = wattsups.setdefault(agg_location, {})
 	location_watts[pkt['wattsupid']] = pkt['watts']
