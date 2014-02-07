@@ -58,12 +58,12 @@ pids = []
 m = MongoInterface.MongoInterface()
 
 
-configs = m.getConfigs()
+configs = m.getAllConfigs()
 
 print('Choose which profile you want:')
 for i, c in zip(range(len(configs)), configs):
 	pids.append(c['profile_id'])
-	print('[{:>3d}] {}'.format(i, c['name']))
+	print('[{:>3d}] {}'.format(i, c['parser_name']))
 cidx = int(raw_input('Index: '))
 print('')
 

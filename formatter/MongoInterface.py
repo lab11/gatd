@@ -53,6 +53,9 @@ class MongoInterface:
 		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
 			{'parser_name': parser_name})
 
+	def getAllConfigs (self):
+		return list(self.mongo_db[gatdConfig.mongo.COL_CONFIG].find())
+
 	# Each profile has its own key that has to be in the data packet in order
 	# to add meta data. This is stored in the TABLE_META_CONFIG table.
 	def getMetaRequiredKey (self, pid):
