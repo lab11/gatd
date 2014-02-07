@@ -90,7 +90,7 @@ The following instructions are for Ubuntu.
     sudo adduser gatd
     cd /opt
     sudo clone https://github.com/lab11/gatd.git
-    sudo chown gatd:gatd gatd
+    sudo chown gatd:gatd gatd -R
     sudo usermod -a -G gatd <username>
     ```
     
@@ -98,7 +98,7 @@ The following instructions are for Ubuntu.
 in the next steps are reflected in this file.
 
     ```
-    cd gatd/config
+    cd /opt/gatd/config
     cp gatd.config.example gatd.config
     ```
 
@@ -106,7 +106,7 @@ in the next steps are reflected in this file.
   1. Copy the config file to `/etc/mongodb.conf`.
 
         ```
-        sudo cp gatd/mongo/mongodb.conf /etc/mongodb.conf
+        sudo cp /opt/gatd/mongo/mongodb.conf /etc/mongodb.conf
         ```
 
   2. Edit the config file with the port you want to use.
@@ -117,17 +117,17 @@ in the next steps are reflected in this file.
         sudo chown mongodb:mongodb /data/mongodb
         ```
         
-  4. Start the MongoDB daemon.
+  4. Restart the MongoDB daemon.
 
         ```
-        sudo service mongodb start
+        sudo service mongodb restart
         ```
 
 3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
   1. Copy the config files to `/etc/rabbitmq`.
 
         ```
-        sudo cp gatd/rabbitmq/rabbitmq* /etc/rabbitmq
+        sudo cp /opt/gatd/rabbitmq/rabbitmq* /etc/rabbitmq
         ```
   
   2. Edit `rabbitmq-gatd.config` with the port you want to use.
@@ -169,14 +169,14 @@ It also seems that you need to set the library directory after this. Add the fol
 7. Compile the receiver.
 
     ```
-    cd receiver
+    cd /opt/gatd/receiver
     tup
     ```
 
 8. Install the Node.js dependencies
 
     ```bash
-    cd streamer
+    cd /opt/gatd/streamer
     sudo npm install -g forever
     npm install
     ```
@@ -184,7 +184,7 @@ It also seems that you need to set the library directory after this. Add the fol
 9. Setup the database in MongoDB.
 
     ```
-    cd mongo
+    cd /opt/gatd/mongo
     ./init_mongo.py
     ````
     
@@ -192,20 +192,20 @@ It also seems that you need to set the library directory after this. Add the fol
   1. Start the receivers.
   
         ```
-        cd receiver
+        cd /opt/gatd/receiver
         ./run_receiver.sh
         ```
 
   2. Run the formatter.
     
         ```
-        cd formatter
+        cd /opt/gatd/formatter
         ./run_formatter.sh
         ```
 
   3. Run the streamers.
    
         ```
-        cd streamer
+        cd /opt/gatd/streamer
         ./run_streamer.sh
         ```
