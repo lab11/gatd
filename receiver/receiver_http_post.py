@@ -51,7 +51,7 @@ class gatdPostHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 			now)
 
 		pkt = {'data':    post_body,
-		       'headers': str(self.headers)}
+		       'headers': dict(self.headers)}
 
 		amqp_pkt += profile_id + json.dumps(pkt)
 
