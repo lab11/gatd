@@ -1,0 +1,14 @@
+[main]
+profile_id: XXX
+url: http://device.com/api/status.xml
+frequency: 50 # time between samples (seconds)
+
+[cron]
+year:
+month:
+day:
+week:
+day_of_week:
+hour:
+minute:
+second:
