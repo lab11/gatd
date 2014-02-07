@@ -62,21 +62,11 @@ GATD uses RabbitMQ for the inter-module queues and MongoDB for data storage.
 ### Requirements
 
 - Python 2.7.*
-  - pika
-  - IPy
-  - pymongo
-  - socketio
 - MongoDB
 - RabbitMQ
-  - rabbitmq-c
 - Node.js
-  - npm
-  - amqp
-  - underscrore
-  - query-engine
-  - simple-ini
-  - socket.io
-  - forever
+- tup
+
 
 
 Installation
@@ -85,8 +75,8 @@ Installation
 The following instructions are for Ubuntu.
 
 1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
-[RabbitMQ Server](http://www.rabbitmq.com/download.html), and
-[Node.js](http://nodejs.org/download/).
+[RabbitMQ Server](http://www.rabbitmq.com/download.html),
+[Node.js](http://nodejs.org/download/), and [tup](http://gittup.org/tup/).
 
 2. Install dependencies
 
@@ -158,14 +148,14 @@ in the next steps are reflected in this file.
         ```
 
 
-4. Set up Python environment
+4. Set up Python environment.
 
     ```bash
     sudo pip2 install virtualenv
     cd /opt/gatd
     virtualenv .
     source ./bin/activate
-    pip2 install pika IPy pymongo socketio-client semantic_version
+    pip2 install -r requirements.pip
     ```
     
 5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
@@ -175,8 +165,6 @@ It also seems that you need to set the library directory after this. Add the fol
     ```
     export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
     ```
-
-6. Install [tup](http://gittup.org/tup/), a software build tool.
 
 7. Compile the receiver.
 
@@ -199,6 +187,7 @@ It also seems that you need to set the library directory after this. Add the fol
     cd mongo
     ./init_mongo.py
     ````
+    
 10. Run GATD
   1. Start the receivers.
   
@@ -220,10 +209,3 @@ It also seems that you need to set the library directory after this. Add the fol
         cd streamer
         ./run_streamer.sh
         ```
-
-
-
-
-
-
-
