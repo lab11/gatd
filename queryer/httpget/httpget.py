@@ -24,6 +24,7 @@ import gatdConfig
 request_header = {'User-Agent': 'GATD-queryer'}
 
 def httpGET (url, profile_id):
+	global amqp_conn, amqp_chan
 	r = requests.get(url, headers=request_header)
 	now = int(time.time()*1000)
 

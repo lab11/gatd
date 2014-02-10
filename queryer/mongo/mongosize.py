@@ -4,7 +4,9 @@ import json
 import os
 import pika
 import pymongo
+import struct
 import sys
+import time
 
 # Enable logging in case apscheduler catches an error
 import logging
@@ -23,14 +25,14 @@ def getDBStats ():
 	stats = mongo_db.command('dbstats', gatdConfig.mongo.COL_FORMATTED)
 	now = int(time.time()*1000)
 
-	j = json.dumps({'profile_id': 'xxx',
-	                'xml':        stats,
+	j = json.dumps({'profile_id': 'Wr6RQjmTMH',
+	                'xml':        json.dumps(stats),
 	                'time':       now,
 	                'port':       gatdConfig.mongo.PORT,
 	                'ip_address': 0})
 
 	pkt = ojson = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + j
-
+	print(pkt)
 	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
 	                        body=pkt,
 	                        routing_key='')
@@ -47,6 +49,6 @@ amqp_conn = pika.BlockingConnection(
 			))
 amqp_chan = amqp_conn.channel();
 
-sched.add_interval_job(func=getDBStats, seconds=1)
+sched.add_interval_job(func=getDBStats, hours=1)
 
 sched.start()
