@@ -21,11 +21,20 @@ class tedParser (parser.parser):
 
 			meter = xml.find('MTUVal').find('MTU1')
 
-			ret['value']   = meter.find('Value').text
-			ret['kva']     = meter.find('KVA').text
-			ret['pf']      = meter.find('PF').text
-			ret['voltage'] = meter.find('Voltage').text
-			ret['phase']   = meter.find('Phase').text
+			ret['watts']   = float(meter.find('Value').text)
+			ret['kva']     = float(meter.find('KVA').text)/1000.0
+			ret['pf']      = float(meter.find('PF').text)/1000.0
+			ret['voltage'] = float(meter.find('Voltage').text)/10.0
+
+			current = meter.find('PhaseCurrent')
+			ret['current_black'] = float(current.find('A').text)/10.0
+			ret['current_red']   = float(current.find('B').text)/10.0
+			ret['current_blue']  = float(current.find('C').text)/10.0
+
+			voltage = meter.find('PhaseVoltage')
+			ret['voltage_black'] = float(voltage.find('A').text)/10.0
+			ret['voltage_red']   = float(voltage.find('B').text)/10.0
+			ret['voltage_blue']  = float(voltage.find('C').text)/10.0
 
 
 		except Exception as e:
@@ -37,4 +46,3 @@ class tedParser (parser.parser):
 		ret['public']  = settings['public']
 
 		return ret
-
