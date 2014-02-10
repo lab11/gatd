@@ -23,7 +23,7 @@ import gatdConfig
 
 request_header = {'User-Agent': 'GATD-queryer'}
 
-def getXML (url, profile_id):
+def httpGET (url, profile_id):
 	r = requests.get(url, headers=request_header)
 	now = int(time.time()*1000)
 
@@ -38,7 +38,7 @@ def getXML (url, profile_id):
 			addr = IPy.IPint(ip_address).int()
 
 		j = json.dumps({'profile_id': profile_id,
-		                'xml':        r.text,
+		                'data':       r.text,
 		                'time':       now,
 		                'port':       urlparsed.port or 80,
 		                'ip_address': addr})
@@ -71,7 +71,7 @@ for config in configs:
 	url        = cfgp.get('main', 'url')
 	frequency  = int(cfgp.get('main', 'frequency'))
 
-	sched.add_interval_job(func=getXML,
+	sched.add_interval_job(func=httpGET,
 	                       seconds=frequency,
 	                       kwargs={'url':url, 'profile_id':profile_id})
 
