@@ -52,19 +52,16 @@ def httpGET (url, profile_id):
 				                        body=pkt,
 				                        routing_key='')
 				break
-			except pika.exceptions.ChannelClosed as e:
-				try:
-					amqp_chan = amqp_conn.channel()
-				except pika.exceptions.ConnectionClosed as ex:
-					amqp_conn = pika.BlockingConnection(
-									pika.ConnectionParameters(
-										host=gatdConfig.rabbitmq.HOST,
-										port=gatdConfig.rabbitmq.PORT,
-										credentials=pika.PlainCredentials(
-											gatdConfig.rabbitmq.USERNAME,
-											gatdConfig.rabbitmq.PASSWORD)
-								))
-					amqp_chan = amqp_conn.channel();
+			except pika.exceptions.ChannelClosed:
+				amqp_conn = pika.BlockingConnection(
+								pika.ConnectionParameters(
+									host=gatdConfig.rabbitmq.HOST,
+									port=gatdConfig.rabbitmq.PORT,
+									credentials=pika.PlainCredentials(
+										gatdConfig.rabbitmq.USERNAME,
+										gatdConfig.rabbitmq.PASSWORD)
+							))
+				amqp_chan = amqp_conn.channel();
 
 
 
