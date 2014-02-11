@@ -9,6 +9,7 @@ import os
 import pika
 import re
 import socket
+import struct
 import sys
 import time
 
@@ -40,7 +41,7 @@ s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
 """
 argument = """<{argumentname}>{value}</{argumentname}>"""
 
-PROFILE_ID = 'xxx'
+PROFILE_ID = 'fyMfyFW1aU'
 
 
 
@@ -111,6 +112,7 @@ def soapMessage (hostname, cat, cmd, resp=False, argname=None, arg=None):
 
 
 def queryWemo (hostname, mac_addr, wemo_type):
+	global ampq_conn, amqp_chan
 	if wemo_type == 'insight':
 		status_response = soapMessage(hostname, 'basicevent', 'GetBinaryState',
 		                              True, argname='BinaryState')
@@ -135,6 +137,8 @@ def queryWemo (hostname, mac_addr, wemo_type):
 		                'ip_address': addr})
 
 		pkt = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + j
+
+		print(pkt)
 
 		while True:
 			try:
