@@ -27,7 +27,7 @@ def getDBStats ():
 	now = int(time.time()*1000)
 
 	j = json.dumps({'profile_id': 'Wr6RQjmTMH',
-	                'xml':        json.dumps(stats),
+	                'data':        json.dumps(stats),
 	                'time':       now,
 	                'port':       gatdConfig.mongo.PORT,
 	                'ip_address': 0})
