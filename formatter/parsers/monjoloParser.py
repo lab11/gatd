@@ -21,7 +21,7 @@ class monjoloParser (parser.parser):
 		cc_version = values[10]
 		data = data[11:]
 
-		if cc_version == 1 or cc_version == 2 or cc_version == 3 or cc_version == 4:
+		if cc_version >= 1 and cc_version <= 5:
 			if len(data) != 2:
 				# not sure what to do
 				print "COILCUBE: Too short!"
