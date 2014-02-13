@@ -77,6 +77,8 @@ json blob')
 			meta['addr'] = data['ip_address']
 			meta['port'] = data['port']
 			meta['time'] = data['time']
+			if 'unique_id' in data:
+				meta['unique_id'] = data['unique_id']
 
 			return (str(data['profile_id'])+data['data'], meta)
 

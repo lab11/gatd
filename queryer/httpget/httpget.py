@@ -23,7 +23,7 @@ import gatdConfig
 
 request_header = {'User-Agent': 'GATD-queryer'}
 
-def httpGET (url, profile_id):
+def httpGET (url, profile_id, unique_id):
 	global amqp_conn, amqp_chan
 	r = requests.get(url, headers=request_header)
 	now = int(time.time()*1000)
@@ -38,13 +38,15 @@ def httpGET (url, profile_id):
 			# This was apparently already an IPv6 address
 			addr = IPy.IPint(ip_address).int()
 
-		j = json.dumps({'profile_id': profile_id,
-		                'data':       r.text,
-		                'time':       now,
-		                'port':       urlparsed.port or 80,
-		                'ip_address': addr})
+		d = {'profile_id': profile_id,
+		     'data':       r.text,
+		     'time':       now,
+		     'port':       urlparsed.port or 80,
+		     'ip_address': addr}
+		if unique_id:
+			d['unique_id'] = unique_id
 
-		pkt = ojson = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + j
+		pkt = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + json.dumps(d)
 
 		while True:
 			try:
@@ -85,9 +87,15 @@ for config in configs:
 	profile_id = cfgp.get('main', 'profile_id')
 	url        = cfgp.get('main', 'url')
 	frequency  = int(cfgp.get('main', 'frequency'))
+	try:
+		unique_id = cfgp.get('main', 'unique_id')
+	except Exception:
+		unique_id = None
+
 
 	sched.add_interval_job(func=httpGET,
 	                       seconds=frequency,
-	                       kwargs={'url':url, 'profile_id':profile_id})
+	                       kwargs={'url':url, 'profile_id':profile_id,
+	                               'unique_id':unique_id})
 
 sched.start()
