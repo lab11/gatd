@@ -20,7 +20,7 @@ class tedParser (parser.parser):
 			xml = ET.fromstring(data[10:])
 
 			meter = xml.find('MTUVal')
-			if meter:
+			if meter is not None:
 				# Commercial TED
 				meter = meter.find('MTU1')
 
@@ -38,18 +38,20 @@ class tedParser (parser.parser):
 				ret['voltage_black'] = float(voltage.find('A').text)/10.0
 				ret['voltage_red']   = float(voltage.find('B').text)/10.0
 				ret['voltage_blue']  = float(voltage.find('C').text)/10.0
-				raise Exception() # exit from processing the xml
+				raise UserWarning() # exit from processing the xml
 
 			meter = xml.find('Voltage')
-			if meter:
+			if meter is not None:
 				# Home TED
 				voltage = meter.find('Total').find('VoltageNow')
 				ret['voltage'] = float(voltage.text)/10.0
 
 				power = xml.find('Power').find('Total').find('PowerNow')
 				ret['watts'] = int(power.text)
-				raise Exception()
+				raise UserWarning()
 
+		except UserWarning:
+			pass
 		except Exception as e:
 			return None
 
