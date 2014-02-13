@@ -25,8 +25,6 @@ class ted5000Parser (parser.parser):
 			power = xml.find('Power').find('Total').find('PowerNow')
 			ret['watts'] = int(power.text)
 
-			print(ret)
-
 		except Exception as e:
 			return None
 
@@ -34,5 +32,5 @@ class ted5000Parser (parser.parser):
 		ret['port']    = meta['port']
 		ret['time']    = meta['time']
 		ret['public']  = settings['public']
-
+		
 		return ret
