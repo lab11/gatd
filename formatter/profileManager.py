@@ -163,6 +163,9 @@ class profileManager:
 		# Require that the profile ID is set
 		r['profile_id'] = pid
 
+		# Set this as a raw packet by setting processor count to 0
+		r['_processor_count'] = 0
+
 		# Add in the meta data
 		r.update(self.db.getMeta(r))
 

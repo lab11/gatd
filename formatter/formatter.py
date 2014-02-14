@@ -117,15 +117,17 @@ def packet_callback (channel, method, prop, body):
 		# Save in database
 		mi.writeFormatted(ret)
 
-		# Set the headers to the keys present in the streamed message
-		# The headers are key, value pairs where the keys are the same keys as
-		# in the packet and the values are a single NULL byte. The only
-		# exception is the "profile_id" key, which is set to the profile id
-		# string because it is included in ALL packets. This allows for
-		# efficient handling of a common use case, which is to receive all
-		# packets from a specific profile.
-		headers = dict((x,struct.pack('B',0)) for x in ret.keys())
+		# Include headers in the RabbitMQ for the processors
+		# First, make sure the profile_id is present as processors
+		# often operate on a specific profile. Second, include all of the
+		# '_processor' key value pairs in the header. Often processors work
+		# off of other processed data so this allows them to filter for exactly
+		# the data they need.
+		headers = {}
 		headers['profile_id'] = ret['profile_id']
+		for key in ret.keys():
+			if key[0:10] == '_processor':
+				headers[key] = ret[key]
 		props = pika.spec.BasicProperties(headers=headers)
 
 		# Send to streamer
