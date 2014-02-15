@@ -10,14 +10,13 @@ class githubParser (parser.parser):
 
 		# Parse the JSON blob
 		post = json.loads(data[10:])
-		ret={}
-#		ret = json.loads(post['data'])
+		
+		ret = json.loads(post['data'])
 		ret['github_event'] = post['headers']['x-github-event']
 
 		ret['address'] = str(meta['addr'])
+		ret['time']    = meta['time']
 		ret['port']    = meta['port']
 		ret['public']  = settings['public']
-
-		print(ret)
 
 		return ret
