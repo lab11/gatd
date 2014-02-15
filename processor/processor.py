@@ -115,11 +115,11 @@ def start_processor (processor_name):
 
 	amqp_conn = pika.BlockingConnection(
 	            	pika.ConnectionParameters(
-					host=gatdConfig.rabbitmq.HOST,
-            		port=gatdConfig.rabbitmq.PORT,
-            		credentials=pika.PlainCredentials(
+	            	host=gatdConfig.rabbitmq.HOST,
+	        		port=gatdConfig.rabbitmq.PORT,
+	        		credentials=pika.PlainCredentials(
 	           			gatdConfig.rabbitmq.USERNAME,
-            			gatdConfig.rabbitmq.PASSWORD)))
+	        			gatdConfig.rabbitmq.PASSWORD)))
 	amqp_chan = amqp_conn.channel()
 
 	# Setup a queue to get the necessary stream
