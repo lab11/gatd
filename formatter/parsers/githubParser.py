@@ -11,8 +11,8 @@ class githubParser (parser.parser):
 
 		# Parse the JSON blob
 		post = json.loads(data[10:])
-		
-		ret = json.loads(post['data'])
+		ret={}
+#		ret = json.loads(post['data'])
 		ret['github_event'] = post['headers']['x-github-event']
 
 		ret['address'] = str(meta['addr'])
