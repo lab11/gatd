@@ -72,77 +72,59 @@ def run_processor (processor_func, processor_idname, pkt_body):
 	                        body=ojson,
 	                        routing_key='')
 
-# Setup and initialize the processor
-def start_processor (processor_name):
-	global amqp_chan
-
-	__import__('processors.'+processor_name)
-	processor_mod = sys.modules['processors.{}'.format(processor_name)]
-	processor_n = getattr(processor_mod, processor_name)
-	# Create a processor instance to run on packets
-	processor = processor_n()
-
-	try:
-		idname = processor.idname
-	except Exception:
-		print('ERROR: no idname found for processor {}'.format(processor_name))
-		sys.exit(1)
-
-	# Verify that the id name is only letters and underscores
-	if re.match('^[a-zA-Z_]*$', idname) == None:
-		print('ERROR: idname for processor {} contains invalid characters.'
-			.format(processor_name))
-		print('ERROR:   only use letters and underscores')
-		sys.exit(1)
-
-	try:
-		query = processor.query
-	except Exception:
-		print('ERROR: no query found for processor {}'.format(processor_name))
-		sys.exit(1)
 
 
-	cb = lambda ch, method, prop, body: run_processor(processor.process,
-	                                                  idname,
-	                                                  body)
+if len(sys.argv) != 2:
+	print('ERROR: Must specify the processor to run as the first argument.')
+	sys.exit(1)
 
-	cb(None, None, None, json.dumps({'type':'coilcube_raw', 'ccid':1,
-		'_processor_first':0, '_processor_second':'last', '_processor_count':2,
-		'profile_id':'vdf'}))
+processor_name = sys.argv[1]
 
-	cb(None, None, None, json.dumps({'type':'coilcube_raw', 'ccid':1,
-		'_processor_count':0, 'profile_id':'h45'}))
+__import__('processors.'+processor_name)
+processor_mod = sys.modules['processors.{}'.format(processor_name)]
+processor_n = getattr(processor_mod, processor_name)
+# Create a processor instance to run on packets
+processor = processor_n()
 
-	amqp_conn = pika.BlockingConnection(
-	            	pika.ConnectionParameters(
-	            	host=gatdConfig.rabbitmq.HOST,
-	        		port=gatdConfig.rabbitmq.PORT,
-	        		credentials=pika.PlainCredentials(
-	           			gatdConfig.rabbitmq.USERNAME,
-	        			gatdConfig.rabbitmq.PASSWORD)))
-	amqp_chan = amqp_conn.channel()
+try:
+	idname = processor.idname
+except Exception:
+	print('ERROR: no idname found for processor {}'.format(processor_name))
+	sys.exit(1)
 
-	# Setup a queue to get the necessary stream
-	strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
-	amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
-	                     queue=strm_queue.method.queue,
-	                     arguments=query)
-	amqp_chan.basic_consume(cb,
-	                        queue=strm_queue.method.queue,
-	                        no_ack=True)
-	amqp_chan.start_consuming()
+# Verify that the id name is only letters and underscores
+if re.match('^[a-zA-Z_]*$', idname) == None:
+	print('ERROR: idname for processor {} contains invalid characters.'
+		.format(processor_name))
+	print('ERROR:   only use letters and underscores')
+	sys.exit(1)
+
+try:
+	query = processor.query
+except Exception:
+	print('ERROR: no query found for processor {}'.format(processor_name))
+	sys.exit(1)
 
 
+cb = lambda ch, method, prop, body: run_processor(processor.process,
+                                                  idname,
+                                                  body)
 
-# Setup all processors in their own process
-processors = glob.glob('processors/*.py')
-for processor_filename in processors:
-	processor_name = os.path.splitext(processor_filename.split('/')[1])[0]
+amqp_conn = pika.BlockingConnection(
+            	pika.ConnectionParameters(
+            	host=gatdConfig.rabbitmq.HOST,
+            	port=gatdConfig.rabbitmq.PORT,
+            	credentials=pika.PlainCredentials(
+            		gatdConfig.rabbitmq.USERNAME,
+            		gatdConfig.rabbitmq.PASSWORD)))
+amqp_chan = amqp_conn.channel()
 
-	if processor_name == '__init__':
-		continue
-
-	# Start a subprocess for each processor
-	p = multiprocessing.Process(target=start_processor, args=(processor_name,))
-	p.start()
-
+# Setup a queue to get the necessary stream
+strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
+amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+                     queue=strm_queue.method.queue,
+                     arguments=query)
+amqp_chan.basic_consume(cb,
+                        queue=strm_queue.method.queue,
+                        no_ack=True)
+amqp_chan.start_consuming()
