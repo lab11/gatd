@@ -18,7 +18,7 @@ class githubParser (parser.parser):
 		headers = post['headers']
 		
 		ret = post['data']
-		ret['github_event'] = headers['x-github-event']i
+		ret['github_event'] = headers['x-github-event']
 
 		print(ret)
 
