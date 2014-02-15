@@ -18,4 +18,6 @@ class githubParser (parser.parser):
 		ret['port']    = meta['port']
 		ret['public']  = settings['public']
 
+		print(ret)
+
 		return ret
