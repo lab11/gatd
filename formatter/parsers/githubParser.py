@@ -8,7 +8,6 @@ class githubParser (parser.parser):
 
 	def parse (self, data, meta, extra, settings):
 
-
 		# Parse the JSON blob
 		post = json.loads(data[10:])
 		ret={}
