@@ -1,9 +1,5 @@
-import IPy
 import json
-import struct
 import parser
-import semantic_version as semver
-import urlparse
 
 class githubParser (parser.parser):
 
@@ -15,17 +11,11 @@ class githubParser (parser.parser):
 		# Parse the JSON blob
 		post = json.loads(data[10:])
 		
-		headers = post['headers']
-		
 		ret = json.loads(post['data'])
-		ret['github_event'] = headers['x-github-event']
+		ret['github_event'] = post['headers']['x-github-event']
 
-		print(ret)
-
-		return None
-
-		ret['address']    = str(meta['addr'])
-		ret['port']       = meta['port']
-		ret['public']     = settings['public']
+		ret['address'] = str(meta['addr'])
+		ret['port']    = meta['port']
+		ret['public']  = settings['public']
 
 		return ret
