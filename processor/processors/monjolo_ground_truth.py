@@ -22,7 +22,7 @@ class monjolo_ground_truth ():
 				self.wattsup[pkt['ccid_mac']] = pkt
 
 		elif pkt['profile_id'] == self.MON_PROFILE:
-			if (not '_processor_freq' in pkt) or
+			if (not '_processor_freq' in pkt) or \
 			   (pkt['_processor_freq'] != 'last'):
 				# Only operate on coilcube_freq packets
 				return None
