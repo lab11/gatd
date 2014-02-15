@@ -45,6 +45,23 @@ class MongoInterface:
 			except StopIteration:
 				pass
 
+	def get_all (self, query):
+
+		now = int(round(time.time() * 1000))
+		if 'time' in query:
+			start = now - query['time']
+		else:
+			start = now
+		query['time'] = {'$gt': start}
+
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
+		while cursor.alive and not self.stop:
+			try:
+				n = cursor.next()
+				n['_id'] = str(n['_id'])
+				yield n
+			except StopIteration:
+				pass
 
 	def __del__ (self):
 		self.mongo_conn.close()

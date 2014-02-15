@@ -21,6 +21,7 @@ port_http_post: 8081
 stream_prefix: /stream
 port_node:     8080
 port_python:   8082
+port_python_historical: 8083
 
 [rabbitmq]
 host:        localhost
