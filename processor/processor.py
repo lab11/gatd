@@ -4,6 +4,7 @@ import glob
 import json
 import multiprocessing
 import os
+import pika
 import re
 import struct
 import sys
@@ -12,10 +13,11 @@ sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
 
+amqp_chan = None
+
 # Function called on each incoming packet from the channel
-def run_processor (processor_func, processor_idname, pkt_body, amqp_chan):
-	print(processor_name)
-	print(pkt_body)
+def run_processor (processor_func, processor_idname, pkt_body):
+	global amqp_chan
 
 	try:
 		inpkt = json.loads(pkt_body)
@@ -63,12 +65,8 @@ def run_processor (processor_func, processor_idname, pkt_body, amqp_chan):
 	pkt['_processor_' + processor_idname] = 'last'
 	pkt['_processor_count'] = count + 1
 
-	print(pkt)
-
 	# Send packet back into gatd
 	ojson = struct.pack('B', gatdConfig.pkt.TYPE_PROCESSED) + json.dumps(pkt)
-
-	print(ojson)
 
 	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
 	                        body=ojson,
@@ -76,7 +74,8 @@ def run_processor (processor_func, processor_idname, pkt_body, amqp_chan):
 
 # Setup and initialize the processor
 def start_processor (processor_name):
-	
+	global amqp_chan
+
 	__import__('processors.'+processor_name)
 	processor_mod = sys.modules['processors.{}'.format(processor_name)]
 	processor_n = getattr(processor_mod, processor_name)
@@ -105,8 +104,7 @@ def start_processor (processor_name):
 
 	cb = lambda ch, method, prop, body: run_processor(processor.process,
 	                                                  idname,
-	                                                  body,
-	                                                  amqp_chan)
+	                                                  body)
 
 	cb(None, None, None, json.dumps({'type':'coilcube_raw', 'ccid':1,
 		'_processor_first':0, '_processor_second':'last', '_processor_count':2,
@@ -115,11 +113,20 @@ def start_processor (processor_name):
 	cb(None, None, None, json.dumps({'type':'coilcube_raw', 'ccid':1,
 		'_processor_count':0, 'profile_id':'h45'}))
 
+	amqp_conn = pika.BlockingConnection(
+	            	pika.ConnectionParameters(
+					host=gatdConfig.rabbitmq.HOST,
+            		port=gatdConfig.rabbitmq.PORT,
+            		credentials=pika.PlainCredentials(
+	           			gatdConfig.rabbitmq.USERNAME,
+            			gatdConfig.rabbitmq.PASSWORD)))
+	amqp_chan = amqp_conn.channel()
+
 	# Setup a queue to get the necessary stream
 	strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
 	amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
 	                     queue=strm_queue.method.queue,
-	                     arguments=keys)
+	                     arguments=query)
 	amqp_chan.basic_consume(cb,
 	                        queue=strm_queue.method.queue,
 	                        no_ack=True)

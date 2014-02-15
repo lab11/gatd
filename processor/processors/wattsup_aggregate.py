@@ -23,9 +23,10 @@ class wattsup_aggregate ():
 			return
 
 		opkt = {}
-		opkt['time']       = pkt['time']
-		opkt['public']     = pkt['public']
-		opkt['profile_id'] = pkt['profile_id']
+		opkt['time']             = pkt['time']
+		opkt['public']           = pkt['public']
+		opkt['profile_id']       = pkt['profile_id']
+		opkt['_processor_count'] = 0
 
 		location_fields = pkt['location_str'].split('|')
 		agg_location = '|'.join(location_fields[0:-1])
@@ -40,5 +41,7 @@ class wattsup_aggregate ():
 		for watt in location_watts.itervalues():
 			total += watt
 		opkt['watts'] = total
+
+		print(opkt)
 
 		return opkt
