@@ -11,16 +11,19 @@ class githubParser (parser.parser):
 		pass
 
 	def parse (self, data, meta, extra, settings):
-		ret = {}
 
 		# Parse the JSON blob
 		post = json.loads(data[10:])
 		
 		headers = post['headers']
-		vals = post['data']
+		
+	#	ret = post['data']
+	#	ret['github_event'] = headers['x-github-event']i
 
-		print(headers)
-		print(vals)
+		ret={}	
+
+		print(type(headers))
+		print(type(vals))
 
 		return None
 
