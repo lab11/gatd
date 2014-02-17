@@ -16,6 +16,8 @@ import gatdConfig
 import MongoInterface
 import profileManager
 
+import logging
+logging.basicConfig()
 
 # Unpack the packet from the receiver/querier
 # Returns tuple(data string, meta info dict)
@@ -177,25 +179,30 @@ mi = MongoInterface.MongoInterface()
 pm = profileManager.profileManager(mi)
 ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
-connection = pika.BlockingConnection(
+
+def onChannel (thischannel):
+# Create the exchange for the streaming packets.
+# Let the queues be created by the streamers. If there are no streamers
+# running, then the messages will just be dropped and that is OK.
+	thischannel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+							 exchange_type='headers',
+							 durable=True)
+
+	thischannel.basic_consume(packet_callback,
+						  queue=gatdConfig.rabbitmq.Q_RECEIVE,
+						  no_ack=False)
+	#channel.start_consuming()
+
+def onConnection (unused_connection):
+	connection.channel(onChannel)	
+
+connection = pika.SelectConnection(
 				pika.ConnectionParameters(
 					host=gatdConfig.rabbitmq.HOST,
 					port=gatdConfig.rabbitmq.PORT,
 					credentials=pika.PlainCredentials(
 						gatdConfig.rabbitmq.USERNAME,
-						gatdConfig.rabbitmq.PASSWORD)
-			))
-channel = connection.channel()
-
-# Create the exchange for the streaming packets.
-# Let the queues be created by the streamers. If there are no streamers
-# running, then the messages will just be dropped and that is OK.
-channel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_STREAM,
-                         exchange_type='headers',
-                         durable=True)
-
-channel.basic_consume(packet_callback,
-                      queue=gatdConfig.rabbitmq.Q_RECEIVE,
-                      no_ack=False)
-channel.start_consuming()
+						gatdConfig.rabbitmq.PASSWORD)),
+				onConnection)
+connection.ioloop.start()
 
