@@ -134,7 +134,7 @@ in the next steps are reflected in this file.
   3. Restart the rabbitmq server.
   
         ```
-        sudo rabbitmqctrl stop
+        sudo rabbitmqctl stop
         sudo service rabbitmq-server start
         ```
 
