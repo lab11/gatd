@@ -24,8 +24,13 @@ import gatdConfig
 request_header = {'User-Agent': 'GATD-queryer'}
 
 def httpGET (url, profile_id, unique_id):
-	global amqp_conn, amqp_chan
-	r = requests.get(url, headers=request_header)
+	try:
+		r = requests.get(url, headers=request_header)
+	except Exception:
+		# Something went wrong
+		print('Could not get HTTP page')
+		return
+
 	now = int(time.time()*1000)
 
 	if r.status_code == 200:
@@ -48,14 +53,9 @@ def httpGET (url, profile_id, unique_id):
 
 		pkt = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + json.dumps(d)
 
-		while True:
-			try:
-				amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
-				                        body=pkt,
-				                        routing_key='')
-				break
-			except pika.exceptions.ChannelClosed:
-				amqp_conn = pika.BlockingConnection(
+
+		# Connect to rabbitmq
+		amqp_conn = pika.BlockingConnection(
 								pika.ConnectionParameters(
 									host=gatdConfig.rabbitmq.HOST,
 									port=gatdConfig.rabbitmq.PORT,
@@ -63,22 +63,17 @@ def httpGET (url, profile_id, unique_id):
 										gatdConfig.rabbitmq.USERNAME,
 										gatdConfig.rabbitmq.PASSWORD)
 							))
-				amqp_chan = amqp_conn.channel();
+		amqp_chan = amqp_conn.channel();
+
+		amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
+		                        body=pkt,
+		                        routing_key='')
+		amqp_chan.close()
 
 
 
 sched = apscheduler.scheduler.Scheduler(standalone=True)
 cfgp = configparser.ConfigParser()
-
-amqp_conn = pika.BlockingConnection(
-				pika.ConnectionParameters(
-					host=gatdConfig.rabbitmq.HOST,
-					port=gatdConfig.rabbitmq.PORT,
-					credentials=pika.PlainCredentials(
-						gatdConfig.rabbitmq.USERNAME,
-						gatdConfig.rabbitmq.PASSWORD)
-			))
-amqp_chan = amqp_conn.channel();
 
 # Load all config files
 configs = glob.glob('configs/*.config')
