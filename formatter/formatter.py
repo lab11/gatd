@@ -19,6 +19,12 @@ import profileManager
 import logging
 logging.basicConfig()
 
+receivers = {gatdConfig.pkt.TYPE_UDP: 'udp',
+             gatdConfig.pkt.TYPE_TCP: 'tcp',
+             gatdConfig.pkt.TYPE_HTTP_POST: 'http_post',
+             gatdConfig.pkt.TYPE_QUERIED: 'query'
+            }
+
 # Unpack the packet from the receiver/querier
 # Returns tuple(data string, meta info dict)
 # Throws BadPacket if something is wrong
@@ -56,6 +62,7 @@ def unpackPacket (pkt):
 		meta['addr'] = addr
 		meta['port'] = port
 		meta['time'] = time
+		meta['_receiver'] = receivers[ptype]
 
 		return (data, meta)
 
@@ -79,6 +86,7 @@ json blob')
 			meta['addr'] = data['ip_address']
 			meta['port'] = data['port']
 			meta['time'] = data['time']
+			meta['_receiver'] = 'query'
 			if 'unique_id' in data:
 				meta['unique_id'] = data['unique_id']
 
@@ -194,7 +202,7 @@ def onChannel (thischannel):
 	#channel.start_consuming()
 
 def onConnection (unused_connection):
-	connection.channel(onChannel)	
+	connection.channel(onChannel)
 
 connection = pika.SelectConnection(
 				pika.ConnectionParameters(

@@ -1,6 +1,7 @@
 import ConfigParser
 import copy
 import glob
+import json
 import IPy
 import random
 import string
@@ -25,7 +26,8 @@ class profileManager:
 	# Default config example
 	default_config  = {'name': None,
 	                   'parser': None,
-	                   'access': 'public'
+	                   'access': 'public',
+	                   'no_parse': False
 	                  }
 
 
@@ -42,6 +44,7 @@ class profileManager:
 				profile_name = ''
 				access = 'public'
 				source_addrs = []
+				no_parse = False
 
 				if hasattr(parser, 'name'):
 					profile_name = parser.name
@@ -49,6 +52,8 @@ class profileManager:
 					access = parser.access
 				if hasattr(parser, 'source_addrs'):
 					source_addrs = parser.source_addrs
+				if hasattr(parser, 'no_parse'):
+					no_parse = parser.no_parse
 
 				# Check if we already know about this parser
 				dbinfo = db.getConfigByParser(parser_name)
@@ -65,6 +70,7 @@ class profileManager:
 				config['name'] = profile_name
 				config['parser'] = parser
 				config['access'] = access
+				config['no_parse'] = no_parse
 				self.configs[profile_id] = config
 
 				for source_addr in source_addrs:
@@ -149,10 +155,29 @@ class profileManager:
 		extra = {}
 
 		try:
-			r = parser.parse(data=data, meta=meta, extra=extra, settings=psettings)
-			if r == None:
-				# Just dump this packet
-				return None
+			# Check if the data source comes as JSON, and we don't need to
+			# format it
+			if config['no_parse']:
+				# Just parse the data as JSON
+				r = json.loads(data[10:])
+
+				if meta['_receiver'] == 'http_post':
+					if r['headers']['Content-Type'] == 'application/json':
+						r = r['data']
+						print('got http json')
+
+				r['address'] = str(meta['addr'])
+				r['time']    = meta['time']
+				r['port']    = meta['port']
+				r['public']  = settings['public']
+				print(r)
+
+			else:
+				# Use a parser
+				r = parser.parse(data=data, meta=meta, extra=extra, settings=psettings)
+				if r == None:
+					# Just dump this packet
+					return None
 		except Exception as e:
 			print('Bad Parser: {}'.format(e))
 			r = None
@@ -165,6 +190,10 @@ class profileManager:
 
 		# Set this as a raw packet by setting processor count to 0
 		r['_processor_count'] = 0
+
+		# Note how we got this packet
+		if '_receiver' in meta:
+			r['_receiver'] = meta['_receiver']
 
 		# Add in the meta data
 		r.update(self.db.getMeta(r))
