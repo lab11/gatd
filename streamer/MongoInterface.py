@@ -74,8 +74,8 @@ class MongoInterface:
 			del query['_speedup']
 
 		# The user must provide the proper query
-		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query) \
-		                                       .sort('time', pymongo.ASCENDING)
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
+		                                       #.sort('time', pymongo.ASCENDING)
 
 		last_time = 0
 		while cursor.alive and not self.stop:
@@ -86,6 +86,8 @@ class MongoInterface:
 
 				if 'time' in n:
 					if last_time == 0:
+						yield n
+					elif n['time'] < last_time:
 						yield n
 					else:
 						time.sleep(((n['time'] - last_time)/1000.0)/speedup)
