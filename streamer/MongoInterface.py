@@ -63,5 +63,35 @@ class MongoInterface:
 			except StopIteration:
 				pass
 
+	# Retrieve records from the main collection and replay them as if they
+	# were coming in in real time
+	def get_all_replay (self, query):
+
+		# The user must provide the proper query
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
+		                                                      .sort({'time':1})
+
+		last_time = 0
+		while cursor.alive and not self.stop:
+			try:
+				n = cursor.next()
+				n['_id'] = str(n['_id'])
+
+
+				if 'time' in n:
+					if last_time == 0:
+						yield n
+					else:
+						time.sleep((n['time'] - last_time)/1000.0)
+						yield n
+
+					last_time = n
+
+				else:
+					yield n
+			except StopIteration:
+				pass
+
+
 	def __del__ (self):
 		self.mongo_conn.close()
