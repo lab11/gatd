@@ -159,18 +159,17 @@ class profileManager:
 			# format it
 			if config['no_parse']:
 				# Just parse the data as JSON
-				r = json.loads(data[10:])
-
+				jsonpkt = json.loads(data[10:])
 				if meta['_receiver'] == 'http_post':
-					if r['headers']['Content-Type'] == 'application/json':
-						r = r['data']
-						print('got http json')
+					if jsonpkt['headers']['content-type'] == 'application/json':
+						r = json.loads(jsonpkt['data'])
+				else:
+					r = jsonpkt
 
 				r['address'] = str(meta['addr'])
 				r['time']    = meta['time']
 				r['port']    = meta['port']
-				r['public']  = settings['public']
-				print(r)
+				r['public']  = psettings['public']
 
 			else:
 				# Use a parser
