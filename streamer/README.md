@@ -31,17 +31,10 @@ Available streamer modules
 Clients that want real time streaming data can connect to one of the following
 streamers.
 
-### Socket.io
 
-This streamer uses socket.io to funnel data from the server to a browser. This
-is the best approach if the client is a webpage.
+### Socket.io with some history
 
-    host: inductor.eecs.umich.edu:8080
-    namespace: /stream
-
-### Socket.io Version 2
-
-This also uses socket.io, but the server is written in python and it supports
+This streamer is written in python and it supports
 "streaming from the past". Basically instead of just streaming from when the
 client connects and into the future, this server can stream data from a point
 in the past. To do this, add the `time` key to the query with the value
@@ -55,6 +48,55 @@ This example will start 5 minutes in the past:
 Usage:
 
     host: inductor.eecs.umich.edu:8082
+    namespace: /stream
+
+
+
+### Socket.io with history and no future
+
+This streamer queries from the main collection so it has access
+to all historical data, but no new data.
+
+    sockio.emit('query', {'profile_id': MY_PROFILE,
+	                      'time': 300000});
+
+Usage:
+
+    host: inductor.eecs.umich.edu:8083
+    namespace: /stream
+
+
+### Socket.io with history and replay
+
+This streamer queries from the main collection and performs in 
+"replay" mode. That is, it streams packets back as if they were coming
+in in real time. So packets that originally came in five seconds apart will
+be streamed to the client five seconds apart. In some cases real-time may
+be too slow, so this streamer supports a speedup mode that scales the time
+between streamed packets.
+
+This streamer doesn't support the "time" key in the same way as the others.
+
+    sockio.emit('query', {'profile_id': MY_PROFILE,
+	                      'time': {'$gt': 300000}},
+	                      '_speedup': 10.0);
+
+Usage:
+
+    host: inductor.eecs.umich.edu:8084
+    namespace: /stream
+
+
+
+Old Streamers
+-------------
+
+### Socket.io
+
+This streamer uses socket.io to funnel data from the server to a browser. This
+is the best approach if the client is a webpage.
+
+    host: inductor.eecs.umich.edu:8080
     namespace: /stream
 
 
