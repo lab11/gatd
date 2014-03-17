@@ -66,10 +66,16 @@ class MongoInterface:
 	# Retrieve records from the main collection and replay them as if they
 	# were coming in in real time
 	def get_all_replay (self, query):
+	
+		speedup = 1.0
+	
+		if '_speedup' in query:
+			speedup = float(query['_speedup'])
+			del query['_speedup']
 
 		# The user must provide the proper query
-		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
-		                                                      .sort({'time':1})
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query) \
+		                                       .sort('time', pymongo.ASCENDING)
 
 		last_time = 0
 		while cursor.alive and not self.stop:
@@ -82,10 +88,10 @@ class MongoInterface:
 					if last_time == 0:
 						yield n
 					else:
-						time.sleep((n['time'] - last_time)/1000.0)
+						time.sleep(((n['time'] - last_time)/1000.0)/speedup)
 						yield n
 
-					last_time = n
+					last_time = n['time']
 
 				else:
 					yield n

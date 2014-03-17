@@ -28,8 +28,11 @@ class socketioManager(object):
 class socketioStreamer(socketio.namespace.BaseNamespace):
 	def on_query(self, msg):
 		self.m = MongoInterface.MongoInterface()
+		print('got query {}'.format(msg))
 		for r in self.m.get_all_replay(msg):
 			self.emit('data', r)
+		print('out of itesms')
+		self.disconnect()
 
 socketio.server.SocketIOServer(('0.0.0.0', gatdConfig.socketio.PORT_PYTHON_REPLAY),
                                socketioManager(),
