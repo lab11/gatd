@@ -76,10 +76,16 @@ be too slow, so this streamer supports a speedup mode that scales the time
 between streamed packets.
 
 This streamer doesn't support the "time" key in the same way as the others.
+Instead, the value is absolute time in ms (relative to when packets were received
+by GATD, that is, EST/EDT).
 
+    var start_time = (UNIX_TIMESTAMP + EDT_OFFSET) * 1000;
     sockio.emit('query', {'profile_id': MY_PROFILE,
-	                      'time': {'$gt': 300000}},
+	                      'time': {'$gt': start_time}},
 	                      '_speedup': 10.0);
+
+This will query from the `start_time` until the present. A `$lt` key may also
+be provided to limit the query range.
 
 Usage:
 
