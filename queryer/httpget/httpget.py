@@ -25,13 +25,15 @@ request_header = {'User-Agent': 'GATD-queryer'}
 
 def httpGET (url, profile_id, unique_id):
 	try:
-		r = requests.get(url, headers=request_header)
+		r = requests.get(url, headers=request_header, timeout=1)
 	except Exception:
 		# Something went wrong
-		print('Could not get HTTP page')
+		print('Could not get HTTP page: {}'.format(url))
 		return
 
 	now = int(time.time()*1000)
+
+	print('got HTTP page: {}'.format(url))
 
 	if r.status_code == 200:
 		urlparsed = urlparse.urlparse(url)
