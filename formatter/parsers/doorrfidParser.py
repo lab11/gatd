@@ -7,7 +7,8 @@ class doorrfidParser (parser.parser):
 
 	source_addrs = ['2001:470:1f11:131a:2ab7:10c9:6e8b:f7a1',
                     '2001:470:1f11:131a:a6bc:f6e5:2144:1196',
-                    '2001:470:1f11:131a:de6d:a438:fb41:788e']
+                    '2001:470:1f11:131a:de6d:a438:fb41:788e',
+					'2001:470:1f11:131a:c298:e552:5048:d86e']
 
 	def __init__ (self):
 		pass
