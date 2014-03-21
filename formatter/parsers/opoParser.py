@@ -2,7 +2,7 @@ import IPy
 import json
 import struct
 import parser
-
+import binascii
 class opoParser (parser.parser):
 
 	def __init__ (self):
@@ -10,9 +10,10 @@ class opoParser (parser.parser):
 
 	def parse (self, data, meta, extra, settings):
 		ret = {}
-
+		print(len(data))
+		print(binascii.hexlify(data))
 		# Opo-Specific
-		s = struct.unpack('!10s H H 5B B H H H H H H')
+		s = struct.unpack('!10s H H 5B B H H H H H H', data)
 		gatd_profile_id                  = s[0]
 		ret['tx_id']                     = s[1]
 		ret['seq']                       = s[2]
