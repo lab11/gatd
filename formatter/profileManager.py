@@ -74,7 +74,7 @@ class profileManager:
 				self.configs[profile_id] = config
 
 				for source_addr in source_addrs:
-					self.addrs[source_addr] = profile_id
+					self._addAddr(source_addr, profile_id)
 
 				print('Added profile {} with parser {}'.format(profile_id,
 					parser_name))
