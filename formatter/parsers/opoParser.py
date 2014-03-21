@@ -25,6 +25,7 @@ class opoParser (parser.parser):
 		ret['t_ultrasonic_wake_falling'] = s[12]
 		ret['t_ultrasonic']              = s[13]
 		ret['t_ultrasonic_falling']      = s[14]
+		ret['range']                     = (float(ret['t_ultrasonic']) / float(ret['t_rf']))/32000.0 * 340.29 - .12
 
 		print(ret)
 
