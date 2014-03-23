@@ -17,10 +17,10 @@ class opoParser (parser.parser):
 		ret['tx_id']      = s[1]
 		ret['seq']        = s[2]
 		ret['last_tx_id'] = s[3]
-		ret['t_rf']       = s[4]
+		ret['t_ul_rf']    = s[4]
 		ret['full_time']  = s[5:10]
-		ret['last_seq']   = s[11]
-		ret['range']      = (float(ret['t_ultrasonic']) - float(ret['t_rf']))/32000.0 * 340.29 - .12
+		ret['last_seq']   = s[10]
+		ret['range']      = float(ret['t_ul_rf'])/32000.0 * 340.29 - .12
 
 		print(ret)
 
