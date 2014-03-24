@@ -3,12 +3,17 @@ import json
 import struct
 import parser
 import binascii
+
 class opoParser (parser.parser):
 
 	def __init__ (self):
 		pass
 
 	def parse (self, data, meta, extra, settings):
+		def convert_bcd(raw_t):
+			h = hex(raw_t)
+			t = int(h.split('x'))
+			return t
 		ret = {}
 
 		# Opo-Specific
@@ -21,6 +26,9 @@ class opoParser (parser.parser):
 		ret['full_time']  = s[5:10]
 		ret['last_seq']   = s[10]
 		ret['range']      = float(ret['t_ul_rf'])/32000.0 * 340.29 - .12
+
+		for i in range(len(ret['full_time'])):
+			ret['full_time'][i] = convert_bcd(ret['full_time'][i])
 
 		print(ret)
 
