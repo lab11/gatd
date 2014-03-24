@@ -28,6 +28,9 @@ class opoParser (parser.parser):
 		ret['range']      = float(ret['t_ul_rf'])/32000.0 * 340.29 - .12
 
 		for i in range(len(ret['full_time'])):
+			"""
+			Time Format, from 0-5: second, minute, hour date, month. Year is assumed 2014
+			"""
 			ret['full_time'][i] = convert_bcd(ret['full_time'][i])
 
 		print(ret)
