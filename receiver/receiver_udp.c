@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <byteswap.h>
 #include <sys/socket.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 
 #include <amqp.h>
@@ -105,6 +106,11 @@ int main (int argc, char** argv) {
 	struct message_item_t   message;
 
 	int                     ret;
+
+	// Set process name
+	if (0 != prctl(PR_SET_NAME, "gatd-r: udp", 0, 0, 0)) {
+		perror("Failed to set process name");
+	}
 
 	// Setup
 	message.type = PKT_TYPE_UDP;

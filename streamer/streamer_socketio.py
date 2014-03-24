@@ -10,6 +10,9 @@ import socketio.namespace
 import socketio.server
 import socketio.mixins
 
+import setproctitle
+setproctitle.setproctitle('gatd-s: socketio')
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 import MongoInterface

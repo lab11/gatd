@@ -13,6 +13,9 @@ import sys
 import time
 import urlparse
 
+import setproctitle
+setproctitle.setproctitle('gatd-q: httpget')
+
 # Enable logging in case apscheduler catches an error
 import logging
 logging.basicConfig()

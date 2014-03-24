@@ -11,6 +11,9 @@ import time
 import os
 import sys
 
+import setproctitle
+setproctitle.setproctitle('gatd-r: http_post')
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 

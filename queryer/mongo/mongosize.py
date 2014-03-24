@@ -8,6 +8,9 @@ import struct
 import sys
 import time
 
+import setproctitle
+setproctitle.setproctitle('gatd-q: mongosize')
+
 # Enable logging in case apscheduler catches an error
 import logging
 logging.basicConfig()

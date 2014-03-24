@@ -7,6 +7,7 @@ import pika
 import re
 import struct
 import sys
+import setproctitle
 
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
@@ -78,6 +79,8 @@ if len(sys.argv) != 2:
 	sys.exit(1)
 
 processor_name = sys.argv[1]
+
+setproctitle.setproctitle('gatd-p: ' + processor_name)
 
 __import__('processors.'+processor_name)
 processor_mod = sys.modules['processors.{}'.format(processor_name)]

@@ -7,6 +7,9 @@ import subprocess
 import time
 import Weather
 
+import setproctitle
+setproctitle.setproctitle('gatd-src: weather')
+
 import os
 
 HOSTNAME = 'inductor.eecs.umich.edu'

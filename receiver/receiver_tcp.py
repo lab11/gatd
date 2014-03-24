@@ -10,6 +10,9 @@ import struct
 import sys
 import time
 
+import setproctitle
+setproctitle.setproctitle('gatd-r: tcp')
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 

@@ -8,6 +8,9 @@ import pika
 import struct
 import sys
 
+import setproctitle
+setproctitle.setproctitle('gatd-f: (formatter)')
+
 import archiveCleaner
 import Deduplicator
 import FormatterExceptions as FE

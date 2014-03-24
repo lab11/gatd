@@ -13,6 +13,9 @@ import struct
 import sys
 import time
 
+import setproctitle
+setproctitle.setproctitle('gatd-q: wemo')
+
 # Enable logging in case apscheduler catches an error
 import logging
 logging.basicConfig()

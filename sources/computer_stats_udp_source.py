@@ -27,6 +27,9 @@ import time
 from numpy import array
 from math import log,ceil
 
+import setproctitle
+setproctitle.setproctitle('gatd-src: computer usage')
+
 from threading import Thread
 # Fuck python3
 try:

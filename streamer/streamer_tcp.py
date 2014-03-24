@@ -9,6 +9,9 @@ import pika
 import json
 import struct
 
+import setproctitle
+setproctitle.setproctitle('gatd-s: tcp')
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
