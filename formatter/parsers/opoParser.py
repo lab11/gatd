@@ -3,6 +3,9 @@ import json
 import struct
 import parser
 import binascii
+import datetime
+import pytz
+import time
 
 class opoParser (parser.parser):
 
@@ -27,11 +30,22 @@ class opoParser (parser.parser):
 		ret['last_seq']   = s[10]
 		ret['range']      = float(ret['t_ul_rf'])/32000.0 * 340.29 - .12
 
+
+
 		for i in range(len(ret['full_time'])):
 			"""
 			Time Format, from 0-5: second, minute, hour date, month. Year is assumed 2014
 			"""
 			ret['full_time'][i] = convert_bcd(ret['full_time'][i])
+
+		sec = ret['full_time'][0]
+		minute = ret['full_time'][1]
+		hr = ret['full_time'][2]
+		d = ret['full_time'][3]
+		month = ret['full_time'][4]
+
+		m_date = datetime.datetime(2014, month, d, hr, minute, sec, tzinfo=pytz.timezone('US/Eastern'))
+		ret['full_time'] = time.mktime(m_date.timetuple())
 
 		print(ret)
 
