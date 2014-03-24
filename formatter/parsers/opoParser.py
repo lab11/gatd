@@ -15,7 +15,7 @@ class opoParser (parser.parser):
 	def parse (self, data, meta, extra, settings):
 		def convert_bcd(raw_t):
 			h = hex(raw_t)
-			t = int(h.split('x'))
+			t = int(h.split('x')[1])
 			return t
 		ret = {}
 
@@ -26,10 +26,9 @@ class opoParser (parser.parser):
 		ret['seq']        = s[2]
 		ret['last_tx_id'] = s[3]
 		ret['t_ul_rf']    = s[4]
-		ret['full_time']  = s[5:10]
+		ret['full_time']  = list(s[5:10])
 		ret['last_seq']   = s[10]
 		ret['range']      = float(ret['t_ul_rf'])/32000.0 * 340.29 - .12
-
 
 
 		for i in range(len(ret['full_time'])):
@@ -46,8 +45,6 @@ class opoParser (parser.parser):
 
 		m_date = datetime.datetime(2014, month, d, hr, minute, sec, tzinfo=pytz.timezone('US/Eastern'))
 		ret['full_time'] = time.mktime(m_date.timetuple())
-
-		print(ret)
 
 		# Standard GATD Footer
 		ret['address'] = str(meta['addr'])
