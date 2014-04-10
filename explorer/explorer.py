@@ -129,7 +129,7 @@ class PikaConnection (object):
 			# streams available
 			data_recurse(data[pid], search[pid], inpkt)
 
-			pp.pprint(data)
+			#pp.pprint(data)
 			#print('packet')
 
 
@@ -152,6 +152,47 @@ class ExploreKeysUpdateHandler (tornado.web.RequestHandler):
 
 		print('Updated {}'.format(pid))
 
+class ExploreKeysBaseHandler (tornado.web.RequestHandler):
+	def set_default_headers(self):
+		self.set_header("Access-Control-Allow-Origin", "*")
+
+class ExploreKeysAllHandler (ExploreKeysBaseHandler):
+	def get (self):
+		self.set_header('Content-Type', 'application/json')
+
+
+		meta = {}
+		configs = mi.getAllConfigs()
+		for config in configs:
+			if config['profile_id'] in data:
+				meta[config['profile_id']] = {'parser_name': config['parser_name']}
+
+		out = {
+				'meta': meta,
+				'explore': data
+		}
+
+		self.write(json.dumps(out))
+
+class ExploreKeysRequestHandler (ExploreKeysBaseHandler):
+	def get (self, pid):
+		self.set_header('Content-Type', 'application/json')
+		if pid in data:
+			self.write(json.dumps(data[pid]))
+		else:
+			self.write('{}')
+
+class ExploreKeysNameHandler (ExploreKeysBaseHandler):
+	def get (self, pid):
+		self.set_header('Content-Type', 'application/json')
+		dbdata = mi.getConfigByProfileId(pid)
+
+		if dbdata:
+			self.write(json.dumps({'profile_id': pid,
+			                       'name':       dbdata['parser_name']}))
+		else:
+			self.write('{}')
+
 
 
 # Make this python instance recognizable in top
@@ -171,7 +212,10 @@ pp = pprint.PrettyPrinter(indent=4)
 p = PikaConnection()
 
 t = tornado.web.Application([
-	(r"/update_explore/(.*)", ExploreKeysUpdateHandler),
+	(r"/explore/update/(.*)", ExploreKeysUpdateHandler),
+	(r"/explore/all", ExploreKeysAllHandler),
+	(r"/explore/profile/([a-zA-Z0-9]*)", ExploreKeysRequestHandler),
+	(r"/explore/profile/name/([a-zA-Z0-9]*)", ExploreKeysNameHandler),
 ])
 
 p.run()

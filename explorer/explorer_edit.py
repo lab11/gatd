@@ -129,7 +129,7 @@ m.updateExploreKeys(explorekeysdb['_id'],
                     json.dumps(explorekeys))
 
 
-req = urllib2.Request('http://{url}:{port}/update_explore/{pid}'
+req = urllib2.Request('http://{url}:{port}/explore/update/{pid}'
 	.format(url=gatdConfig.explorer.HOST,
             port=gatdConfig.explorer.PORT_HTTP_POST,
             pid=explorekeysdb['profile_id']))
