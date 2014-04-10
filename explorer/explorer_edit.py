@@ -129,14 +129,10 @@ m.updateExploreKeys(explorekeysdb['_id'],
                     json.dumps(explorekeys))
 
 
-#req = urllib2.Request('http://{url}:{port}/update_explore/{pid}'
-#	.format(url=gatdConfig.mongo.HOST,
-#            port=gatdConfig.explorer.PORT_HTTP_POST,
-#            pid=explorekeysdb['profile_id']))
 req = urllib2.Request('http://{url}:{port}/update_explore/{pid}'
-	.format(url='memristor-v1.eecs.umich.edu',
-	        port=gatdConfig.explorer.PORT_HTTP_POST,
-	        pid=explorekeysdb['profile_id']))
+	.format(url=gatdConfig.explorer.HOST,
+            port=gatdConfig.explorer.PORT_HTTP_POST,
+            pid=explorekeysdb['profile_id']))
 
 try:
 	urllib2.urlopen(req, '1')
