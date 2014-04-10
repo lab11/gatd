@@ -10,24 +10,26 @@ class doorrfidParser (parser.parser):
                     '2001:470:1f11:131a:de6d:a438:fb41:788e',
 					'2001:470:1f11:131a:c298:e552:5048:d86e']
 
+	RFID_CARD_OPEN = 1
+	RFID_CARD_FAIL = 2
+	RFID_REMOTE_OPEN = 3
+	RFID_REMOTE_FAIL = 4
+	DOOR_OPEN = 5
+	DOOR_CLOSE = 6
+
 	def __init__ (self):
 		pass
 
 	def parse (self, data, meta, extra, settings):
 		ret = {}
 
+		if len(data) == 0:
+			return None
 
-		if len(data) == 18:
-			# This was a remote udp packet that opened the door
-			values = struct.unpack("!H2Q", data)
-			remote_src_addr = int("0x{:0>16x}{:0>16x}".format(values[1], values[2]), 16)
-			seq_no = values[0]
+		pkt_type = struct.unpack('!B', data[0])[0]
+		data = data[1:]
 
-			ret['type'] = "udp"
-			ret['opener_address'] = str(remote_src_addr)
-			ret['seq_no'] = seq_no
-
-		elif len(data) == 15:
+		if pkt_type == self.RFID_CARD_OPEN:	
 			# This was a RFID card swipe
 			values = struct.unpack("!H8sLB", data)
 
@@ -46,7 +48,7 @@ class doorrfidParser (parser.parser):
 			ret['uniqname'] = uniqname
 			ret['rfid_code'] = rfid_code
 
-		elif len(data) == 7:
+		elif pkt_type == self.RFID_CARD_FAIL:
 			# This RFID card does not have access to the room
 			values = struct.unpack("!HLB", data)
 
@@ -57,7 +59,17 @@ class doorrfidParser (parser.parser):
 			ret['seq_no'] = seq_no
 			ret['rfid_code'] = rfid_code
 
-		elif len(data) > 18:
+		elif pkt_type == self.RFID_REMOTE_OPEN:
+			# This was a remote udp packet that opened the door
+			values = struct.unpack("!H2Q", data)
+			remote_src_addr = int("0x{:0>16x}{:0>16x}".format(values[1], values[2]), 16)
+			seq_no = values[0]
+
+			ret['type'] = "udp"
+			ret['opener_address'] = str(remote_src_addr)
+			ret['seq_no'] = seq_no
+
+		elif pkt_type == self.RFID_REMOTE_FAIL:
 			# This was a remove udp packet with an invalid password
 			values = struct.unpack("!H2QB{}s".format(len(data)-19), data)
 
@@ -70,6 +82,27 @@ class doorrfidParser (parser.parser):
 			ret['seq_no'] = seq_no
 			ret['opener_address'] = str(remote_src_addr)
 			ret['password'] = password
+
+		elif pkt_type == self.DOOR_OPEN:
+			# The door was opened
+			print('door Opened')
+			
+			values = struct.unpack('!H', data)
+			ret['seq_no'] = values[0]
+			ret['type'] = 'door_open'
+
+
+		elif pkt_type == self.DOOR_CLOSE:
+			# The door was opened
+			print('door Closed')
+			
+			values = struct.unpack('!H', data)
+			ret['seq_no'] = values[0]
+			ret['type'] = 'door_close'
+
+		else:
+			print('Unknown door packet.')
+			return None
 
 
 		ret['address'] = str(meta['addr'])
