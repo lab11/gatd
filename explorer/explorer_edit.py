@@ -3,9 +3,11 @@
 import json
 import os
 import sys
+import urllib2
 
 sys.path.append(os.path.abspath('../config'))
 sys.path.append(os.path.abspath('../formatter'))
+import gatdConfig
 import MongoInterface
 
 import edit_tree
@@ -31,22 +33,6 @@ def confirm (prompt, default=False):
 
 		print('Bad response. Try again.')
 
-
-
-def edit_meta (req_key, req_key_val, query, addit):
-	while True:
-		req_key_val, query, addit = edit_item.edit_meta(req_key,
-		                                                req_key_val,
-		                                                query,
-		                                                addit)
-		strip(query)
-		strip(addit)
-		print('\nMeta Record:')
-		print(DSTR_A.format(req_key, 'QUERY', 'ADDITIONAL'))
-		print(DSTR_A.format(req_key_val, query, addit))
-		if not confirm('Continue editing?'):
-			break
-	return (req_key_val, query, addit)
 
 
 def print_keys (indent, key_list):
@@ -88,15 +74,8 @@ def parseNewTree (lines, thislist, indent):
 
 
 
-DSTR_T = '[idx] {:<25s} {:<20s} {:<50s}'
-DSTR   = '[{:>3d}] {:<25s} {:<20s} {:<50s}'
-
-DSTR_A = '      {:<25s} {:<20s} {:<50s}'
 
 pids = []
-
-
-
 m = MongoInterface.MongoInterface()
 
 
@@ -149,6 +128,20 @@ m.updateExploreKeys(explorekeysdb['_id'],
                     explorekeysdb['profile_id'],
                     json.dumps(explorekeys))
 
+
+#req = urllib2.Request('http://{url}:{port}/update_explore/{pid}'
+#	.format(url=gatdConfig.mongo.HOST,
+#            port=gatdConfig.explorer.PORT_HTTP_POST,
+#            pid=explorekeysdb['profile_id']))
+req = urllib2.Request('http://{url}:{port}/update_explore/{pid}'
+	.format(url='memristor-v1.eecs.umich.edu',
+	        port=gatdConfig.explorer.PORT_HTTP_POST,
+	        pid=explorekeysdb['profile_id']))
+
+try:
+	urllib2.urlopen(req, '1')
+except:
+	pass
 
 print('Updated Explore Keys for {}'.format(name))
 
