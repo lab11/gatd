@@ -62,14 +62,10 @@ def print_keys (indent, key_list):
 
 def parseNewTree (lines, thislist, indent):
 
-	print(lines)
-
 	i = 0
-
 	while i < len(lines):
 
 		line = lines[i]
-
 
 		lineindent = 0
 		for c in line:
@@ -77,8 +73,6 @@ def parseNewTree (lines, thislist, indent):
 				lineindent += 1
 			else:
 				break
-
-		print('indent: {} lineindent: {} line: {}'.format(indent,lineindent,line))
 
 		if lineindent == indent:
 			thislist.append({'key': line.strip(), 'children': []})
@@ -105,37 +99,56 @@ pids = []
 
 m = MongoInterface.MongoInterface()
 
-dbkeys = m.getExploreKeys()
 
-for pidkeys in dbkeys:
-	name = m.getConfigByProfileId(pidkeys['profile_id'])
+# List all of the profiles so we can edit the key layout for the proper one
+configs = m.getAllConfigs()
 
-	print('Profile ID: {}'.format(pidkeys['profile_id']))
-	print('Profile Name: {}'.format(name['parser_name']))
+print('Choose which profile you want:')
+for i, c in zip(range(len(configs)), configs):
+	pids.append(c['profile_id'])
+	print('[{:>3d}] {}'.format(i, c['parser_name']))
+cidx = int(raw_input('Index: '))
+print('')
 
-	keys = json.loads(pidkeys['keys_json'])
 
-	print_keys(4, keys)
+explorekeysdb = m.getExploreKeysSingle(pids[cidx])
+
+if not explorekeysdb:
+	# Haven't set this one up yet
+	# Do so now
+	m.addExploreKeys(pids[cidx], json.dumps([]))
+	explorekeysdb = m.getExploreKeysSingle(pids[cidx])
 
 
+
+name = m.getConfigByProfileId(explorekeysdb['profile_id'])['parser_name']
+
+print('Editing Explore keys for {}\n'.format(name))
+
+explorekeys = json.loads(explorekeysdb['keys_json'])
+
+# Loop until the user is happy with the result
+while True:
+
+	# Run the editor so we can update the explore key tree
+	newtreetxt = edit_tree.edit_tree(explorekeys)
+
+	# Convert text to list/dict structure
+	explorekeys = []
+	parseNewTree(newtreetxt.strip().split('\n'), explorekeys, 0)
+
+	print('New Explore Key tree:\n')
+	print_keys(0, explorekeys)
 	print('')
-	print('')
-
-	newtreetxt = edit_tree.edit_tree(keys)
-
-	print(newtreetxt)
-
-	new_tree = []
-
-	parseNewTree(newtreetxt.strip().split('\n'), new_tree, 0)
-
-	print(new_tree)
 
 
-	print_keys(4, new_tree)
+	if not confirm('Continue editing?', False):
+		break
+
+m.updateExploreKeys(explorekeysdb['_id'],
+                    explorekeysdb['profile_id'],
+                    json.dumps(explorekeys))
 
 
-
-	quit()
-
+print('Updated Explore Keys for {}'.format(name))
 

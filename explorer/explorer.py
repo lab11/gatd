@@ -9,7 +9,10 @@ import struct
 import sys
 import setproctitle
 
+import pprint
+
 sys.path.append(os.path.abspath('../config'))
+sys.path.append(os.path.abspath('../formatter'))
 import gatdConfig
 import MongoInterface
 
@@ -18,6 +21,8 @@ import MongoInterface
 search = {}
 
 data = {}
+
+pp = pprint.PrettyPrinter(indent=4)
 
 # Recurse over the search data structure looking for matching keys in the
 # incoming packet. Update the data_struct with the relevant information
@@ -72,7 +77,7 @@ def got_packet (ch, method, prop, body):
 		# streams available
 		data_recurse(data[pid], search[pid], inpkt)
 
-		print(data)
+		pp.pprint(data)
 
 
 
