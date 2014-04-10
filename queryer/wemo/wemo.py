@@ -185,6 +185,8 @@ for config in configs:
 	frequency = int(cfgp.get('main', 'frequency'))
 	mac_addr  = cfgp.get('main', 'macaddr')
 
+	print('Adding job for {} from {}'.format(hostname, config))
+
 	sched.add_interval_job(func=queryWemo,
 	                       seconds=frequency,
 	                       kwargs={'hostname':hostname, 'wemo_type':wemo_type,
