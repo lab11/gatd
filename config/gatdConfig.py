@@ -8,7 +8,7 @@
 #
 # becomes, in Python,:
 #
-#  gatdConfig.mongo.host
+#  gatdConfig.mongo.HOST
 #
 
 
@@ -17,7 +17,13 @@ import os
 import sys
 
 class BaseConfigSection (object):
-	pass
+	def __getattr__ (self, name):
+		print('')
+		print('Could not find the proper key in gatd.config')
+		print('Do you have the latest copy of gatd.config?')
+		print('')
+		raise AttributeError('error: {}'.format(name))
+
 
 CONFIG_FILENAME = 'gatd.config'
 
@@ -36,7 +42,6 @@ for section in config.sections():
 			pass
 
 	lattrs = dict((k.upper(), v) for k, v in attrs.iteritems())
-
 	newclass = type(section, (BaseConfigSection,), lattrs)
-	setattr(sys.modules[__name__], section, newclass)
 
+	setattr(sys.modules[__name__], section, newclass())
