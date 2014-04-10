@@ -11,31 +11,16 @@ import setproctitle
 
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
+import MongoInterface
 
 
 
-search = {
-			'U8H29zqH0i': [{
-								'key': 'location_str',
-								'children': [{
-												'key': 'type',
-												'children': []
-											 }]
-						   },
-						   {
-								'key': 'uniqname',
-								'children': []
-						   },
-						   {
-						   		'key': 'full_name',
-						   		'children': []
-						   }
-						]
-		}
+search = {}
 
 data = {}
 
-
+# Recurse over the search data structure looking for matching keys in the
+# incoming packet. Update the data_struct with the relevant information
 def data_recurse (data_struct, search_list, inpkt):
 
 	# End when our search list is an empty list. This means there are no
@@ -48,11 +33,14 @@ def data_recurse (data_struct, search_list, inpkt):
 
 		if k in inpkt:
 
+			# If we haven't found this key yet make a note of it
 			if k not in data_struct:
 				data_struct[k] = {}
 
 			v = inpkt[k]
 
+			# If we haven't found this particular value of the key in question
+			# make a note of it
 			if v not in data_struct[k]:
 				data_struct[k][v] = {}
 
@@ -70,24 +58,21 @@ def got_packet (ch, method, prop, body):
 		print('Could not parse JSON packet')
 		print(e)
 
-	#print(inpkt)
-
 	pid = inpkt['profile_id']
 
+	# Only bother to do anything with this packet if we have a explorer layout
+	# for this profile
 	if pid in search:
 
-		# Add the new profile_id to the data item if it is no there
+		# Add the new profile_id to the data item if it is not there
 		if pid not in data:
 			data[pid] = {}
 
-		searches = search[pid]
-
-		data_recurse(data[pid], searches, inpkt)
-
+		# Recursively iterate over the keys we are looking for to discover the
+		# streams available
+		data_recurse(data[pid], search[pid], inpkt)
 
 		print(data)
-
-
 
 
 
@@ -105,6 +90,11 @@ amqp_conn = pika.BlockingConnection(
             		gatdConfig.rabbitmq.USERNAME,
             		gatdConfig.rabbitmq.PASSWORD)))
 amqp_chan = amqp_conn.channel()
+
+mi = MongoInterface.MongoInterface()
+dbdata = mi.getExploreKeys()
+for pidkeys in dbdata:
+	search[pidkeys['profile_id']] = json.loads(pidkeys['keys_json'])
 
 # Setup a queue to get the necessary stream
 strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)

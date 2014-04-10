@@ -53,6 +53,10 @@ class MongoInterface:
 		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
 			{'parser_name': parser_name})
 
+	def getConfigByProfileId (self, pid):
+		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
+			{'profile_id': pid})
+
 	def getAllConfigs (self):
 		return list(self.mongo_db[gatdConfig.mongo.COL_CONFIG].find())
 
@@ -172,6 +176,28 @@ class MongoInterface:
 	def deleteGatewayKeys (self, dbid):
 		self.mongo_db[gatdConfig.mongo.COL_GATEWAY].remove(
 			{'_id': bson.objectid.ObjectId(dbid)})
+
+	def getExploreKeys (self):
+		'''Return all of the data about which keys to use for exploratory
+		discovery'''
+		return list(self.mongo_db[gatdConfig.mongo.COL_EXPLORE_KEYS].find())
+
+	def getExploreKeysSingle (self, pid):
+		'''Return all of the data about which keys to use for exploratory
+		discovery for a particular profile'''
+		return self.mongo_db[gatdConfig.mongo.COL_EXPLORE_KEYS].find_one(
+			{'profile_id': pid})
+
+	def addExploreKeys (self, pid, keys_json):
+		insert = {'profile_id': pid,
+		          'keys_json': keys_json}
+		self.mongo_db[gatdConfig.mongo.COL_EXPLORE_KEYS].insert(insert)
+
+	def updateExploreKeys (self, dbid, pid, keys_json):
+		insert = {'_id':        bson.objectid.ObjectId(dbid),
+		          'profile_id': pid,
+		          'keys_json': keys_json}
+		self.mongo_db[gatdConfig.mongo.COL_EXPLORE_KEYS].save(insert)
 
 
 	def getArchives (self):
