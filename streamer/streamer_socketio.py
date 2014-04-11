@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
-from gevent import monkey; monkey.patch_all()
+#from gevent import monkey; monkey.patch_all()
+#import gevent
 
 import sys
 import os
@@ -15,7 +16,7 @@ setproctitle.setproctitle('gatd-s: socketio')
 
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
-import MongoInterface
+import MongoInterfaceDux
 
 class socketioManager(object):
 
@@ -25,12 +26,22 @@ class socketioManager(object):
 
 class socketioStreamer(socketio.namespace.BaseNamespace):
 	def on_query(self, msg):
-		self.m = MongoInterface.MongoInterface()
-		for r in self.m.get(msg):
-			self.emit('data', r)
+		print(msg)
+		self.m = MongoInterfaceDux.MongoInterface(self.emit, msg)
+		self.m.start()
+#		for r in self.m.get(msg):
+#			self.emit('data', r)
+#		while True:
+#			self.emit('data', '{"k":"v"}')
+#			print('emit k:v')
+#			gevent.sleep(2)
+#		self.emit("{}")
+
+	def recv_disconnect (self):
+		print('GOT DIS')
 
 
-socketio.server.SocketIOServer(('0.0.0.0', gatdConfig.socketio.PORT_PYTHON),
+socketio.server.SocketIOServer(('0.0.0.0', 8086),
                                socketioManager(),
                                resource='socket.io',
                                policy_server=False

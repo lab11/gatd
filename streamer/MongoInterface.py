@@ -3,45 +3,55 @@ import pymongo
 import sys
 import time
 
+import gevent
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
-class MongoInterface:
+class MongoInterface(gevent.greenlet.Greenlet):
 
-	def __init__(self):
+	def __init__(self, cb, query):
 		# Connect to the mongo database
+
+		super(MongoInterface, self).__init__()
+
 		try:
+			from gevent import monkey
+			monkey.patch_socket()
 			self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
-			                                      port=gatdConfig.mongo.PORT)
+			                                      port=gatdConfig.mongo.PORT,
+												  use_greenlets=True)
 			self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
 			self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
 			                           gatdConfig.mongo.PASSWORD)
 			self.stop = False
 
+			self.cb = cb
+			self.query = query
 		except pymongo.errors.ConnectionFailure:
 			print "Could not connect. Check the host and port."
 			sys.exit(1)
 
-	def get (self, query):
+	def run (self):
 
 		# Use the capped collection to implement streaming starting at a time
 		# in the past. If the time key is present it is used as the minimum
 		# timestamp.
 		now = int(round(time.time() * 1000))
-		if 'time' in query:
+		if 'time' in self.query:
 			start = now - query['time']
 		else:
 			start = now
-		query['time'] = {'$gt': start}
+		self.query['time'] = {'$gt': start}
 
-		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(query,
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(self.query,
 			tailable=True,
 			await_data=True)
 		while cursor.alive and not self.stop:
 			try:
 				n = cursor.next()
 				n['_id'] = str(n['_id'])
-				yield n
+				self.cb('data', n)
 			except StopIteration:
 				pass
 
