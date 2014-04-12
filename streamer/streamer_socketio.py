@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 
-#from gevent import monkey; monkey.patch_all()
-#import gevent
 
 import sys
 import os
@@ -32,15 +30,36 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 		if self.m:
 			self.m.kill(timeout=1)
 
-		self.m = MongoInterface.MongoInterface(self.emit, 'get_new')
+		self.m = MongoInterface.MongoInterface(self.emit, cmd)
 		self.m.set_query(msg)
 		self.m.start()
+		self.disconnect()
 
 	def recv_disconnect (self):
+		self.m.kill(timeout=1)
 		del self.m
 
 
-socketio.server.SocketIOServer(('0.0.0.0', 8086),
+# Configure which streamer based on command line argument
+if len(sys.argv) != 2:
+	print('usage: {} new|all|replay'.format(sys.argv[0]))
+	sys.exit(1)
+
+if sys.argv[1] == 'new':
+	cmd = 'get_new'
+	port = gatdConfig.socketio.PORT_PYTHON
+elif sys.argv[1] == 'all':
+	cmd = 'get_all'
+	port = gatdConfig.socketio.PORT_PYTHON_HISTORICAL
+elif sys.argv[1] == 'replay':
+	cmd = 'get_all_replay'
+	gatdConfig.socketio.PORT_PYTHON_REPLAY
+else:
+	print('usage: {} new|all|replay'.format(sys.argv[0]))
+	sys.exit(1)
+
+
+socketio.server.SocketIOServer(('0.0.0.0', port),
                                socketioManager(),
                                resource='socket.io',
                                policy_server=False
