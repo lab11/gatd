@@ -10,7 +10,7 @@ import gatdConfig
 
 class MongoInterface(gevent.greenlet.Greenlet):
 
-	def __init__(self, cb, query):
+	def __init__(self, cb, cmd):
 		# Connect to the mongo database
 
 		super(MongoInterface, self).__init__()
@@ -27,12 +27,27 @@ class MongoInterface(gevent.greenlet.Greenlet):
 			self.stop = False
 
 			self.cb = cb
-			self.query = query
+
+			if cmd == 'get_new':
+				self.cmd = self._get_new
+			elif cmd == 'get_all':
+				self.cmd = self._get_all
+			elif cmd == 'get_all_replay':
+				self.cmd = self._get_all_replay
+
+
 		except pymongo.errors.ConnectionFailure:
 			print "Could not connect. Check the host and port."
 			sys.exit(1)
 
+	def set_query (self, query):
+		self.query = query
+
 	def run (self):
+		self.stop = False
+		(self.cmd)()
+
+	def _get_new (self):
 
 		# Use the capped collection to implement streaming starting at a time
 		# in the past. If the time key is present it is used as the minimum
@@ -55,7 +70,7 @@ class MongoInterface(gevent.greenlet.Greenlet):
 			except StopIteration:
 				pass
 
-	def get_all (self, query):
+	def _get_all (self, query):
 
 		now = int(round(time.time() * 1000))
 		if 'time' in query:
@@ -75,10 +90,10 @@ class MongoInterface(gevent.greenlet.Greenlet):
 
 	# Retrieve records from the main collection and replay them as if they
 	# were coming in in real time
-	def get_all_replay (self, query):
-	
+	def _get_all_replay (self, query):
+
 		speedup = 1.0
-	
+
 		if '_speedup' in query:
 			speedup = float(query['_speedup'])
 			del query['_speedup']

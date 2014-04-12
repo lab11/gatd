@@ -16,7 +16,7 @@ setproctitle.setproctitle('gatd-s: socketio')
 
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
-import MongoInterfaceDux
+import MongoInterface
 
 class socketioManager(object):
 
@@ -25,17 +25,16 @@ class socketioManager(object):
 			{gatdConfig.socketio.STREAM_PREFIX: socketioStreamer});
 
 class socketioStreamer(socketio.namespace.BaseNamespace):
-	def on_query(self, msg):
+	def recv_connect (self):
+		# Create a mongo connection and give it a way to send to the client
+		self.m = MongoInterface.MongoInterface(self.emit, 'get_new')
+
+	def on_query (self, msg):
 		print(msg)
-		self.m = MongoInterfaceDux.MongoInterface(self.emit, msg)
+		self.m.setQuery(msg)
+		self.m.kill()
 		self.m.start()
-#		for r in self.m.get(msg):
-#			self.emit('data', r)
-#		while True:
-#			self.emit('data', '{"k":"v"}')
-#			print('emit k:v')
-#			gevent.sleep(2)
-#		self.emit("{}")
+
 
 	def recv_disconnect (self):
 		print('GOT DIS')
