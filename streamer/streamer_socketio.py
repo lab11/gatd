@@ -30,10 +30,9 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 		if self.m:
 			self.m.kill(timeout=1)
 
-		self.m = MongoInterface.MongoInterface(self.emit, cmd)
+		self.m = MongoInterface.MongoInterface(self.emit, cmd, self.disconnect)
 		self.m.set_query(msg)
 		self.m.start()
-		self.disconnect()
 
 	def recv_disconnect (self):
 		self.m.kill(timeout=1)

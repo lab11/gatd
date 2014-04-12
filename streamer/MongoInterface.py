@@ -12,7 +12,7 @@ import gatdConfig
 
 class MongoInterface(gevent.greenlet.Greenlet):
 
-	def __init__(self, cb, cmd):
+	def __init__(self, cb, cmd, done_cb):
 		# Connect to the mongo database
 
 		gevent.greenlet.Greenlet.__init__(self)
@@ -28,6 +28,9 @@ class MongoInterface(gevent.greenlet.Greenlet):
 
 			# Save the emit() function used to send the data packet
 			self.cb = cb
+
+			# The function to call when all packets have been found
+			self.done = done_cb
 
 			# Configure which streamer we actually want to use
 			if cmd == 'get_new':
@@ -55,7 +58,7 @@ class MongoInterface(gevent.greenlet.Greenlet):
 			# minimum timestamp.
 			now = int(round(time.time() * 1000))
 			if 'time' in self.query:
-				start = now - query['time']
+				start = now - self.query['time']
 			else:
 				start = now
 			self.query['time'] = {'$gt': start}
@@ -74,16 +77,17 @@ class MongoInterface(gevent.greenlet.Greenlet):
 		except gevent.greenlet.GreenletExit:
 			pass
 
-	def _get_all (self, query):
+	def _get_all (self):
 		try:
 			now = int(round(time.time() * 1000))
-			if 'time' in query:
-				start = now - query['time']
+			if 'time' in self.query:
+				start = now - self.query['time']
 			else:
 				start = now
-			query['time'] = {'$gt': start}
+			self.query['time'] = {'$gt': start}
 
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
+			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(
+				self.query)
 			while cursor.alive and not self.stop:
 				try:
 					n = cursor.next()
@@ -91,21 +95,22 @@ class MongoInterface(gevent.greenlet.Greenlet):
 					yield n
 				except StopIteration:
 					pass
+			(self.done)()
 		except gevent.greenlet.GreenletExit:
 			pass
 
 	# Retrieve records from the main collection and replay them as if they
 	# were coming in in real time
-	def _get_all_replay (self, query):
+	def _get_all_replay (self):
 		try:
 			speedup = 1.0
 
-			if '_speedup' in query:
-				speedup = float(query['_speedup'])
-				del query['_speedup']
+			if '_speedup' in self.query:
+				speedup = float(self.query['_speedup'])
+				del self.query['_speedup']
 
 			# The user must provide the proper query
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(query)
+			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(self.query)
 			                                   #.sort('time', pymongo.ASCENDING)
 
 			last_time = 0
@@ -127,9 +132,10 @@ class MongoInterface(gevent.greenlet.Greenlet):
 						last_time = n['time']
 
 					else:
-						yield n
+						yield n			
 				except StopIteration:
 					pass
+			(self.done)()
 		except gevent.greenlet.GreenletExit:
 			pass
 
