@@ -3,6 +3,8 @@ import pymongo
 import sys
 import time
 
+from gevent import monkey
+monkey.patch_socket()
 import gevent
 
 sys.path.append(os.path.abspath('../config'))
@@ -13,11 +15,9 @@ class MongoInterface(gevent.greenlet.Greenlet):
 	def __init__(self, cb, cmd):
 		# Connect to the mongo database
 
-		super(MongoInterface, self).__init__()
+		gevent.greenlet.Greenlet.__init__(self)
 
 		try:
-			from gevent import monkey
-			monkey.patch_socket()
 			self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
 			                                      port=gatdConfig.mongo.PORT,
 												  use_greenlets=True)
@@ -49,26 +49,30 @@ class MongoInterface(gevent.greenlet.Greenlet):
 
 	def _get_new (self):
 
-		# Use the capped collection to implement streaming starting at a time
-		# in the past. If the time key is present it is used as the minimum
-		# timestamp.
-		now = int(round(time.time() * 1000))
-		if 'time' in self.query:
-			start = now - query['time']
-		else:
-			start = now
-		self.query['time'] = {'$gt': start}
+		try:
 
-		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(self.query,
-			tailable=True,
-			await_data=True)
-		while cursor.alive and not self.stop:
-			try:
-				n = cursor.next()
-				n['_id'] = str(n['_id'])
-				self.cb('data', n)
-			except StopIteration:
-				pass
+			# Use the capped collection to implement streaming starting at a time
+			# in the past. If the time key is present it is used as the minimum
+			# timestamp.
+			now = int(round(time.time() * 1000))
+			if 'time' in self.query:
+				start = now - query['time']
+			else:
+				start = now
+			self.query['time'] = {'$gt': start}
+
+			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(self.query,
+				tailable=True,
+				await_data=True)
+			while cursor.alive and not self.stop:
+				try:
+					n = cursor.next()
+					n['_id'] = str(n['_id'])
+					self.cb('data', n)
+				except StopIteration:
+					pass
+		except gevent.greenlet.GreenletExit:
+			pass
 
 	def _get_all (self, query):
 

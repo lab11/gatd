@@ -26,18 +26,18 @@ class socketioManager(object):
 
 class socketioStreamer(socketio.namespace.BaseNamespace):
 	def recv_connect (self):
-		# Create a mongo connection and give it a way to send to the client
-		self.m = MongoInterface.MongoInterface(self.emit, 'get_new')
+		self.m = None
 
 	def on_query (self, msg):
-		print(msg)
-		self.m.setQuery(msg)
-		self.m.kill()
+		if self.m:
+			self.m.kill(timeout=1)
+
+		self.m = MongoInterface.MongoInterface(self.emit, 'get_new')
+		self.m.set_query(msg)
 		self.m.start()
 
-
 	def recv_disconnect (self):
-		print('GOT DIS')
+		del self.m
 
 
 socketio.server.SocketIOServer(('0.0.0.0', 8086),
