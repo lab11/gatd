@@ -3,8 +3,9 @@
 ################################################################################
 ## CONFIGURATION
 
-HOSTNAME = 'inductor.eecs.umich.edu'
-PORT     = 4001
+HOSTNAME   = 'gatd.com'
+PORT       = 4001
+PROFILE_ID = 'ABCDEFGHIJ'
 
 # Seconds to sleep between collection data points, may be float, minimum 0.1
 DATA_RESOLUTION=3
@@ -166,8 +167,6 @@ while True:
 
 		ls, lr = (-1, -1)
 
-		pid = 'aWXe5FTVxu'
-
 		while True:
 			time.sleep(DATA_RESOLUTION)
 
@@ -214,7 +213,7 @@ while True:
 			 'disk': get_disk_percent()
 			}
 
-			measurements.put(pid + json.dumps(m))
+			measurements.put(PROFILE_ID + json.dumps(m))
 	
 	except Exception, e:
 		print "Suppressed excpetion", e
