@@ -59,7 +59,7 @@ class profileManager (object):
 		sys.path.append(externals_path)
 
 		# Load all parsers in and update any information in the database
-		parsers = glob.glob(os.path.join(externals_path, '*.py')
+		parsers = glob.glob(os.path.join(externals_path, '*.py'))
 		for parser_file in parsers:
 			self._loadParserFile(parser_file)
 
@@ -152,15 +152,13 @@ class profileManager (object):
 		# Load or reload the python parser
 
 		try:
-			parser_path = 'parsers.{}'.format(parser_name)
-
-			if parser_path not in sys.modules:
+			if parser_name not in sys.modules:
 				# Import the first time
-				__import__(parser_path)
-				parser_mod = sys.modules[parser_path]
+				__import__(parser_name)
+				parser_mod = sys.modules[parser_name]
 			else:
 				# Reload the second time
-				parser_mod = sys.modules[parser_path]
+				parser_mod = sys.modules[parser_name]
 				reload(parser_mod)
 			parser_n   = getattr(parser_mod, parser_name)
 			# Create a parser object to use for parsing matching
