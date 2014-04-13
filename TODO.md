@@ -10,6 +10,11 @@ All `_` prefaced keys are reserved.
 - `time` -> `_time` and make required
 - `address` -> `_ip_address` and make required
 
+Formatters
+----------
+
+- Add a way to test a new formatter
+
 Other
 -----
 
