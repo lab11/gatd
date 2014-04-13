@@ -27,5 +27,6 @@ mongo_db.create_collection(name=gatdConfig.mongo.COL_CONFIG)
 mongo_db.create_collection(name=gatdConfig.mongo.COL_META_CONFIG)
 mongo_db.create_collection(name=gatdConfig.mongo.COL_META)
 mongo_db.create_collection(name=gatdConfig.mongo.COL_GATEWAY)
+mongo_db.create_collection(name=gatdConfig.mongo.COL_EXPLORE_KEYS)
 
 mongo_conn.close()
