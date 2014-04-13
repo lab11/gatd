@@ -5,3 +5,6 @@ pika>=0.9.13
 pymongo>=2.6.3
 semantic-version>=2.2.2
 socketIO-client>=0.5.3
+watchdog>=0.7.1
+setproctitle>=1.1.8
+tornado>=3.2
