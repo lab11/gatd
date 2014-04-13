@@ -12,9 +12,10 @@ setproctitle.setproctitle('gatd-src: weather')
 
 import os
 
-HOSTNAME = 'inductor.eecs.umich.edu'
+HOSTNAME = 'gatd.com'
 PORT     = 4001
 HOUR     = 3600
+PID      = 'ABCDEFGHIJ'
 
 print os.getcwd()
 
@@ -24,8 +25,6 @@ while True:
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.bind(('', 10002))
 
-		pid = 'nghjDMLmHY'
-
 		while True:
 
 			Weather.fetch()
@@ -33,7 +32,7 @@ while True:
 
 			m = dict(station.items())
 
-			s.sendto(pid + json.dumps(m), (HOSTNAME, PORT))
+			s.sendto(PID + json.dumps(m), (HOSTNAME, PORT))
 
 			time.sleep(HOUR)
 
