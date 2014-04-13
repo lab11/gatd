@@ -4,7 +4,10 @@ import struct
 import parser
 import urlparse
 
-class wattsupParser (parser.parser) :
+class wattsupParser (parser.parser):
+
+	name = 'Watts Up?'
+	description = 'Load level energy metering.'
 
 	def __init__ (self):
 		pass

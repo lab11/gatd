@@ -9,6 +9,7 @@ class projectorStatusParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'InFocus Projector'
+	description = 'Projector change events and status.'
 
 	status  = ['off', 'on', 'turning_off', 'turning_on']
 	sources = ['', 'VGA', 'HDMI 1', 'HDMI 2', 'S-Video', 'Composite']

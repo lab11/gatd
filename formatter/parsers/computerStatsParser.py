@@ -3,7 +3,10 @@ import json
 import struct
 import parser
 
-class computerStatsParser (parser.parser) :
+class computerStatsParser (parser.parser):
+
+	name = 'Computer Stats'
+	description = 'CPU, memory, disk, and network usage statistics for computers.'
 
 	def __init__ (self):
 		pass
@@ -34,5 +37,3 @@ class computerStatsParser (parser.parser) :
 		print str(IPy.IP(meta['addr'])) + ' usage: ' + str(datamap['cpu'])
 
 		return ret
-
-

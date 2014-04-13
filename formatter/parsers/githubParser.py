@@ -3,6 +3,9 @@ import parser
 
 class githubParser (parser.parser):
 
+	name = 'GitHub Events'
+	description = 'Events on GitHub repositories'
+
 	def __init__ (self):
 		pass
 

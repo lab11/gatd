@@ -7,8 +7,8 @@ import parser
 class monjoloParser (parser.parser):
 
 	# Parameters for this profile
-	name = 'Coilcube'
-	access = 'public'
+	name = 'Monjolo'
+	description = 'Energy-harvesting pulse meters.'
 
 	def __init__ (self):
 		pass

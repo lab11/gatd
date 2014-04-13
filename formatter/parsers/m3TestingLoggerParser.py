@@ -8,7 +8,7 @@ class m3TestingLoggerParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'M3 Testers Logging'
-	access = 'public'
+	description = 'Status of the M3 project development and testing.'
 
 	def __init__ (self):
 		pass

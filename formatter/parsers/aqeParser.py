@@ -6,6 +6,7 @@ class aqeParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'Air Quality Egg Parser'
+	description = 'Measurements from the Air Quality Egg sensors.'
 
 	def __init__ (self):
 		pass

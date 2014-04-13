@@ -1,11 +1,10 @@
 import parser
 
-class fitbitLocatorParser (parser.parser) :
+class fitbitLocatorParser (parser.parser):
 
 	name = 'Fitbit Finder'
-	access = 'public'
+	description = 'Discovery of fitbits in a particular location.'
 	no_parse = True
 
 	def __init__ (self):
 		pass
-

@@ -8,6 +8,7 @@ class wemoParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'WeMo Parser'
+	description = 'Belkin WeMo data.'
 
 	def __init__ (self):
 		pass

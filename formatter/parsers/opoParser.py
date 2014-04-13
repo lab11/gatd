@@ -9,6 +9,9 @@ import time
 
 class opoParser (parser.parser):
 
+	name = 'Opo'
+	description = 'Human inter-contact measurement.'
+
 	def __init__ (self):
 		pass
 

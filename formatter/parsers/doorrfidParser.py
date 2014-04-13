@@ -5,6 +5,9 @@ import parser
 
 class doorrfidParser (parser.parser):
 
+	name = 'Door Events'
+	description = 'Door open, close, and access events.'
+
 	source_addrs = ['2001:470:1f11:131a:2ab7:10c9:6e8b:f7a1',
                     '2001:470:1f11:131a:a6bc:f6e5:2144:1196',
                     '2001:470:1f11:131a:de6d:a438:fb41:788e',

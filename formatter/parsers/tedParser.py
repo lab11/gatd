@@ -9,6 +9,7 @@ class tedParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'The Energy Detective'
+	description = 'Whole-house energy metering.'
 
 	def __init__ (self):
 		pass

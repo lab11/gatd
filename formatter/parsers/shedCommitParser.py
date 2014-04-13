@@ -1,6 +1,9 @@
 import time
 
-class shedCommitParser () :
+class shedCommitParser ():
+
+	name = 'Shed Commits'
+	description = 'Shed commits with user and commit message.'
 
 	def __init__ (self):
 		pass

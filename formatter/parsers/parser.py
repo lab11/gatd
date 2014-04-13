@@ -1,4 +1,4 @@
-
+# Base class for all parsers
 
 class parser:
 	def __init__ (self):
@@ -6,4 +6,3 @@ class parser:
 
 	def parse (self, data, meta, extra, settings):
 		pass
-

@@ -4,6 +4,9 @@ import struct
 
 class printerQueryerParser ():
 
+	name = 'Printer Status'
+	description = 'What the printer is up to.'
+
 	def __init__ (self):
 		pass
 

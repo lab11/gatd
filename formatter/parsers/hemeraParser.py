@@ -3,7 +3,10 @@ import json
 import struct
 import parser
 
-class hemeraParser (parser.parser) :
+class hemeraParser (parser.parser):
+
+	name = 'Hemera Sensor Data'
+	description = 'Room monitoring sensor data. Light, humidity, temperature, and motion.'
 
 	source_addrs = ['2001:470:1f11:131a:8226:33eb:3455:36de']
 

@@ -7,6 +7,9 @@ import urlparse
 
 class gridwatchParser (parser.parser):
 
+	name = 'GridWatch'
+	description = 'Data from phones monitoring the power grid.'
+
 	def __init__ (self):
 		pass
 

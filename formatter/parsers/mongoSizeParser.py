@@ -8,6 +8,7 @@ class mongoSizeParser (parser.parser):
 
 	# Parameters for this profile
 	name = 'MongoDB Size Stats'
+	description = 'Tracking the size of the MongoDB database for GATD.'
 
 	def __init__ (self):
 		pass
