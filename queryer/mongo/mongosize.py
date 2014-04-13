@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
+
 import apscheduler.scheduler
+import ConfigParser as configparser
 import json
 import os
 import pika
@@ -18,8 +20,10 @@ logging.basicConfig()
 sys.path.append(os.path.abspath('../../config'))
 import gatdConfig
 
+profile_id = ''
+
 def getDBStats ():
-	global amqp_conn, amqp_chan
+	global amqp_conn, amqp_chan, profile_id
 	mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
 	                                 port=gatdConfig.mongo.PORT)
 	mongo_db   = mongo_conn[gatdConfig.mongo.DATABASE]
@@ -29,8 +33,8 @@ def getDBStats ():
 	stats = mongo_db.command('dbstats', gatdConfig.mongo.COL_FORMATTED)
 	now = int(time.time()*1000)
 
-	j = json.dumps({'profile_id': 'Wr6RQjmTMH',
-	                'data':        json.dumps(stats),
+	j = json.dumps({'profile_id': profile_id,
+	                'data':       json.dumps(stats),
 	                'time':       now,
 	                'port':       gatdConfig.mongo.PORT,
 	                'ip_address': 0})
@@ -55,6 +59,12 @@ def getDBStats ():
 			amqp_chan = amqp_conn.channel();
 
 sched = apscheduler.scheduler.Scheduler(standalone=True)
+
+externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
+                              gatdConfig.queryer.EXTERNALS_MONGO_SIZE)
+cfgp = configparser.ConfigParser()
+cfgp.read(os.path.join(externals_path, 'gatd.config'))
+profile_id = cfgp.get('main', 'profile_id')
 
 amqp_conn = pika.BlockingConnection(
 				pika.ConnectionParameters(
