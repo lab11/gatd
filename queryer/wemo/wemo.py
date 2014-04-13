@@ -177,7 +177,9 @@ amqp_conn = pika.BlockingConnection(
 amqp_chan = amqp_conn.channel();
 
 # Load all config files
-configs = glob.glob('configs/*.config')
+externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
+                              gatdConfig.queryer.EXTERNALS_WEMO)
+configs = glob.glob(os.path.join(externals_path, '*.config'))
 for config in configs:
 	cfgp.read(config)
 	hostname  = cfgp.get('main', 'hostname')
