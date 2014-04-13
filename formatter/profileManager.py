@@ -2,6 +2,7 @@ import ConfigParser
 import copy
 import glob
 import json
+import inspect
 import IPy
 import random
 import string
@@ -10,9 +11,27 @@ import os
 import sys
 import uuid
 
+import watchdog.observers
+import watchdog.events
+
 import FormatterExceptions as FE
 
-class profileManager:
+class ParserWatcher (watchdog.events.FileSystemEventHandler):
+	def __init__(self, pm):
+		self.pm = pm
+
+	def handle_change (self, filename):
+		self.pm._loadParserFile(filename)
+
+	def on_any_event (self, event):
+		if not event.is_directory:
+			if hasattr(event, 'src_path'):
+				self.handle_change(event.src_path)
+			if hasattr(event, 'dest_path'):
+				self.handle_change(event.dest_path)
+
+
+class profileManager (object):
 
 	# Map of pid->config map
 	# Stores all of the relevant information about each profile, like the parser
@@ -24,9 +43,7 @@ class profileManager:
 	addrs   = {}
 
 	# Default config example
-	default_config  = {'name': None,
-	                   'parser': None,
-	                   'access': 'public',
+	default_config  = {'parser': None,
 	                   'no_parse': False
 	                  }
 
@@ -37,57 +54,81 @@ class profileManager:
 		# Load all parsers in and update any information in the database
 		parsers = glob.glob('parsers/*.py')
 		for parser_file in parsers:
-			try:
-				parser_name = os.path.splitext(os.path.basename(parser_file))[0]
-				parser = self._getParser(parser_name)
+			self._loadParserFile(parser_file)
 
-				profile_name = ''
-				access = 'public'
-				source_addrs = []
-				no_parse = False
-
-				if hasattr(parser, 'name'):
-					profile_name = parser.name
-				if hasattr(parser, 'access'):
-					access = parser.access
-				if hasattr(parser, 'source_addrs'):
-					source_addrs = parser.source_addrs
-				if hasattr(parser, 'no_parse'):
-					no_parse = parser.no_parse
-
-				# Check if we already know about this parser
-				dbinfo = db.getConfigByParser(parser_name)
-
-				if dbinfo:
-					profile_id = dbinfo['profile_id']
-				else:
-					# Create a profile id and save it
-					profile_id = self._createProfileId()
-					db.storeConfig(parser_name, profile_id)
-
-				# Store all of the info in the dicts in this instance
-				config = copy.copy(self.default_config)
-				config['name'] = profile_name
-				config['parser'] = parser
-				config['access'] = access
-				config['no_parse'] = no_parse
-				self.configs[profile_id] = config
-
-				for source_addr in source_addrs:
-					self._addAddr(source_addr, profile_id)
-
-				print('Added profile {} with parser {}'.format(profile_id,
-					parser_name))
-
-			except TypeError as typee:
-				# Skip error with trying to import __init__.py
-				pass
+		self.observer = watchdog.observers.Observer()
+		self.observer.schedule(ParserWatcher(self), './parsers', recursive=False)
+		self.observer.start()
 
 	def __str__ (self):
 		out = 'addrs\n'
 		for a in self.addrs:
 			out += str(IPy.IP(a)) + ': ' + str(self.addrs[a]) + '\n'
 		return out
+
+	def _loadParserFile (self, filename):
+		parser_name,parser_ext = os.path.splitext(os.path.basename(filename))
+
+		# Check for files we don't want to parse
+		if parser_ext != '.py':
+			return
+		if parser_name == 'parser':
+			# Skip the base class
+			return
+
+		try:
+			parser = self._getParser(parser_name)
+
+			if not parser:
+				print('Could not load parser {}'.format(parser_name))
+				# Error occurred while loading the parser
+				return
+
+			# Find the special attributes that determine formatter behavior
+			source_addrs = []
+			no_parse = False
+			if hasattr(parser, 'source_addrs'):
+				source_addrs = parser.source_addrs
+			if hasattr(parser, 'no_parse'):
+				no_parse = parser.no_parse
+
+			# All attributes that are strings are saved to be used in later
+			# parts of the system
+			meta = {}
+			for m in inspect.getmembers(parser):
+				if isinstance(m[1], basestring) and m[0][0] != '_':
+					# Get all attributes that are strings and not system
+					# attributes
+					meta[m[0]] = m[1]
+
+			# Check if we already know about this parser
+			dbinfo = self.db.getProfileByParser(parser_name)
+
+			# Get a profile id if this is new
+			if dbinfo:
+				profile_id = dbinfo['profile_id']
+				# Save any information that may have changed
+				self.db.updateProfile(dbinfo, meta)
+			else:
+				# Create a profile id and save it
+				profile_id = self._createProfileId()
+				self.db.addProfile(parser_name, profile_id, meta)
+
+			# Save important information in memory for handling packets
+			config = copy.copy(self.default_config)
+			config['parser'] = parser
+			config['no_parse'] = no_parse
+			self.configs[profile_id] = config
+
+			for source_addr in source_addrs:
+				self._addAddr(source_addr, profile_id)
+
+			print('Added profile {} with parser {}'.format(profile_id,
+				parser_name))
+
+		except TypeError as typee:
+			# Skip error with trying to import __init__.py
+			pass
 
 	def _addAddr (self, ip_str, pid):
 		# Add the IP address to the dict
@@ -99,14 +140,39 @@ class profileManager:
 		return pid
 
 	def _getParser (self, parser_name):
-		# Load the python parser
+		# Load or reload the python parser
 
-		exec('import parsers.{}'.format(parser_name))
-		parser_mod = sys.modules['parsers.{}'.format(parser_name)]
-		parser_n   = getattr(parser_mod, parser_name)
-		# Create a parser object to use for parsing matching incoming packets
-		parser     = parser_n()
-		return parser
+		try:
+			parser_path = 'parsers.{}'.format(parser_name)
+
+			if parser_path not in sys.modules:
+				# Import the first time
+				__import__(parser_path)
+				parser_mod = sys.modules[parser_path]
+			else:
+				# Reload the second time
+				parser_mod = sys.modules[parser_path]
+				reload(parser_mod)
+			parser_n   = getattr(parser_mod, parser_name)
+			# Create a parser object to use for parsing matching
+			# incoming packets
+			parser     = parser_n()
+			return parser
+		except ImportError:
+			# Tried to import but the file wasn't there
+			# We should delete the profile from the db because the parser
+			# file is gone, but that could be dangerous, so we won't do that
+			# for now.
+			return None
+		except AttributeError:
+			# Tried to access the parser class that is the same name of the
+			# file but that failed. That means the author messed up.
+			return None
+		except Exception:
+			# This could fail if the user doesn't name things correctly
+			# But we don't want to crash the entire formatter so catch
+			# everything and return None
+			return None
 
 	def getPacketPid (self, addr, data):
 		if addr != None:
@@ -173,7 +239,10 @@ class profileManager:
 
 			else:
 				# Use a parser
-				r = parser.parse(data=data, meta=meta, extra=extra, settings=psettings)
+				r = parser.parse(data=data,
+				                 meta=meta,
+				                 extra=extra,
+				                 settings=psettings)
 				if r == None:
 					# Just dump this packet
 					return None
@@ -201,3 +270,11 @@ class profileManager:
 		r.update(self.db.getGatewayKeys(addr >> 64))
 
 		return r
+
+if __name__ == '__main__':
+	import time
+	import MongoInterface
+	mi = MongoInterface.MongoInterface()
+	p = profileManager(mi)
+
+	time.sleep(1000000)

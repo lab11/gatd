@@ -43,21 +43,30 @@ class MongoInterface:
 		except OverflowError as oe:
 			print oe
 
-	def storeConfig (self, parser_name, profile_id):
+	def addProfile (self, parser_name, profile_id, meta):
 		config_map = {'parser_name': parser_name,
 		              'profile_id' : profile_id}
+		config_map.update(meta)
+		uid = self.mongo_db[gatdConfig.mongo.COL_CONFIG].insert(config_map)
+		return str(uid)
+
+	def updateProfile (self, dbinfo, meta):
+		config_map = {}
+		config_map.update(dbinfo)
+		config_map['_id'] = bson.objectid.ObjectId(dbinfo['_id'])
+		config_map.update(meta)
 		uid = self.mongo_db[gatdConfig.mongo.COL_CONFIG].save(config_map)
 		return str(uid)
 
-	def getConfigByParser (self, parser_name):
+	def getProfileByParser (self, parser_name):
 		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
 			{'parser_name': parser_name})
 
-	def getConfigByProfileId (self, pid):
+	def getProfileByProfileId (self, pid):
 		return self.mongo_db[gatdConfig.mongo.COL_CONFIG].find_one(
 			{'profile_id': pid})
 
-	def getAllConfigs (self):
+	def getAllProfiles (self):
 		return list(self.mongo_db[gatdConfig.mongo.COL_CONFIG].find())
 
 	# Each profile has its own key that has to be in the data packet in order
