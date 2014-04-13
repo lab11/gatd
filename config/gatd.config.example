@@ -1,40 +1,59 @@
+[gatd]
+externals_root: /path/to/externals/directory   # This points to a folder where all the implementation specific code and configuration is stored
+
 [mongo]
-host:                 localhost
-port:                 27017
-username:             uname
-password:             pword
-database:             getallthedata
-col_formatted:        formatted_data
-col_formatted_capped: formatted_data_capped
-col_unformatted:      unformatted_archive
-col_config:           configuration
-col_meta_config:      meta_config
-col_meta:             meta
-col_gateway:          gateway
+host:                 localhost                # Server where the MongoDB database is running
+port:                 27017                    # Port MongoDB is listening on
+username:             uname                    # Username for MongoDB
+password:             pword                    # Username for MongoDB
+database:             getallthedata            # MongoDB database name for this instance of GATD
+col_formatted:        formatted_data           # Collection name where all the data is stored
+col_formatted_capped: formatted_data_capped    # Collection name where streaming data is temporarily stored
+col_unformatted:      unformatted_archive      # Collection name where unknown data is stored
+col_config:           configuration            # Collection name where profile information is stored
+col_meta_config:      meta_config              # Collection name where meta required_keys are stored
+col_meta:             meta                     # Collection name where all meta information is stored
+col_gateway:          gateway                  # Collection name where all gateway/border router config info is stored
+col_explore_keys:     explore_keys             # Collection name where keys for explorer are stored
 
 [receiver]
-port_udp:       4001
-port_tcp:       4002
-port_http_post: 8081
+port_udp:       4001                           # Port the UDP receiver listens on
+port_tcp:       4002                           # Port the TCP receiver listens on
+port_http_post: 8081                           # Port the HTTP post receiver listens on
+
+[queryer]
+externals_http:       queries/http             # Folder in external directory where HTTP get queryer configs are
+externals_mongo_size: queries/mongo_size       # Folder in external directory where the mongo size queryer config is
+externals_wemo:       queries/wemo             # Folder in external directory where the wemo query conifgs are
+
+[formatter]
+externals_profiles: formatters                 # Folder in external directory where the profile formatters are
+
+[processor]
+externals_processors: processors               # Folder in external directory where the processors are
+
+[explorer]
+host:           inductor.eecs.umich.edu        # Host that is running the explorer aggregator
+port_http_post: 8085                           # Port the explorer is listening on
 
 [socketio]
-stream_prefix: /stream
-port_node:              8080
-port_python:            8082
-port_python_historical: 8083
-port_python_replay:     8084
+stream_prefix:          /stream                # Socket.io prefix to use
+port_node:              8080                   # Port the node.js streamer listens on
+port_python:            8082                   # Port the python real-time streamer uses
+port_python_historical: 8083                   # Port the python historical streamer uses
+port_python_replay:     8084                   # Port the python historical replay streamer uses
 
 [rabbitmq]
-host:        localhost
-port:        1234
-username:    guest
-password:    guest
-q_receive:   receive_queue
-xch_stream:  streamer_exchange
-xch_receive: receive_exchange
+host:        localhost                         # Host running the RabbitMQ queue
+port:        1234                              # Port RabbitMQ listens on
+username:    guest                             # Username for RabbitMQ
+password:    guest                             # Passowrd for RabbitMQ
+q_receive:   receive_queue                     # Queue name between the receivers and the formatter
+xch_stream:  streamer_exchange                 # Exchange for streamers and processors to use
+xch_receive: receive_exchange                  # Exchange that receivers use
 
 [streamer]
-port_tcp: 7999
+port_tcp: 7999                                 # TCP streamer port
 
 # Packets moving to the formatter
 [pkt]
