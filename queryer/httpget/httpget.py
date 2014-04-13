@@ -81,7 +81,9 @@ sched = apscheduler.scheduler.Scheduler(standalone=True)
 cfgp = configparser.ConfigParser()
 
 # Load all config files
-configs = glob.glob('configs/*.config')
+externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
+                              gatdConfig.queryer.EXTERNALS_HTTP)
+configs = glob.glob(os.path.join(externals_path, '*.config'))
 for config in configs:
 	cfgp.read(config)
 	profile_id = cfgp.get('main', 'profile_id')
