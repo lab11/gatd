@@ -10,9 +10,11 @@ import StringIO
 import os
 import sys
 import uuid
-
 import watchdog.observers
 import watchdog.events
+
+sys.path.append(os.path.abspath('../config'))
+import gatdConfig
 
 import FormatterExceptions as FE
 
@@ -51,13 +53,20 @@ class profileManager (object):
 	def __init__ (self, db):
 		self.db = db
 
+		# Setup the path to the external parsers
+		externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
+		                              gatdConfig.formatter.EXTERNALS_PROFILES)
+		sys.path.append(externals_path)
+
 		# Load all parsers in and update any information in the database
-		parsers = glob.glob('parsers/*.py')
+		parsers = glob.glob(os.path.join(externals_path, '*.py')
 		for parser_file in parsers:
 			self._loadParserFile(parser_file)
 
 		self.observer = watchdog.observers.Observer()
-		self.observer.schedule(ParserWatcher(self), './parsers', recursive=False)
+		self.observer.schedule(ParserWatcher(self),
+		                       externals_path,
+		                       recursive=False)
 		self.observer.start()
 
 	def __str__ (self):
