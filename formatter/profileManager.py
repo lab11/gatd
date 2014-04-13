@@ -145,7 +145,8 @@ class profileManager (object):
 		self.addrs[ip.int()] = pid
 
 	def _createProfileId (self):
-		pid = ''.join(random.choice(string.letters + string.digits) for x in range(10))
+		pid = ''.join(random.choice(string.letters + string.digits) \
+			for x in range(10))
 		return pid
 
 	def _getParser (self, parser_name):
@@ -216,14 +217,6 @@ class profileManager (object):
 		# Create dict of settings that need to get passed to parser
 		psettings = {}
 
-		# Set the public key->value
-		try:
-			if config['access'] == 'public':
-				psettings['public'] = True
-		except KeyError:
-			psettings['public'] = False
-
-
 		# need to fill in extra at some point
 		extra = {}
 
@@ -242,7 +235,6 @@ class profileManager (object):
 				r['address'] = str(meta['addr'])
 				r['time']    = meta['time']
 				r['port']    = meta['port']
-				r['public']  = psettings['public']
 
 			else:
 				# Use a parser
