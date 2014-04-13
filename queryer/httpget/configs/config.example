@@ -2,6 +2,7 @@
 profile_id: XXX
 url: http://device.com/api/status.xml
 frequency: 50 # time between samples (seconds)
+unique_id: xxxXXX # identifying id to be passed along with packet, if necessary
 
 [cron]
 year:
