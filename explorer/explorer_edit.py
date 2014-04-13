@@ -80,7 +80,7 @@ m = MongoInterface.MongoInterface()
 
 
 # List all of the profiles so we can edit the key layout for the proper one
-configs = m.getAllConfigs()
+configs = m.getAllProfiles()
 
 print('Choose which profile you want:')
 for i, c in zip(range(len(configs)), configs):
@@ -100,7 +100,7 @@ if not explorekeysdb:
 
 
 
-name = m.getConfigByProfileId(explorekeysdb['profile_id'])['parser_name']
+name = m.getProfileByProfileId(explorekeysdb['profile_id'])['parser_name']
 
 print('Editing Explore keys for {}\n'.format(name))
 
