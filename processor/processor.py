@@ -82,8 +82,13 @@ processor_name = sys.argv[1]
 
 setproctitle.setproctitle('gatd-p: ' + processor_name)
 
-__import__('processors.'+processor_name)
-processor_mod = sys.modules['processors.{}'.format(processor_name)]
+# Add path to external processors
+externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
+                              gatdConfig.processor.EXTERNALS_PROCESSORS)
+sys.path.append(externals_path)
+
+__import__(processor_name)
+processor_mod = sys.modules[processor_name]
 processor_n = getattr(processor_mod, processor_name)
 # Create a processor instance to run on packets
 processor = processor_n()
