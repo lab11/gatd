@@ -23,7 +23,7 @@ import gatdConfig
 profile_id = ''
 
 def getDBStats ():
-	global amqp_conn, amqp_chan, profile_id
+	global profile_id
 	mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
 	                                 port=gatdConfig.mongo.PORT)
 	mongo_db   = mongo_conn[gatdConfig.mongo.DATABASE]
@@ -39,24 +39,24 @@ def getDBStats ():
 	                'port':       gatdConfig.mongo.PORT,
 	                'ip_address': 0})
 
+	print(j)
+
 	pkt = ojson = struct.pack('B', gatdConfig.pkt.TYPE_QUERIED) + j
 
-	while True:
-		try:
-			amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
-			                        body=pkt,
-			                        routing_key='')
-			break
-		except pika.exceptions.ChannelClosed as e:
-			amqp_conn = pika.BlockingConnection(
-							pika.ConnectionParameters(
-								host=gatdConfig.rabbitmq.HOST,
-								port=gatdConfig.rabbitmq.PORT,
-								credentials=pika.PlainCredentials(
-									gatdConfig.rabbitmq.USERNAME,
-									gatdConfig.rabbitmq.PASSWORD)
-						))
-			amqp_chan = amqp_conn.channel();
+	amqp_conn = pika.BlockingConnection(
+					pika.ConnectionParameters(
+						host=gatdConfig.rabbitmq.HOST,
+						port=gatdConfig.rabbitmq.PORT,
+						credentials=pika.PlainCredentials(
+							gatdConfig.rabbitmq.USERNAME,
+							gatdConfig.rabbitmq.PASSWORD)
+				))
+	amqp_chan = amqp_conn.channel()
+
+	amqp_chan.basic_publish(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
+	                        body=pkt,
+	                        routing_key='')
+
 
 sched = apscheduler.scheduler.Scheduler(standalone=True)
 
@@ -65,16 +65,6 @@ externals_path = os.path.join(gatdConfig.gatd.EXTERNALS_ROOT,
 cfgp = configparser.ConfigParser()
 cfgp.read(os.path.join(externals_path, 'gatd.config'))
 profile_id = cfgp.get('main', 'profile_id')
-
-amqp_conn = pika.BlockingConnection(
-				pika.ConnectionParameters(
-					host=gatdConfig.rabbitmq.HOST,
-					port=gatdConfig.rabbitmq.PORT,
-					credentials=pika.PlainCredentials(
-						gatdConfig.rabbitmq.USERNAME,
-						gatdConfig.rabbitmq.PASSWORD)
-			))
-amqp_chan = amqp_conn.channel();
 
 sched.add_interval_job(func=getDBStats, hours=1)
 
