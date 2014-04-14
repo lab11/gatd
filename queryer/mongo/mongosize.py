@@ -66,6 +66,6 @@ cfgp = configparser.ConfigParser()
 cfgp.read(os.path.join(externals_path, 'gatd.config'))
 profile_id = cfgp.get('main', 'profile_id')
 
-sched.add_interval_job(func=getDBStats, hours=1)
+sched.add_interval_job(func=getDBStats, minutes=30)
 
 sched.start()
