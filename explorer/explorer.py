@@ -165,7 +165,10 @@ class ExploreKeysAllHandler (ExploreKeysBaseHandler):
 		configs = mi.getAllConfigs()
 		for config in configs:
 			if config['profile_id'] in data:
-				meta[config['profile_id']] = {'parser_name': config['parser_name']}
+				meta[config['profile_id']] = {}
+				for k,v in config.items():
+					if k not in ['profild_id', '_id']:
+						meta[config['profile_id']][k] = v
 
 		out = {
 				'meta': meta,
