@@ -18,10 +18,7 @@ import MongoInterface
 
 
 search = {}
-
 data = {}
-
-
 
 # Recurse over the search data structure looking for matching keys in the
 # incoming packet. Update the data_struct with the relevant information
@@ -217,18 +214,13 @@ p = PikaConnection()
 t = tornado.web.Application([
 	(r"/explore/update/(.*)", ExploreKeysUpdateHandler),
 	(r"/explore/all", ExploreKeysAllHandler),
-	(r"/explore/profile/([a-zA-Z0-9]*)", ExploreKeysRequestHandler),
-	(r"/explore/profile/name/([a-zA-Z0-9]*)", ExploreKeysNameHandler),
+	(r"/explore/profile/([a-zA-Z0-9]{10})", ExploreKeysRequestHandler),
+	(r"/explore/profile/meta/([a-zA-Z0-9]{10})", ExploreKeysNameHandler),
 ])
 
 p.run()
 t.listen(gatdConfig.explorer.PORT_HTTP_POST)
 
-
-
 # Run the loop!
 # This works for both tornado and pika/rabbitmq
 tornado.ioloop.IOLoop.instance().start()
-
-
-
