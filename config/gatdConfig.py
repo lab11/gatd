@@ -19,7 +19,7 @@ import sys
 class BaseConfigSection (object):
 	def __getattr__ (self, name):
 		print('')
-		print('Could not find the proper key in gatd.config')
+		print('Could not find the proper key in gatd.config.')
 		print('Do you have the latest copy of gatd.config?')
 		print('')
 		raise AttributeError('error: {}'.format(name))
