@@ -28,3 +28,37 @@ values, and `version` values present in the datastream for this particular
 profile. Then, for each unique `location_str` the explorer will identify
 each unique `node_id` and `node_type` present in that location.
 
+
+Usage
+-----
+
+The explorer module runs as a service with GATD. It provides a simple HTTP based
+JSON API to retrieve information about the current streams. The following are
+valid URLs:
+
+- `/explore/all`: Returns a JSON blob representing the streams in GATD.
+```
+{
+	"explore": {profile_id: {
+                               key: {
+                                       value: {
+                                                 key: {
+                                                        value: {}
+                                                      }
+                                              },
+                                       value: {}
+                                    }
+                            }
+               },
+	"meta": {profile_id: {
+	                       "meta1": value,
+	                       "meta2": value
+	                     }
+	        }
+}
+```
+- `/explore/profile/<profile_id>`: Returns the same key value hierarchy
+as `/explore/all` except for only one Profile ID and without the meta
+information.
+- `/explore/profile/meta/<profile_id>`: Returns the meta information
+for a particular Profile ID.
