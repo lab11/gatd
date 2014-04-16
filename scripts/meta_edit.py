@@ -3,8 +3,8 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../../config'))
+sys.path.append(os.path.abspath('../formatter'))
+sys.path.append(os.path.abspath('../config'))
 import MongoInterface
 
 import edit_item
@@ -58,7 +58,7 @@ pids = []
 m = MongoInterface.MongoInterface()
 
 
-configs = m.getAllConfigs()
+configs = m.getAllProfiles()
 
 print('Choose which profile you want:')
 for i, c in zip(range(len(configs)), configs):

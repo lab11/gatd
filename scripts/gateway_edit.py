@@ -4,8 +4,8 @@ import IPy
 import os
 import sys
 
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../../config'))
+sys.path.append(os.path.abspath('../formatter'))
+sys.path.append(os.path.abspath('../config'))
 import MongoInterface
 
 import edit_item

@@ -5,8 +5,8 @@ import os
 import sys
 import urllib2
 
-sys.path.append(os.path.abspath('../config'))
 sys.path.append(os.path.abspath('../formatter'))
+sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 import MongoInterface
 
