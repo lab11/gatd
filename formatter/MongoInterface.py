@@ -39,7 +39,7 @@ class MongoInterface:
 	def writeFormatted (self, to_write):
 		try:
 			self.mongo_db[gatdConfig.mongo.COL_FORMATTED].save(to_write)
-			self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].save(to_write)
+			self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].save(to_write)
 		except OverflowError as oe:
 			print oe
 

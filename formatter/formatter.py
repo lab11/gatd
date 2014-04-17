@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+import base64
 import bson.binary
 import IPy
 import json
@@ -118,6 +119,14 @@ def packet_callback (channel, method, prop, body):
 			ret = data
 
 		else:
+			# Send the data to the formatter test exchange so that we
+			# can test parsers
+			form_test = json.dumps({'meta': meta, 'data': base64.b64encode(data)})
+			
+			channel.basic_publish(exchange=gatdConfig.rabbitmq.XCH_FORMATTER_TEST,
+			                      body=form_test,
+								  routing_key='')
+
 			# Process the packet by the correct parser
 			ret = pm.parsePacket(data=data, meta=meta)
 			if ret == None:
@@ -192,11 +201,16 @@ ac = archiveCleaner.archiveCleaner(db=mi, pm=pm)
 
 
 def onChannel (thischannel):
-# Create the exchange for the streaming packets.
-# Let the queues be created by the streamers. If there are no streamers
-# running, then the messages will just be dropped and that is OK.
+	# Create the exchange for the streaming packets.
+	# Let the queues be created by the streamers. If there are no streamers
+	# running, then the messages will just be dropped and that is OK.
 	thischannel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_STREAM,
 							 exchange_type='headers',
+							 durable=True)
+
+	# Create an exchange for the formatter test
+	thischannel.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_FORMATTER_TEST,
+							 exchange_type='fanout',
 							 durable=True)
 
 	thischannel.basic_consume(packet_callback,
