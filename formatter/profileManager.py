@@ -166,17 +166,20 @@ class profileManager (object):
 			# incoming packets
 			parser     = parser_n()
 			return parser
-		except ImportError:
+		except ImportError as e:
+			print(e)
 			# Tried to import but the file wasn't there
 			# We should delete the profile from the db because the parser
 			# file is gone, but that could be dangerous, so we won't do that
 			# for now.
 			return None
-		except AttributeError:
+		except AttributeError as e:
+			print(e)
 			# Tried to access the parser class that is the same name of the
 			# file but that failed. That means the author messed up.
 			return None
-		except Exception:
+		except Exception as e:
+			print(e)
 			# This could fail if the user doesn't name things correctly
 			# But we don't want to crash the entire formatter so catch
 			# everything and return None
@@ -246,7 +249,7 @@ class profileManager (object):
 					# Just dump this packet
 					return None
 		except Exception as e:
-			print('Bad Parser: {}'.format(e))
+			print('Bad Parser: Exception: {}'.format(e))
 			r = None
 
 		if type(r) != dict:

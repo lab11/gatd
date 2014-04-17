@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import argparse
+import base64
 import bson.binary
 import IPy
 import json
@@ -103,18 +104,18 @@ def packet_callback (channel, method, prop, body):
 	try:
 		pkt = json.loads(body)
 
-
-		print('Received:')
-		print(pkt['data'])
-		print('as the raw input.')
-		print('')
-
+		data = base64.b64decode(pkt['data'])
+		
 		# Process the packet by the correct parser
-		ret = pt.parsePacket(data=pkt['data'], meta=pkt['meta'])
+		ret = pt.parsePacket(data=data, meta=pkt['meta'])
 		if ret == None:
 			# Discard this packet from storage and the streamer
 			raise Exception
 
+		print('Received:')
+		print(data)
+		print('as the raw input.')
+		print('')
 
 		print('After formatting got:')
 		pp.pprint(ret)
