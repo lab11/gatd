@@ -27,9 +27,9 @@ def run_processor (processor_func, processor_idname, pkt_body):
 
 	try:
 		pkt = processor_func(inpkt)
-	except Exception:
+	except Exception as e:
 		# Any exception the processor returns just ignore
-		print('exc')
+		print(e)
 		return
 
 	if pkt == None:

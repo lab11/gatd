@@ -63,7 +63,7 @@ class MongoInterface(gevent.greenlet.Greenlet):
 				start = now
 			self.query['time'] = {'$gt': start}
 
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAP].find(
+			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(
 				self.query,
 				tailable=True,
 				await_data=True)
