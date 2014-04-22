@@ -1,23 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-################################################################################
-## CONFIGURATION
-
-HOSTNAME   = 'gatd.com'
-PORT       = 4001
-PROFILE_ID = 'ABCDEFGHIJ'
-
-# Seconds to sleep between collection data points, may be float, minimum 0.1
-DATA_RESOLUTION=3
-
-# How often to send batches of packets, unit is seconds
-PACKET_INTERVAL_AC=3
-PACKET_INTERVAL_BATTERY=60
-
-## END CONFIGURATION
-################################################################################
-
-import sys
+import sys,os
 import json
 import psutil
 import socket
@@ -32,22 +15,46 @@ import setproctitle
 setproctitle.setproctitle('gatd-src: computer usage')
 
 from threading import Thread
-# Fuck python3
+# Py{2,3}k
 try:
 	import Queue as queue
 except ImportError:
 	import queue
 measurements = queue.Queue()
 
-try:
-	PACKET_INTERVAL_AC = int(sys.argv[1])
-	PACKET_INTERVAL_BATTERY = int(sys.argv[2])
-except IndexError:
-	pass
+################################################################################
+## CONFIGURATION
 
-if DATA_RESOLUTION > PACKET_INTERVAL_AC or DATA_RESOLUTION > PACKET_INTERVAL_BATTERY:
-	print "Configuration Error: DATA_RESOLUTION must be <= PACKET_INTERVAL"
-	print "(You can't send packets more frequently that you're sampling data...)"
+try:
+	import configparser
+except ImportError:
+	print("Are you running python 3?")
+	raise
+
+DEFAULTS = {
+		'hostname'   : 'localhost',
+		'port'       : '4001',
+		'profile_id' : 'ABCDEFGHIJ',
+
+		# Seconds to sleep between collection data points, may be float, minimum 0.1
+		'data_resolution' : '3',
+
+		# How often to send batches of packets, unit is seconds
+		'packet_interval_ac' : '3',
+		'packet_interval_battery' : '60',
+		}
+
+config_all = configparser.ConfigParser(DEFAULTS)
+config_all.read('computer_stats_udp_source.conf')
+config = config_all['DEFAULT']
+
+## END CONFIGURATION
+################################################################################
+
+if float(config['data_resolution']) > float(config['packet_interval_ac']) or\
+		float(config['data_resolution']) > float(config['packet_interval_battery']):
+	print("Configuration Error: DATA_RESOLUTION must be <= PACKET_INTERVAL")
+	print("(You can't send packets more frequently that you're sampling data...)")
 	raise ValueError
 
 
@@ -55,18 +62,18 @@ if DATA_RESOLUTION > PACKET_INTERVAL_AC or DATA_RESOLUTION > PACKET_INTERVAL_BAT
 ##
 ## Can't do callbacks without a glib main loop, so... poll every packet sending
 power_func=None
-PACKET_INTERVAL=PACKET_INTERVAL_AC
+PACKET_INTERVAL=float(config['packet_interval_ac'])
 
 def onPowerChange(args, kwargs):
 	global PACKET_INTERVAL
 	if dev.GetProperty('ac_adapter.present'):
-		if PACKET_INTERVAL != PACKET_INTERVAL_AC:
-			PACKET_INTERVAL = PACKET_INTERVAL_AC
-			print 'On AC power, packet interval set to', PACKET_INTERVAL
+		if PACKET_INTERVAL != float(config['packet_interval_ac']):
+			PACKET_INTERVAL = float(config['packet_interval_ac'])
+			print('On AC power, packet interval set to {}'.format(PACKET_INTERVAL))
 	else:
-		if PACKET_INTERVAL != PACKET_INTERVAL_BATTERY:
-			PACKET_INTERVAL = PACKET_INTERVAL_BATTERY
-			print 'On battery power, packet interval set to', PACKET_INTERVAL
+		if PACKET_INTERVAL != float(config['packet_interval_battery']):
+			PACKET_INTERVAL = float(config['packet_interval_battery'])
+			print('On battery power, packet interval set to {}'.format(PACKET_INTERVAL))
 
 try:
 	import dbus
@@ -85,14 +92,14 @@ try:
 		onPowerChange(None, None)
 
 	except IndexError:
-		print 'No AC adaptor found on dbus; no power management hooks'
-		print 'will be enabled for this session'
+		print('No AC adaptor found on dbus; no power management hooks')
+		print('will be enabled for this session')
 except ImportError:
-	print 'Failed to import dbus module! power managment hooks disabled'
-	print '(try installing python-dbus?)'
+	print('Failed to import dbus module! power managment hooks disabled')
+	print('(try installing python-dbus?)')
 except dbus.exceptions.DBusException:
-	print 'Dbus exception; no power managment hooks'
-	print 'will be enabled for this session'
+	print('Dbus exception; no power managment hooks')
+	print('will be enabled for this session')
 
 
 #################
@@ -123,32 +130,35 @@ def sender():
 	while True:
 		try:
 			batched.append(measurements.get())
-			print "[%3d]: %s" % (len(batched), m)
+			print("[%3d]: %s" % (len(batched), m))
 
-			if len(batched) >= (PACKET_INTERVAL / DATA_RESOLUTION):
+			if len(batched) >= (PACKET_INTERVAL / float(config['data_resolution'])):
 				backlog.extend(batched)
 				try:
 					for p in backlog:
-						s.sendto(p, (HOSTNAME, PORT))
-					print "\033[1;32mSent %d packet%s at %s\033[m\n" %\
+						s.sendto(p, (config['hostname'], int(config['port'])))
+					print("\033[1;32mSent %d packet%s at %s\033[m\n" %\
 						(len(backlog),
 						('s','')[len(backlog)==1],
-						time.ctime())
+						time.ctime()),
+						)
 					backlog = []
 				except socket.gaierror as e:
 					if e.errno != -errno.EIO:
 						raise e
-					print "\033[1;33mBacklogged %d packet%s at %s\033[m" %\
+					print("\033[1;33mBacklogged %d packet%s at %s\033[m" %\
 						(len(batched),
 						('s','')[len(batched)==1],
-						time.ctime())
-					print "\t\033[0;33mCurrent backlog: %d\033[m\n" %\
-						(len(backlog))
+						time.ctime()),
+						)
+					print("\t\033[0;33mCurrent backlog: %d\033[m\n" %\
+						(len(backlog)),
+						)
 				batched = []
 				if power_func:
 					power_func(None, None)
 		except Exception as e:
-			print "Suppressed excpetion", e
+			print("Suppressed excpetion: {}".format(e))
 			time.sleep(1)
 
 sender_thread = Thread(target=sender)
@@ -168,7 +178,7 @@ while True:
 		ls, lr = (-1, -1)
 
 		while True:
-			time.sleep(DATA_RESOLUTION)
+			time.sleep(float(config['data_resolution']))
 
 			# Network
 			js,jr = psutil.network_io_counters()[0:2]
@@ -213,9 +223,10 @@ while True:
 			 'disk': get_disk_percent()
 			}
 
-			measurements.put(PROFILE_ID + json.dumps(m))
+			pkt = config['profile_id'] + json.dumps(m)
+			measurements.put(pkt.encode('utf-8'))
 	
-	except Exception, e:
-		print "Suppressed excpetion", e
+	except Exception as e:
+		print("Suppressed excpetion: {}".format(e))
 		time.sleep(1)
 

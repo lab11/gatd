@@ -11,7 +11,7 @@ fi
 
 # Check if psutil is installed
 echo "Checking if psutil is installed"
-python -c "import psutil" > /dev/null 2> /dev/null
+python3 -c "import psutil" > /dev/null 2> /dev/null
 
 if [ "$?" -ne 0 ]; then
 	# No psutil
@@ -26,7 +26,7 @@ if [ "$?" -ne 0 ]; then
 		wget http://psutil.googlecode.com/files/psutil-0.4.1.tar.gz
 		tar xzf psutil-0.4.1.tar.gz
 		cd psutil-0.4.1.tar.gz
-		sudo python setup.py install
+		sudo python3 setup.py install
 		if [ "$?" -ne 0 ]; then
 			# didn't work, are you root
 			echo "psutil failed to install"
@@ -38,7 +38,7 @@ if [ "$?" -ne 0 ]; then
 	else
 		# Use pip
 		echo "installing psutil with pip"
-		sudo pip install psutil
+		sudo pip-python3 install psutil
 		if [ "$?" -ne 0 ]; then
 			# didn't work, are you root
 			echo "psutil failed to install"
@@ -49,7 +49,7 @@ if [ "$?" -ne 0 ]; then
 
 fi
 
-screen -S gatd-usage-test -d -m python computer_stats_udp_source.py
+screen -S gatd-usage-test -d -m python3 computer_stats_udp_source.py
 if [ "$?" -ne 0 ]; then
 	echo "usage monitor failed to start"
 else
