@@ -19,7 +19,7 @@ if [ "$?" -ne 0 ]; then
 
 	# Check for pip
 	pip --version > /dev/null 2> /dev/null
-	if ["$?" -ne 0 ]; then
+	if [ "$?" -ne 0 ]; then
 		# No pip
 		echo "pip not installed"
 		echo "installing psutil by source"

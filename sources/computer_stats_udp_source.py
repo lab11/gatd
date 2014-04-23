@@ -111,7 +111,7 @@ def get_cpu_percent ():
 	return psutil.cpu_percent()
 
 def get_memory_percent ():
-	return psutil.phymem_usage()[3]
+	return psutil.virtual_memory()[2]
 
 def get_disk_percent ():
 	return psutil.disk_usage('/')[3]
@@ -225,7 +225,7 @@ while True:
 
 			pkt = config['profile_id'] + json.dumps(m)
 			measurements.put(pkt.encode('utf-8'))
-	
+
 	except Exception as e:
 		print("Suppressed excpetion: {}".format(e))
 		time.sleep(1)
