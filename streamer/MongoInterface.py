@@ -92,7 +92,7 @@ class MongoInterface(gevent.greenlet.Greenlet):
 				try:
 					n = cursor.next()
 					n['_id'] = str(n['_id'])
-					yield n
+					self.cb('data', n)
 				except StopIteration:
 					pass
 			(self.done)()
@@ -122,17 +122,17 @@ class MongoInterface(gevent.greenlet.Greenlet):
 
 					if 'time' in n:
 						if last_time == 0:
-							yield n
+							self.cb('data', n)
 						elif n['time'] < last_time:
-							yield n
+							self.cb('data', n)
 						else:
 							time.sleep(((n['time'] - last_time)/1000.0)/speedup)
-							yield n
+							self.cb('data', n)
 
 						last_time = n['time']
 
 					else:
-						yield n			
+						self.cb('data', n)	
 				except StopIteration:
 					pass
 			(self.done)()

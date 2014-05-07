@@ -30,6 +30,7 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 		if self.m:
 			self.m.kill(timeout=1)
 
+		print(msg)
 		self.m = MongoInterface.MongoInterface(self.emit, cmd, self.disconnect)
 		self.m.set_query(msg)
 		self.m.start()
@@ -52,7 +53,7 @@ elif sys.argv[1] == 'all':
 	port = gatdConfig.socketio.PORT_PYTHON_HISTORICAL
 elif sys.argv[1] == 'replay':
 	cmd = 'get_all_replay'
-	gatdConfig.socketio.PORT_PYTHON_REPLAY
+	port = gatdConfig.socketio.PORT_PYTHON_REPLAY
 else:
 	print('usage: {} new|all|replay'.format(sys.argv[0]))
 	sys.exit(1)
