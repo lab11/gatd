@@ -116,22 +116,25 @@ except Exception:
 cb = lambda ch, method, prop, body: run_processor(processor.process,
                                                   idname,
                                                   body)
+while True:
+	try:
+		amqp_conn = pika.BlockingConnection(
+		            	pika.ConnectionParameters(
+		            	host=gatdConfig.rabbitmq.HOST,
+		            	port=gatdConfig.rabbitmq.PORT,
+		            	credentials=pika.PlainCredentials(
+		            		gatdConfig.rabbitmq.USERNAME,
+		            		gatdConfig.rabbitmq.PASSWORD)))
+		amqp_chan = amqp_conn.channel()
 
-amqp_conn = pika.BlockingConnection(
-            	pika.ConnectionParameters(
-            	host=gatdConfig.rabbitmq.HOST,
-            	port=gatdConfig.rabbitmq.PORT,
-            	credentials=pika.PlainCredentials(
-            		gatdConfig.rabbitmq.USERNAME,
-            		gatdConfig.rabbitmq.PASSWORD)))
-amqp_chan = amqp_conn.channel()
-
-# Setup a queue to get the necessary stream
-strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
-amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
-                     queue=strm_queue.method.queue,
-                     arguments=query)
-amqp_chan.basic_consume(cb,
-                        queue=strm_queue.method.queue,
-                        no_ack=True)
-amqp_chan.start_consuming()
+		# Setup a queue to get the necessary stream
+		strm_queue = amqp_chan.queue_declare(exclusive=True, auto_delete=True)
+		amqp_chan.queue_bind(exchange=gatdConfig.rabbitmq.XCH_STREAM,
+		                     queue=strm_queue.method.queue,
+		                     arguments=query)
+		amqp_chan.basic_consume(cb,
+		                        queue=strm_queue.method.queue,
+		                        no_ack=True)
+		amqp_chan.start_consuming()
+	except pika.exceptions.ConnectionClosed:
+		pass
