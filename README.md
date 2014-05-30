@@ -72,7 +72,7 @@ GATD uses RabbitMQ for the inter-module queues and MongoDB for data storage.
 Installation
 ------------
 
-The following instructions are for Ubuntu.
+### Ubuntu
 
 1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
 [RabbitMQ Server](http://www.rabbitmq.com/download.html),
@@ -99,6 +99,142 @@ in the next steps are reflected in this file.
 
     ```
     cd /opt/gatd/config
+    cp gatd.config.example gatd.config
+    ```
+
+2. Configure MongoDB using the template config file in the `mongo` folder.
+  1. Copy the config file to `/etc/mongodb.conf`.
+
+        ```
+        sudo cp /opt/gatd/mongo/mongodb.conf /etc/mongodb.conf
+        ```
+
+  2. Edit the config file with the port you want to use.
+  3. Create a directory for the database.
+
+        ```
+        sudo mkdir -p /data/mongodb
+        sudo chown mongodb:mongodb /data/mongodb
+        ```
+        
+  4. Restart the MongoDB daemon.
+
+        ```
+        sudo service mongodb restart
+        ```
+
+3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
+  1. Copy the config files to `/etc/rabbitmq`.
+
+        ```
+        sudo cp /opt/gatd/rabbitmq/rabbitmq* /etc/rabbitmq
+        ```
+  
+  2. Edit `rabbitmq-gatd.config` with the port you want to use.
+  3. Restart the rabbitmq server.
+  
+        ```
+        sudo rabbitmqctl stop
+        sudo service rabbitmq-server start
+        ```
+
+  4. Delete the default rabbitmq user, create a GATD user, and set permissions.
+  
+        ```
+        sudo rabbitmqctl delete_user guest
+        sudo rabbitmqctl add_user gatd <password>
+        sudo rabbitmqctl set_user_tags gatd administrator
+        sudo rabbitmqctl set_permissions -p / gatd ".*" ".*" ".*"
+        ```
+
+
+4. Set up Python environment.
+
+    ```bash
+    sudo pip2 install virtualenv
+    cd /opt/gatd
+    virtualenv .
+    source ./bin/activate
+    pip2 install -r requirements.pip
+    ```
+    
+5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
+Use the cmake install directions that end up with the library installed.
+It also seems that you need to set the library directory after this. Add the following to `.bashrc`:
+
+    ```
+    export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    ```
+
+7. Compile the receiver.
+
+    ```
+    cd /opt/gatd/receiver
+    tup
+    ```
+
+8. Install the Node.js dependencies
+
+    ```bash
+    cd /opt/gatd/streamer
+    sudo npm install -g forever
+    npm install
+    ```
+
+9. Setup the database in MongoDB.
+
+    ```
+    cd /opt/gatd/mongo
+    ./init_mongo.py
+    ````
+    
+10. Run GATD
+  1. Start the receivers.
+  
+        ```
+        cd /opt/gatd/receiver
+        ./run_receiver.sh
+        ```
+
+  2. Run the formatter.
+    
+        ```
+        cd /opt/gatd/formatter
+        ./run_formatter.sh
+        ```
+
+  3. Run the streamers.
+   
+        ```
+        cd /opt/gatd/streamer
+        ./run_streamer.sh
+        ```
+
+
+### Mac OS X
+
+
+1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
+[RabbitMQ Server](http://www.rabbitmq.com/download.html),
+[Node.js](http://nodejs.org/download/), and [tup](http://gittup.org/tup/).
+
+2. Install dependencies
+
+    ```
+    sudo port install py27-pip git-core cmake
+    ```
+    
+2. Get GATD
+
+    ```
+    clone https://github.com/lab11/gatd.git
+    ```
+    
+2. Copy the example GATD config file and set the necessary values. You will want to make sure any passwords set
+in the next steps are reflected in this file.
+
+    ```
+    cd gatd/config
     cp gatd.config.example gatd.config
     ```
 
