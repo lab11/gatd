@@ -89,7 +89,7 @@ Installation
     ```
     sudo adduser gatd
     cd /opt
-    sudo clone https://github.com/lab11/gatd.git
+    sudo git clone https://github.com/lab11/gatd.git
     sudo chown gatd:gatd gatd -R
     sudo usermod -a -G gatd <username>
     ```
