@@ -159,29 +159,6 @@ in the next steps are reflected in this file.
     source ./bin/activate
     pip2 install -r requirements.pip
     ```
-    
-5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
-Use the cmake install directions that end up with the library installed.
-It also seems that you need to set the library directory after this. Add the following to `.bashrc`:
-
-    ```
-    export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-    ```
-
-7. Compile the receiver.
-
-    ```
-    cd /opt/gatd/receiver
-    tup
-    ```
-
-8. Install the Node.js dependencies
-
-    ```bash
-    cd /opt/gatd/streamer
-    sudo npm install -g forever
-    npm install
-    ```
 
 9. Setup the database in MongoDB.
 
@@ -295,29 +272,7 @@ in the next steps are reflected in this file.
     source ./bin/activate
     pip2 install -r requirements.pip
     ```
-    
-5. Install the [rabbitmq-c](https://github.com/alanxz/rabbitmq-c) library for compiling the UDP receiver.
-Use the cmake install directions that end up with the library installed.
-It also seems that you need to set the library directory after this. Add the following to `.bashrc`:
 
-    ```
-    export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-    ```
-
-7. Compile the receiver.
-
-    ```
-    cd /opt/gatd/receiver
-    tup
-    ```
-
-8. Install the Node.js dependencies
-
-    ```bash
-    cd /opt/gatd/streamer
-    sudo npm install -g forever
-    npm install
-    ```
 
 9. Setup the database in MongoDB.
 
