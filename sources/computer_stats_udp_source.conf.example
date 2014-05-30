@@ -1,0 +1,4 @@
+[DEFAULT]:
+hostname = PUT_HOSTNAME_HERE
+port = 4001
+profile_id = OUTPUT_OF /scripts/profile.py --parser computerStatsParser
