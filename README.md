@@ -72,7 +72,7 @@ GATD uses RabbitMQ for the inter-module queues and MongoDB for data storage.
 Installation
 ------------
 
-### Ubuntu
+### Ubuntu / RHEL
 
 1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
 [RabbitMQ Server](http://www.rabbitmq.com/download.html),
@@ -82,6 +82,8 @@ Installation
 
     ```
     sudo apt-get install python-pip git vim python-dev cmake libssl-dev
+       --- or ---
+    sudo yum install python-pip git vim python-devel cmake openssl-devel
     ```
     
 2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
