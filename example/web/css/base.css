@@ -1,0 +1,14 @@
+body {
+	padding-top: 70px;
+}
+.page-title {
+	padding-top: 3px;
+	font-size: 28px;
+	font-weight: bold;
+	color: #0892D0;
+}
+
+.well-clear {
+	background-image: none;
+	background-color: transparent;
+}

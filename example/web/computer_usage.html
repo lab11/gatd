@@ -1,0 +1,233 @@
+<html>
+<head>
+	<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico" />
+	<script src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
+	<!-- bower is sometimes inconsistent about whether the 'dist' is here, just grab both, one will fail -->
+	<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="/bower_components/jquery/jquery.min.js"></script>
+	<script src="/bower_components/underscore/underscore.js"></script>
+	<script>WEB_SOCKET_SWF_LOCATION='/bower_components/socket.io-client/dist/WebSocketMain.swf'</script>
+	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="/bower_components/bootstrap/dist/css/bootstrap-theme.min.css" media="all" rel="stylesheet" type="text/css" />
+	<link href="/css/base.css" media="all" rel="stylesheet" type="text/css" />
+
+	
+<script src="js/jquery.flot.custom-0.8.2.js"></script>
+<script src="bower_components/flot/jquery.flot.time.js"></script>
+<script src="js/jquery.grapher.js"></script>
+
+
+	<title>
+GATD - Computer Usage Statistics
+</title>
+
+	
+</head>
+
+<body>
+
+	
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header page-title">
+				<div class="hidden-xs">
+				Computer Usage Statistics
+				</div>
+				<div class="visible-xs">
+					<div class="row">
+						<div class="col-xs-2">
+							<a href="http://www.eecs.umich.edu/cse/">
+								<img src="/images/michigan.png" height="35px" style="margin:4px 0 0 10px;"/>
+							</a>
+						</div>
+						<div class="col-xs-8">
+							<div class="text-center">
+								Computer Usage Stats
+							</div>
+						</div>
+						<div class="col-xs-2">
+							<a href="http://lab11.eecs.umich.edu">
+								<img src="/images/lab11_50px.jpg" height="35px" style="margin:4px 10px 0px 0;"/>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="navbar-right hidden-xs" style="margin:8px 0 0 20px;">
+				<a href="http://www.eecs.umich.edu/cse/">
+					<img src="/images/michigan.png" height="35px" />
+				</a>
+			</div>
+			<div class="nav navbar-nav navbar-right hidden-xs" style="margin:8px 0 0 20px;">
+				<a href="http://lab11.eecs.umich.edu">
+					<img src="/images/lab11_50px.jpg" height="35px" />
+				</a>
+			</div>
+		</div>
+	</div>
+
+
+	
+	<div class="container">
+		<div class="page-header">
+			<h1> 
+Computer Usage Statistics
+ <small> 
+What's your computer doing?
+ </small></h1>
+		</div>
+		
+<p>
+The graph shows the runtime statistics of various computers.
+</p>
+
+	</div>
+
+
+
+<div class="container">
+	<div class="well well-clear">
+		<div class="row">
+			<div class="col-lg-10 col-xs-12">
+				<div id="graph" style="width:100%;height:500px;margin-left:auto;margin-right:auto;"></div>
+			</div>
+			<div class="col-lg-2 col-xs-12">
+				<div id="graph_key"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="well">
+		<h3>Machines reporting usage data:</h3>
+		<div id="hostname_select">
+			<ul style="list-style-type:none;">
+			</ul>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+
+var socket;
+var hostnames = {};
+var g;
+var active_hostnames = [];
+
+var keep_hostnames_for = 900000;
+
+function sanitize_hostname (h) {
+	return h.replace(/[^a-zA-Z0-9]./g, "");
+}
+
+function remove_old_hostnames () {
+	timenow = new Date().getTime();
+
+	for (h in hostnames) {
+		if (hostnames[h] + keep_hostnames_for < timenow) {
+			delete hostnames[h];
+		}
+	}
+}
+
+function display_hostnames () {
+	for (h in hostnames) {
+		if ($("#hostname_select ul #check_" + sanitize_hostname(h)).length == 0) {
+			add_checkbox(h);
+		}
+	}
+}
+
+function add_checkbox(name) {
+	var container = $('#hostname_select ul');
+
+	sname = sanitize_hostname(name);
+	var html = '<li><input type="checkbox" id="check_'+sname+'" value="'+name+'" /> <label for="check_'+sname+'">'+name+'</label></li>';
+	container.append($(html));
+	$("#hostname_select input[type='checkbox']").change(update_active_hostnames);
+}
+
+function update_active_hostnames () {
+	active_hostnames.splice(0, active_hostnames.length);
+	$("#hostname_select input[type='checkbox']").each(function () {
+		if ($(this).prop('checked')) {
+			active_hostnames.push($(this).attr('value'));
+		} else {
+			g.removeSeries($(this).attr('value'));
+		}
+	});
+	g.update();
+}
+
+function toggle_hostname (name) {
+	for (var i=0; i<active_hostnames.length; i++) {
+		if (active_hostnames[i] == name) {
+			active_hostnames.splice(i, 1);
+			g.removeSeries(name);
+			g.update();
+			return;
+		}
+	}
+	active_hostnames.push(name);
+}
+
+function hostname_is_active (name) {
+	for (var i=0; i<active_hostnames.length; i++) {
+		if (active_hostnames[i] == name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+onload = function() {
+	alert('GATD_HOSTNAME not set!');
+	var GATD_HOSTNAME = 'localhost'
+	alert('COMP_USAGE_PROFILE_ID not set!');
+	var COMP_USAGE_PROFILE_ID = 'XXXXXXXXXX';
+
+	socket = io.connect(GATD_HOSTNAME+':8082/stream');
+
+	socket.on('connect', function (data) {
+		var query = {profile_id: COMP_USAGE_PROFILE_ID};
+		socket.emit('query', query);
+	});
+
+	socket.on('data', function (data) {
+		hostnames[data['hostname']] = data['time'];
+
+		remove_old_hostnames();
+		display_hostnames();
+
+		if (hostname_is_active(data['hostname'])) {
+			pdw = {};
+			pd  = {};
+			pd['cpu_usage']       = [data['time']-14400000, data['cpu_usage']];
+			pd['disk_usage']      = [data['time']-14400000, data['disk_usage']];
+			pd['memory_usage']    = [data['time']-14400000, data['memory_usage']];
+			if (_.has(data, 'network_sent') && _.has(data, 'network_receive')) {
+				pd['network_sent']    = [data['time']-14400000, data['network_sent']];
+				pd['network_receive'] = [data['time']-14400000, data['network_receive']];
+			}
+			pdw = {name: data['hostname'], data:pd};
+			g.addData(pdw);
+			g.update();
+		}
+	});
+
+
+	g = $.grapher($("#graph"), {legend: {show: true, container: $("#graph_key")}});
+
+
+
+}
+</script>
+
+
+
+
+
+</body>
+</html>
