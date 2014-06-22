@@ -74,16 +74,15 @@ Installation
 
 ### Ubuntu / RHEL
 
-1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
-[RabbitMQ Server](http://www.rabbitmq.com/download.html),
-[Node.js](http://nodejs.org/download/), and [tup](http://gittup.org/tup/).
+1. Install [MongoDB](http://docs.mongodb.org/manual/installation/) and
+[RabbitMQ Server](http://www.rabbitmq.com/download.html).
 
 2. Install dependencies
 
     ```
-    sudo apt-get install python-pip git vim python-dev cmake libssl-dev
+    sudo apt-get install python-pip git python-dev screen
        --- or ---
-    sudo yum install python-pip git vim python-devel cmake openssl-devel
+    sudo yum install python-pip git python-devel screen
     ```
     
 2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
@@ -123,7 +122,7 @@ in the next steps are reflected in this file.
   4. Restart the MongoDB daemon.
 
         ```
-        sudo service mongodb restart
+        sudo service mongod restart
         ```
 
 3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
