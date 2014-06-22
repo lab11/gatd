@@ -8,3 +8,4 @@ socketIO-client>=0.5.3
 watchdog>=0.7.1
 setproctitle>=1.1.8
 tornado>=3.2
+apscheduler>=2.1.2
