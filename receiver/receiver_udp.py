@@ -30,6 +30,19 @@ amqp_conn = pika.BlockingConnection(
 		))
 amqp_chan = amqp_conn.channel();
 
+# Create the exchange if it doesn't exist
+amqp_chan.exchange_declare(exchange=gatdConfig.rabbitmq.XCH_RECEIVE,
+                           exchange_type='fanout',
+                           durable='true')
+
+# Create a queue to hold the packets
+amqp_chan.queue_declare(queue=gatdConfig.rabbitmq.Q_RECEIVE,
+                        durable=True)
+
+# Bind the queue to the exchange
+amqp_chan.queue_bind(queue=gatdConfig.rabbitmq.Q_RECEIVE,
+                     exchange=gatdConfig.rabbitmq.XCH_RECEIVE)
+
 while True:
 	d, pkt_addr = s.recvfrom(1000)
 	now = int(time.time()*1000)
@@ -47,8 +60,8 @@ while True:
 
 	amqp_pkt = struct.pack("!BQQHQ",
 			gatdConfig.pkt.TYPE_UDP,
-			addr>>(64*8),
-			addr,
+			(addr>>(64*8)) & 0xFFFFFFFFFFFFFFFF,
+			addr & 0xFFFFFFFFFFFFFFFF,
 			src_port,
 			now)
 
