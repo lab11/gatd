@@ -122,7 +122,7 @@ in the next steps are reflected in this file.
   4. Restart the MongoDB daemon.
 
         ```
-        sudo service mongodb restart
+        sudo service mongod restart
         ```
 
 3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
