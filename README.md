@@ -80,9 +80,9 @@ Installation
 2. Install dependencies
 
     ```
-    sudo apt-get install python-pip git python-dev
+    sudo apt-get install python-pip git python-dev screen
        --- or ---
-    sudo yum install python-pip git python-devel
+    sudo yum install python-pip git python-devel screen
     ```
     
 2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
