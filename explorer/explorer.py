@@ -159,7 +159,7 @@ class ExploreKeysAllHandler (ExploreKeysBaseHandler):
 
 
 		meta = {}
-		configs = mi.getAllConfigs()
+		configs = mi.getAllProfiles()
 		for config in configs:
 			if config['profile_id'] in data:
 				meta[config['profile_id']] = {}
