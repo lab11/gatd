@@ -23,23 +23,25 @@ class socketioManager(object):
 
 class socketioStreamer(socketio.namespace.BaseNamespace):
 	def recv_connect (self):
-		self.m = None
+		pass
 
 	def on_query (self, msg):
-		if self.m:
-			self.m.kill(timeout=1)
-
 		print(msg)
 		self.msg  = msg
-		self.m = MongoInterface.MongoInterface(self.emit, cmd, self.disconnect)
-		self.m.set_query(msg)
-		self.m.start()
+		m = MongoInterface.MongoInterface(self.emit, self.disconnect)
+		m.set_query(msg)
+
+		# Configure which streamer we actually want to use
+		if cmd == 'get_new':
+			self.spawn(m.get_new)
+		elif cmd == 'get_all':
+			self.spawn(m.get_all)
+		elif cmd == 'get_all_replay':
+			self.spawn(m.get_all_replay)
 
 	def recv_disconnect (self):
-		print("disconnect: {}".format(self.msg))
-		self.m.kill(timeout=1)
-		print('killed mongo connection')
-		del self.m
+		print('disconnect: {}'.format(self.msg))
+		pass
 
 
 # Configure which streamer based on command line argument

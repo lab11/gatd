@@ -3,18 +3,12 @@ import pymongo
 import sys
 import time
 
-from gevent import monkey
-monkey.patch_socket()
-import gevent
-
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
-class MongoInterface(gevent.greenlet.Greenlet):
+class MongoInterface ():
 
-	def __init__(self, cb, cmd, done_cb):
-
-		gevent.greenlet.Greenlet.__init__(self)
+	def __init__ (self, cb, done_cb):
 
 		# Connect to the mongo database
 		while True:
@@ -46,10 +40,6 @@ class MongoInterface(gevent.greenlet.Greenlet):
 	def set_query (self, query):
 		self.query = query
 
-	def run (self):
-		self.stop = False
-		(self.cmd)()
-
 	def _connect_mongo (self):
 		self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
 		                                      port=gatdConfig.mongo.PORT,
@@ -58,93 +48,88 @@ class MongoInterface(gevent.greenlet.Greenlet):
 		self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
 		                           gatdConfig.mongo.PASSWORD)
 
-	def _get_new (self):
-		try:
-			# Use the capped collection to implement streaming starting at a
-			# time in the past. If the time key is present it is used as the
-			# minimum timestamp.
-			now = int(round(time.time() * 1000))
-			if 'time' in self.query:
-				start = now - self.query['time']
-			else:
-				start = now
-			self.query['time'] = {'$gt': start}
+	def get_new (self):
+		# Use the capped collection to implement streaming starting at a
+		# time in the past. If the time key is present it is used as the
+		# minimum timestamp.
+		now = int(round(time.time() * 1000))
+		if 'time' in self.query:
+			start = now - self.query['time']
+		else:
+			start = now
+		self.query['time'] = {'$gt': start}
 
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(
-				self.query,
-				tailable=True,
-				await_data=True)
-			while cursor.alive and not self.stop:
-				try:
-					n = cursor.next()
-					n['_id'] = str(n['_id'])
-					self.cb('data', n)
-				except StopIteration:
-					pass
-		except gevent.greenlet.GreenletExit:
-			pass
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(
+			self.query,
+			tailable=True,
+			await_data=True)
+		while cursor.alive and not self.stop:
+			try:
+				n = cursor.next()
+				n['_id'] = str(n['_id'])
+				self.cb('data', n)
+			except StopIteration:
+				pass
 
-	def _get_all (self):
-		try:
-			now = int(round(time.time() * 1000))
-			if 'time' in self.query:
-				start = now - self.query['time']
-			else:
-				start = now
-			self.query['time'] = {'$gt': start}
+	def get_all (self):
+		now = int(round(time.time() * 1000))
+		if 'time' in self.query:
+			start = now - self.query['time']
+		else:
+			start = now
+		self.query['time'] = {'$gt': start}
 
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(
-				self.query)
-			while cursor.alive and not self.stop:
-				try:
-					n = cursor.next()
-					n['_id'] = str(n['_id'])
-					self.cb('data', n)
-				except StopIteration:
-					pass
-			(self.done)()
-		except gevent.greenlet.GreenletExit:
-			pass
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(
+			self.query)
+		while cursor.alive and not self.stop:
+			try:
+				n = cursor.next()
+				n['_id'] = str(n['_id'])
+				self.cb('data', n)
+			except StopIteration:
+				pass
+
+		# Call the disconnect function at the end
+		(self.done)()
 
 	# Retrieve records from the main collection and replay them as if they
 	# were coming in in real time
-	def _get_all_replay (self):
-		try:
-			speedup = 1.0
+	def get_all_replay (self):
+		speedup = 1.0
 
-			if '_speedup' in self.query:
-				speedup = float(self.query['_speedup'])
-				del self.query['_speedup']
+		if '_speedup' in self.query:
+			speedup = float(self.query['_speedup'])
+			del self.query['_speedup']
 
-			# The user must provide the proper query
-			cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(self.query)
-			                                   #.sort('time', pymongo.ASCENDING)
+		# The user must provide the proper query
+		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED].find(self.query)
+		                                   #.sort('time', pymongo.ASCENDING)
 
-			last_time = 0
-			while cursor.alive and not self.stop:
-				try:
-					n = cursor.next()
-					n['_id'] = str(n['_id'])
+		last_time = 0
+		while cursor.alive and not self.stop:
+			try:
+				n = cursor.next()
+				n['_id'] = str(n['_id'])
 
 
-					if 'time' in n:
-						if last_time == 0:
-							self.cb('data', n)
-						elif n['time'] < last_time:
-							self.cb('data', n)
-						else:
-							time.sleep(((n['time'] - last_time)/1000.0)/speedup)
-							self.cb('data', n)
-
-						last_time = n['time']
-
+				if 'time' in n:
+					if last_time == 0:
+						self.cb('data', n)
+					elif n['time'] < last_time:
+						self.cb('data', n)
 					else:
-						self.cb('data', n)	
-				except StopIteration:
-					pass
-			(self.done)()
-		except gevent.greenlet.GreenletExit:
-			pass
+						time.sleep(((n['time'] - last_time)/1000.0)/speedup)
+						self.cb('data', n)
+
+					last_time = n['time']
+
+				else:
+					self.cb('data', n)	
+			except StopIteration:
+				pass
+
+		# Signal disconnect
+		(self.done)()
 
 
 	def __del__ (self):
