@@ -13,36 +13,35 @@ import gatdConfig
 class MongoInterface(gevent.greenlet.Greenlet):
 
 	def __init__(self, cb, cmd, done_cb):
-		# Connect to the mongo database
 
 		gevent.greenlet.Greenlet.__init__(self)
 
-		try:
-			self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
-			                                      port=gatdConfig.mongo.PORT,
-												  use_greenlets=True)
-			self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
-			self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
-			                           gatdConfig.mongo.PASSWORD)
-			self.stop = False
+		# Connect to the mongo database
+		while True:
+			try:
+				self._connect_mongo()
+				break
+			except pymongo.errors.ConnectionFailure:
+				print("Could not connect. Check the host and port.")
+				print("Retrying")
 
-			# Save the emit() function used to send the data packet
-			self.cb = cb
+		self.stop = False
 
-			# The function to call when all packets have been found
-			self.done = done_cb
+		# Save the emit() function used to send the data packet
+		self.cb = cb
 
-			# Configure which streamer we actually want to use
-			if cmd == 'get_new':
-				self.cmd = self._get_new
-			elif cmd == 'get_all':
-				self.cmd = self._get_all
-			elif cmd == 'get_all_replay':
-				self.cmd = self._get_all_replay
+		# The function to call when all packets have been found
+		self.done = done_cb
 
-		except pymongo.errors.ConnectionFailure:
-			print "Could not connect. Check the host and port."
-			sys.exit(1)
+		# Configure which streamer we actually want to use
+		if cmd == 'get_new':
+			self.cmd = self._get_new
+		elif cmd == 'get_all':
+			self.cmd = self._get_all
+		elif cmd == 'get_all_replay':
+			self.cmd = self._get_all_replay
+
+
 
 	def set_query (self, query):
 		self.query = query
@@ -50,6 +49,14 @@ class MongoInterface(gevent.greenlet.Greenlet):
 	def run (self):
 		self.stop = False
 		(self.cmd)()
+
+	def _connect_mongo (self):
+		self.mongo_conn = pymongo.MongoClient(host=gatdConfig.mongo.HOST,
+		                                      port=gatdConfig.mongo.PORT,
+		                                      use_greenlets=True)
+		self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
+		self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
+		                           gatdConfig.mongo.PASSWORD)
 
 	def _get_new (self):
 		try:
