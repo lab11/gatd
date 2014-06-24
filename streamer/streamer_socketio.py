@@ -10,7 +10,6 @@ import socketio.server
 import socketio.mixins
 
 import setproctitle
-setproctitle.setproctitle('gatd-s: socketio')
 
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
@@ -31,12 +30,15 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 			self.m.kill(timeout=1)
 
 		print(msg)
+		self.msg  = msg
 		self.m = MongoInterface.MongoInterface(self.emit, cmd, self.disconnect)
 		self.m.set_query(msg)
 		self.m.start()
 
 	def recv_disconnect (self):
+		print("disconnect: {}".format(self.msg))
 		self.m.kill(timeout=1)
+		print('killed mongo connection')
 		del self.m
 
 
@@ -46,12 +48,15 @@ if len(sys.argv) != 2:
 	sys.exit(1)
 
 if sys.argv[1] == 'new':
+	setproctitle.setproctitle('gatd-s: sio-base')
 	cmd = 'get_new'
 	port = gatdConfig.socketio.PORT_PYTHON
 elif sys.argv[1] == 'all':
+	setproctitle.setproctitle('gatd-s: sio-hist')
 	cmd = 'get_all'
 	port = gatdConfig.socketio.PORT_PYTHON_HISTORICAL
 elif sys.argv[1] == 'replay':
+	setproctitle.setproctitle('gatd-s: sio-repl')
 	cmd = 'get_all_replay'
 	port = gatdConfig.socketio.PORT_PYTHON_REPLAY
 else:
