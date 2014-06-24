@@ -83,9 +83,12 @@ Installation
     sudo apt-get install python-pip git python-dev screen
        --- or ---
     sudo yum install python-pip git python-devel screen
+       --- or ---
+    sudo port install py27-pip git-core
     ```
     
-2. Setup user and checkout gatd. You will also want to add yourself to the `gatd` group and then log out and back in.
+2. Setup user and checkout gatd. You will also want to add yourself to the
+`gatd` group and then log out and back in. Probably can skip this step on Mac.
 
     ```
     sudo adduser gatd
@@ -96,7 +99,8 @@ Installation
     sudo usermod -a -G gatd <username>
     ```
     
-2. Copy the example GATD config file and set the necessary values. You will want to make sure any passwords set
+2. Copy the example GATD config file and set the necessary values.
+You will want to make sure any passwords set
 in the next steps are reflected in this file.
 
     ```
@@ -125,6 +129,21 @@ in the next steps are reflected in this file.
         sudo service mongod restart
         ```
 
+  5. Add the gatd user to the Mongo database
+
+        ```
+        mongo --port <mongo db port>
+        use getallthedata
+        db.createUser({
+            user: "reportsUser",
+            pwd: "12345678",
+            roles: [
+                     { role: "dbAdmin", db: "getallthedata" }
+                   ]
+            }
+        )
+        ```
+
 3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
   1. Copy the config files to `/etc/rabbitmq`.
 
@@ -189,116 +208,3 @@ in the next steps are reflected in this file.
         ./run_streamer.sh
         ```
 
-
-### Mac OS X
-
-
-1. Install [MongoDB](http://docs.mongodb.org/manual/installation/),
-[RabbitMQ Server](http://www.rabbitmq.com/download.html),
-[Node.js](http://nodejs.org/download/), and [tup](http://gittup.org/tup/).
-
-2. Install dependencies
-
-    ```
-    sudo port install py27-pip git-core cmake
-    ```
-    
-2. Get GATD
-
-    ```
-    clone https://github.com/lab11/gatd.git
-    ```
-    
-2. Copy the example GATD config file and set the necessary values. You will want to make sure any passwords set
-in the next steps are reflected in this file.
-
-    ```
-    cd gatd/config
-    cp gatd.config.example gatd.config
-    ```
-
-2. Configure MongoDB using the template config file in the `mongo` folder.
-  1. Copy the config file to `/etc/mongodb.conf`.
-
-        ```
-        sudo cp /opt/gatd/mongo/mongodb.conf /etc/mongodb.conf
-        ```
-
-  2. Edit the config file with the port you want to use.
-  3. Create a directory for the database.
-
-        ```
-        sudo mkdir -p /data/mongodb
-        sudo chown mongodb:mongodb /data/mongodb
-        ```
-        
-  4. Restart the MongoDB daemon.
-
-        ```
-        sudo service mongodb restart
-        ```
-
-3. Configure RabbitMQ using the config files in the `rabbitmq` folder.
-  1. Copy the config files to `/etc/rabbitmq`.
-
-        ```
-        sudo cp /opt/gatd/rabbitmq/rabbitmq* /etc/rabbitmq
-        ```
-  
-  2. Edit `rabbitmq-gatd.config` with the port you want to use.
-  3. Restart the rabbitmq server.
-  
-        ```
-        sudo rabbitmqctl stop
-        sudo service rabbitmq-server start
-        ```
-
-  4. Delete the default rabbitmq user, create a GATD user, and set permissions.
-  
-        ```
-        sudo rabbitmqctl delete_user guest
-        sudo rabbitmqctl add_user gatd <password>
-        sudo rabbitmqctl set_user_tags gatd administrator
-        sudo rabbitmqctl set_permissions -p / gatd ".*" ".*" ".*"
-        ```
-
-
-4. Set up Python environment.
-
-    ```bash
-    sudo pip2 install virtualenv
-    cd /opt/gatd
-    virtualenv .
-    source ./bin/activate
-    pip2 install -r requirements.pip
-    ```
-
-
-9. Setup the database in MongoDB.
-
-    ```
-    cd /opt/gatd/mongo
-    ./init_mongo.py
-    ````
-    
-10. Run GATD
-  1. Start the receivers.
-  
-        ```
-        cd /opt/gatd/receiver
-        ./run_receiver.sh
-        ```
-
-  2. Run the formatter.
-    
-        ```
-        cd /opt/gatd/formatter
-        ./run_formatter.sh
-        ```
-
-  3. Run the streamers.
-   
-        ```
-        cd /opt/gatd/streamer
-        ./run_streamer.sh
-        ```
