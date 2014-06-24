@@ -3,6 +3,10 @@ import pymongo
 import sys
 import time
 
+from gevent import monkey
+monkey.patch_socket()
+import gevent
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 
@@ -27,16 +31,6 @@ class MongoInterface ():
 		# The function to call when all packets have been found
 		self.done = done_cb
 
-		# Configure which streamer we actually want to use
-		if cmd == 'get_new':
-			self.cmd = self._get_new
-		elif cmd == 'get_all':
-			self.cmd = self._get_all
-		elif cmd == 'get_all_replay':
-			self.cmd = self._get_all_replay
-
-
-
 	def set_query (self, query):
 		self.query = query
 
@@ -58,7 +52,7 @@ class MongoInterface ():
 		else:
 			start = now
 		self.query['time'] = {'$gt': start}
-
+		
 		cursor = self.mongo_db[gatdConfig.mongo.COL_FORMATTED_CAPPED].find(
 			self.query,
 			tailable=True,
@@ -70,6 +64,9 @@ class MongoInterface ():
 				self.cb('data', n)
 			except StopIteration:
 				pass
+			except gevent.greenlet.GreenletExit:
+				self.mongo_conn.close()
+				return
 
 	def get_all (self):
 		now = int(round(time.time() * 1000))
@@ -88,6 +85,9 @@ class MongoInterface ():
 				self.cb('data', n)
 			except StopIteration:
 				pass
+			except gevent.greenlet.GreenletExit:
+				self.mongo_conn.close()
+				return
 
 		# Call the disconnect function at the end
 		(self.done)()
@@ -122,15 +122,14 @@ class MongoInterface ():
 						self.cb('data', n)
 
 					last_time = n['time']
-
 				else:
-					self.cb('data', n)	
+					self.cb('data', n)
 			except StopIteration:
 				pass
+			except gevent.greenlet.GreenletExit:
+				self.mongo_conn.close()
+				return
 
 		# Signal disconnect
 		(self.done)()
 
-
-	def __del__ (self):
-		self.mongo_conn.close()

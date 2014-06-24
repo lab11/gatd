@@ -22,11 +22,9 @@ class socketioManager(object):
 			{gatdConfig.socketio.STREAM_PREFIX: socketioStreamer});
 
 class socketioStreamer(socketio.namespace.BaseNamespace):
-	def recv_connect (self):
-		pass
-
+	
 	def on_query (self, msg):
-		print(msg)
+		print('connect {}'.format(msg))
 		self.msg  = msg
 		m = MongoInterface.MongoInterface(self.emit, self.disconnect)
 		m.set_query(msg)
@@ -41,7 +39,7 @@ class socketioStreamer(socketio.namespace.BaseNamespace):
 
 	def recv_disconnect (self):
 		print('disconnect: {}'.format(self.msg))
-		pass
+		self.disconnect(silent=True)
 
 
 # Configure which streamer based on command line argument
