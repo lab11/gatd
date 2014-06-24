@@ -95,7 +95,7 @@ Installation
     cd /opt
     sudo git clone https://github.com/lab11/gatd.git
     sudo chown gatd:gatd gatd -R
-    sudo chmod -r g+w gatd
+    sudo chmod -R g+w gatd
     sudo usermod -a -G gatd <username>
     ```
     
