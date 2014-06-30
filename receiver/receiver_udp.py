@@ -60,7 +60,7 @@ while True:
 
 	amqp_pkt = struct.pack("!BQQHQ",
 			gatdConfig.pkt.TYPE_UDP,
-			(addr>>(64*8)) & 0xFFFFFFFFFFFFFFFF,
+			(addr>>(64)) & 0xFFFFFFFFFFFFFFFF,
 			addr & 0xFFFFFFFFFFFFFFFF,
 			src_port,
 			now)
