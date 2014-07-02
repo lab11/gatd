@@ -118,7 +118,7 @@ class MongoInterface ():
 					elif n['time'] < last_time:
 						self.cb('data', n)
 					else:
-						time.sleep(((n['time'] - last_time)/1000.0)/speedup)
+						gevent.sleep(((n['time'] - last_time)/1000.0)/speedup)
 						self.cb('data', n)
 
 					last_time = n['time']
