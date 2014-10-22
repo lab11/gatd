@@ -155,7 +155,16 @@ parser.add_argument('--profile_id',
 
 args = parser.parse_args()
 
-pp = pprint.PrettyPrinter()
+class HexAndIntPrettyPrinter(pprint.PrettyPrinter):
+	def format(self, object, context, maxlevels, level):
+		repr, readable, recursive = pprint.PrettyPrinter.format(
+				self, object, context, maxlevels, level)
+		if isinstance(object, int):
+			return "{} (0x{:x})".format(object, object), readable, recursive
+		else:
+			return repr, readable, recursive
+
+pp = HexAndIntPrettyPrinter()
 mi = MongoInterface.MongoInterface()
 pt = profileTester(mi, args.parser_file, args.profile_id)
 pi = PikaConnection(packet_callback)
