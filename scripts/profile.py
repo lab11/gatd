@@ -51,14 +51,26 @@ parser.add_argument('--parser',
                     required=True,
                     help='class name of the parser (formatter) that will \
 handle the packets. Example: "temperatureParser"')
+parser.add_argument('--lookup-only',
+                    action='store_true',
+                    help='fail if parser does not exist')
 
 args = parser.parse_args()
+
+# Strip file extension if provided
+if args.parser[-3:] == '.py':
+	args.parser = args.parser[:-3]
 
 
 dbinfo = m.getProfileByParser(args.parser)
 
 if dbinfo:
-	print('Profile ID: {}'.format(dbinfo['profile_id']))
+	if args.lookup_only:
+		print(dbinfo['profile_id'])
+	else:
+		print('Profile ID: {}'.format(dbinfo['profile_id']))
+elif args.lookup_only:
+	sys.exit(-1)
 else:
 	print('No Profile ID found for that parser.')
 	if confirm('Create new Profile ID for {}?'.format(args.parser)):
