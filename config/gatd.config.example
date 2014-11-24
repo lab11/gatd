@@ -55,6 +55,9 @@ xch_receive: receive_exchange                  # Exchange that receivers use
 [streamer]
 port_tcp: 7999                                 # TCP streamer port
 
+[viewer]
+port: 8086
+
 # Packets moving to the formatter
 [pkt]
 header_len:     26
