@@ -1,4 +1,4 @@
-import time
+import time as pytime
 
 #
 # Returns true if the packet is unique, false if it is a duplicate
@@ -45,14 +45,17 @@ class Deduplicator (object):
 		# Save the timestamp and backwards lookup
 		self.timestamps.append(time)
 		self.time_hashes[time] = key
-
+	
 		# Get rid of old packets from the dicts to reduce memory usage
-		now = int(time.time()*1000)
+		now = int(pytime.time()*1000)
 		while True:
+			if len(self.timestamps) == 0:
+				break
+
 			time_check = self.timestamps[0]
 			if now - time_check > TIME_DELAY:
 				# Deleting this timestamp
-				self.timestamps.remove(0)
+				self.timestamps.pop(0)
 
 				# Get the packet that corresponds to that time
 				pkt = self.time_hashes[time_check]

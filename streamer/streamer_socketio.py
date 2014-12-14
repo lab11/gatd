@@ -11,6 +11,9 @@ import socketio.mixins
 
 import setproctitle
 
+import logging
+logging.basicConfig()
+
 sys.path.append(os.path.abspath('../config'))
 import gatdConfig
 import MongoInterface
@@ -24,18 +27,23 @@ class socketioManager(object):
 class socketioStreamer(socketio.namespace.BaseNamespace):
 	
 	def on_query (self, msg):
-		print('connect {}'.format(msg))
-		self.msg  = msg
-		m = MongoInterface.MongoInterface(self.emit, self.disconnect)
-		m.set_query(msg)
+		try:	
+			print('connect {}'.format(msg))
+			self.msg  = msg
+		
+			m = MongoInterface.MongoInterface(self.emit, self.disconnect)
+			m.set_query(msg)
 
-		# Configure which streamer we actually want to use
-		if cmd == 'get_new':
-			self.spawn(m.get_new)
-		elif cmd == 'get_all':
-			self.spawn(m.get_all)
-		elif cmd == 'get_all_replay':
-			self.spawn(m.get_all_replay)
+			# Configure which streamer we actually want to use
+			if cmd == 'get_new':
+				self.spawn(m.get_new)
+			elif cmd == 'get_all':
+				self.spawn(m.get_all)
+			elif cmd == 'get_all_replay':
+				self.spawn(m.get_all_replay)
+		except Exception as e:
+			print(e)
+			print('argggg')
 
 	def recv_disconnect (self):
 		print('disconnect: {}'.format(self.msg))
