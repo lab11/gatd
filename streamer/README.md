@@ -47,7 +47,7 @@ This example will start 5 minutes in the past:
 
 Usage:
 
-    host: inductor.eecs.umich.edu:8082
+    host: gatd.eecs.umich.edu:8082
     namespace: /stream
 
 
@@ -62,7 +62,7 @@ to all historical data, but no new data.
 
 Usage:
 
-    host: inductor.eecs.umich.edu:8083
+    host: gatd.eecs.umich.edu:8083
     namespace: /stream
 
 
@@ -89,7 +89,7 @@ be provided to limit the query range.
 
 Usage:
 
-    host: inductor.eecs.umich.edu:8084
+    host: gatd.eecs.umich.edu:8084
     namespace: /stream
 
 
@@ -102,7 +102,7 @@ Old Streamers
 This streamer uses socket.io to funnel data from the server to a browser. This
 is the best approach if the client is a webpage.
 
-    host: inductor.eecs.umich.edu:8080
+    host: gatd.eecs.umich.edu:8080
     namespace: /stream
 
 
@@ -111,7 +111,7 @@ is the best approach if the client is a webpage.
 For a more basic interface, a client can simply create a TCP connection
 and receive packets over the connection.
 
-    host: inductor.eecs.umich.edu
+    host: gatd.eecs.umich.edu
     port: 22500
 
 Upon connecting, the client should send a JSON string representing the query

@@ -33,7 +33,7 @@ externals_profiles: formatters                 # Folder in external directory wh
 externals_processors: processors               # Folder in external directory where the processors are
 
 [explorer]
-host:           inductor.eecs.umich.edu        # Host that is running the explorer aggregator
+host:           gatd.eecs.umich.edu        # Host that is running the explorer aggregator
 port_http_post: 8085                           # Port the explorer is listening on
 
 [socketio]
