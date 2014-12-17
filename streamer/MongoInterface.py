@@ -41,6 +41,7 @@ class MongoInterface ():
 		self.mongo_db = self.mongo_conn[gatdConfig.mongo.DATABASE]
 		self.mongo_db.authenticate(gatdConfig.mongo.USERNAME,
 		                           gatdConfig.mongo.PASSWORD)
+		print(self.mongo_db)
 
 	def get_new (self):
 		# Use the capped collection to implement streaming starting at a
@@ -65,6 +66,7 @@ class MongoInterface ():
 			except StopIteration:
 				pass
 			except gevent.greenlet.GreenletExit:
+				print('exit')
 				self.mongo_conn.close()
 				return
 
