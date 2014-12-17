@@ -4,7 +4,7 @@
 # so in gatd.config:
 #
 #  [mongo]
-#  host: inductor.eecs.umich.edu
+#  host: gatd.eecs.umich.edu
 #
 # becomes, in Python,:
 #
