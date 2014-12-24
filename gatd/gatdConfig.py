@@ -12,7 +12,7 @@
 #
 
 
-import ConfigParser
+import configparser
 import os
 import sys
 
@@ -27,7 +27,7 @@ class BaseConfigSection (object):
 
 CONFIG_FILENAME = 'gatd.config'
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          CONFIG_FILENAME))
 
@@ -41,7 +41,7 @@ for section in config.sections():
 		except ValueError:
 			pass
 
-	lattrs = dict((k.upper(), v) for k, v in attrs.iteritems())
+	lattrs = dict((k.upper(), v) for k, v in attrs.items())
 	newclass = type(section, (BaseConfigSection,), lattrs)
 
 	setattr(sys.modules[__name__], section, newclass())
