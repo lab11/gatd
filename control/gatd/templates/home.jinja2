@@ -1,0 +1,136 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+GATD: Get All The Data / Lab11 / University of Michigan
+{% endblock %}
+
+{% block body %}
+
+  <section id="home" name="home"></section>
+  <div id="headerwrap">
+    <div class="container">
+      <div class="row centered">
+        <div class="col-lg-12">
+          <h1>Welcome To <b>GATD</b></h1>
+          <h3>Collecting data from the world's sensors.</h3>
+          <br>
+        </div>
+
+        <div class="col-lg-2">
+          <h5>Get All The Data</h5>
+          <p>From the tiniest sensor to a billion networked devices, GATD is
+          designed to handle the streaming data from the entire swarm.</p>
+        </div>
+        <div class="col-lg-7">
+          <img class="img-responsive" src="static/img/app-bg.png" alt="">
+        </div>
+        <!-- <div class="col-lg-2">
+          <br>
+          <img class="hidden-xs hidden-sm hidden-md" src="static/img/arrow2.png">
+          <h5>Building Blocks Approach</h5>
+          <p>Configure how GATD handles your data by connecting blocks.</p>
+        </div> -->
+
+    
+        <div class="col-lg-3">
+          <h3>Login/Signup</h3>
+          <p></p>
+          <div class="sns-signin">
+            <a href="#" class="signin-facebook"><i class="fa fa-facebook"></i><span>Sign in with Facebook</span></a>
+            <a href="#" class="signin-google-plus"><i class="fa fa-google-plus"></i><span>Sign in with Google+</span></a>
+            <a href="#" class="signin-github"><i class="fa fa-github"></i><span>Sign in with GitHub</span></a>
+          </div>
+        </div>
+      </div>
+    </div> <!--/ .container -->
+  </div><!--/ #headerwrap -->
+
+
+  <section id="desc" name="desc"></section>
+  <!-- INTRO WRAP -->
+  <div id="intro">
+    <div class="container">
+      <div class="row centered">
+        <h1>Designed for Streaming Data</h1>
+        <br>
+        <br>
+        <div class="col-lg-4">
+          <img src="static/img/intro01.png" alt="">
+          <h3>Collection</h3>
+          <p>The first step is to get data into GATD. GATD's architecture allows
+          it to receive data from any source over any protocol. At the moment,
+          receivers for UDP and HTTP POST data have been implemented.</p>
+        </div>
+        <div class="col-lg-4">
+          <img src="static/img/intro02.png" alt="">
+          <h3>Processing</h3>
+          <p>Once in the system, data often needs to be cleaned, restructured,
+          or processed in some way. GATD allows this to happen in the cloud.</p>
+        </div>
+        <div class="col-lg-4">
+          <img src="static/img/intro03.png" alt="">
+          <h3>Distribution</h3>
+          <p>Getting data out of GATD is in many ways more important than getting it
+          in. GATD's streaming architecture allows data to flow out in real-time.
+          Additionally, data can be queried, replayed, and dumped on-demand.</p>
+        </div>
+      </div>
+      <br>
+      <hr>
+    </div> <!--/ .container -->
+  </div><!--/ #introwrap -->
+
+  <section id="showcase" name="showcase"></section>
+  <div id="showcase">
+    <div class="container">
+      <div class="row">
+        <h1 class="centered">Build with Blocks</h1>
+        <br>
+        <div class="col-lg-7 col-lg-offset-1">
+          <img class="img-responsive" src="static/img/app-bg.png" alt="">
+        </div>
+        <div class="col-lg-3">
+          <h3>Create Your Profile</h3>
+          <p>With GATD, you create your own streaming data profile.
+          Declare receivers, formatters, processors, data storage elements,
+          streamers, and more, all from a visual drap-and-drop editor.</p>
+          <h3>Runs in the Cloud</h3>
+          <p>Your profile is automatically loaded into the cloud-based
+          GATD system. Simply start sending data to see it in action.</p>
+        </div>
+      </div>
+      <br>
+      <br>
+      <br>  
+    </div><!-- /container -->
+  </div>
+
+  <section id="contact" name="contact"></section>
+  <div id="footerwrap">
+    <div class="container">
+      <div class="row">
+        <h1 class="centered">Get Started</h1>
+        <br>
+        <div class="col-lg-6">
+          <h2>Login to get Started</h2>
+          <p>Sign in with your account on some other service. GATD doesn't need
+          any permissions, at most we care about your name. We just aren't
+          interested in requiring yet-another-password.</p>
+
+          <div class="col-lg-8 sns-signin">
+            <a href="/login/facebook" class="signin-facebook"><i class="fa fa-facebook"></i><span>Sign in with Facebook</span></a>
+            <a href="/login/google" class="signin-google-plus"><i class="fa fa-google-plus"></i><span>Sign in with Google+</span></a>
+            <a href="/login/github" class="signin-github"><i class="fa fa-github"></i><span>Sign in with GitHub</span></a>
+          </div>
+
+        </div>
+
+        <div class="col-lg-5 col-lg-offset-1">
+          <h2>Help</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

@@ -1,8 +1,11 @@
 _id:          unique id from mongo
-profile_name: Some overall name given to this profile by the user
+name:         Some overall name given to this profile by the user
+profile_id:   some unique string for the profile, hopefully readable
+aliases:      other unique strings for the profile, allows it to "change"
 user_id:      relates the user table to the profiles they own
 blocks: [     array of elements in their profile
 	type:     type of the block
+	block_id: some unique name for the block
 ]
 
 
