@@ -11,10 +11,27 @@ GATD - Editor
 <h1>Edit your data profile.</h1>
 
 <div class="row">
-  <div id="gatd-editor" class="col-lg-10">
+  <div id="gatd-editor" class="col-lg-9">
   </div>
-  <div id="gatd-editor-buttons" class="col-lg-2">
-    <button type="button" class="gatd-editor-button" id="add-receiver-udp-ipv6" name="add-receiver-udp-ipv6">Add UDP Receiver (IPv6)</button>
+  <div id="gatd-editor-buttons" class="col-lg-3">
+
+    <div class="btn-group-vertical" role="group">
+
+      {% for button_group in block_buttons %}
+      <!-- <h4>{{ button_group[0] }}</h4> -->
+
+        <button class="btn btn-success">{{ button_group[0] }}</button>
+
+        {% for button in button_group[1] %}
+          <button type="button" class="gatd-editor-button btn btn-default" data-block="{{ button }}">Add {{ blocks[button]['name'] }}</button>
+        {% endfor %}
+
+      
+      {% endfor %}
+
+    </div>
+
+    
   </div>
 </div>
 

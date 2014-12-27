@@ -58,39 +58,6 @@ function new_block (name, options) {
 		});
 	}
 
-	
-	
-
-	// if (input) {
-	// 	$(new_block).append(input_type);
-	// }
-
-
-	// jsp.draggable($(new_block));
-
-
-	// jsp.makeSource($(new_block), {
-	// 	filter: '.source-group', // make the block the source but only work from the little square
-	// 	anchor: "AutoDefault",   // use the best anchor, but only in the middle of each side
-	// 	connector:[ "Flowchart", { cornerRadius:5 } ], // make the connectors straight lines with 90 degree bends
-	// 	connectorStyle:{ strokeStyle: "#5c96bc",
-	// 	                 lineWidth: 2,
-	// 	                 outlineColor: "transparent",
-	// 	                 outlineWidth: 4
-	// 	               },
-	// 	maxConnections: 5,
-	// 	onMaxConnections: function(info, e) {
-	// 		alert("Maximum connections (" + info.maxConnections + ") reached");
-	// 	}
-	// });
-
-
-	// jsp.makeTarget($(new_block), {
-	// 	dropOptions:{ hoverClass:"dragHover" },
-	// 	anchor:"AutoDefault",
-	// 	allowLoopback:false
-	// });
-
 }
 
 
@@ -115,11 +82,24 @@ jsPlumb.ready(function() {
 		Container:          "gatd-editor"
 	});
 
-	new_block('UDP Receiver (IPv6)', {'source_group':'a'});
-	new_block('Formatter', {'source_group': 'b',
-		                    'target_group': 'a'});
-	new_block('Processor', {'source_group': 'b',
-		                    'target_group': 'a'});
-	new_block('Mongo DB', {'source_group': 'c',
-                           'target_group': 'b'})
+	$(".gatd-editor-button").click(function () {
+		var block_type = $(this).attr('data-block');
+		$.ajax('/editor/block/'+block_type, {'dataType': 'json'})
+		.done(function (j) {
+			if (j.status != 'success') {
+				console.log('Error occurred getting block.');
+				return;
+			}
+			new_block(j.name, j.options);
+		});
+	});
+
+
+	// new_block('UDP Receiver (IPv6)', {'source_group':'a'});
+	// new_block('Formatter', {'source_group': 'b',
+	// 	                    'target_group': 'a'});
+	// new_block('Processor', {'source_group': 'b',
+	// 	                    'target_group': 'a'});
+	// new_block('Mongo DB', {'source_group': 'c',
+ //                           'target_group': 'b'})
 });

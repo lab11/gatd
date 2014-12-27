@@ -31,6 +31,7 @@ def main(global_config, **settings):
 	
 	config.add_route('home', '/')
 	config.add_route('editor', '/editor')
+	config.add_route('editor_block', '/editor/block/{block}')
 
 	config.scan()
 	return config.make_wsgi_app()

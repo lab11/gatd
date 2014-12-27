@@ -30,7 +30,7 @@
 }
 
 .w:hover {
-	background-color: #5c96bc;
+	background-color: #ccc;
 	color:white;
 
 }
@@ -42,7 +42,7 @@
 }
 
 .aLabel._jsPlumb_hover, ._jsPlumb_source_hover, ._jsPlumb_target_hover {
-	background-color:#1e8151;
+	background-color:#999;
 	color:white;
 }
 
