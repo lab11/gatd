@@ -1,0 +1,25 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+GATD - Editor
+{% endblock %}
+
+{% block body %}
+
+    <link href="{{'gatd:static/css/gatd-editor.css'|static_url}}" rel="stylesheet">
+  
+<h1>Edit your data profile.</h1>
+
+<div class="row">
+  <div id="gatd-editor" class="col-lg-10">
+  </div>
+  <div id="gatd-editor-buttons" class="col-lg-2">
+    <button type="button" class="gatd-editor-button" id="add-receiver-udp-ipv6" name="add-receiver-udp-ipv6">Add UDP Receiver (IPv6)</button>
+  </div>
+</div>
+
+
+<script src="/static/js/dom.jsPlumb-1.7.2.js"></script>
+<script src="/static/js/gatd-editor.js"></script>
+
+{% endblock %}
