@@ -8,7 +8,7 @@ options: {
 	target_group: [a,b,c]
 }
 */
-function new_block (name, options) {
+function new_block (name, block_uuid, html, options) {
 	var colors = {
 		'a': '#5696BC',
 		'b': '#E04836',
@@ -16,7 +16,8 @@ function new_block (name, options) {
 	}
 
 	var new_block = $('<div>', {class: 'w ui-draggable'})
-	                 .text(name);
+	                 .text(name)
+	                 .attr('data-blockid', block_uuid);
 	var new_source = $('<div>', {class: 'source-group'});
 	var new_target = $('<div>', {class: 'target-group'});
 
@@ -58,6 +59,26 @@ function new_block (name, options) {
 		});
 	}
 
+	$(new_block).append(html);
+
+	$(new_block).dblclick(function () {
+		$('#block_'+block_uuid+'_popup').show();
+	})
+
+}
+
+function save_profile () {
+	var blocks = [];
+
+	// {
+	// 	'block_id': 
+	// 	'top': 
+	// 	'left':
+	// 	'settings': [
+	// 	],
+	// 	'parameters': [
+	// 	]
+	// }
 }
 
 
@@ -90,7 +111,9 @@ jsPlumb.ready(function() {
 				console.log('Error occurred getting block.');
 				return;
 			}
-			new_block(j.name, j.options);
+			var opts = {'source_group': j.block.source_group,
+			            'target_group': j.block.target_group}
+			new_block(j.block.name, j.block.uuid, j.html, opts);
 		});
 	});
 

@@ -1,4 +1,11 @@
+
+import copy
+import ipaddress
+import os
+import uuid
+
 from pyramid.view import view_config
+import pyramid.renderers
 
 
 blocks = {
@@ -42,6 +49,12 @@ packet.',
 				'name': 'POST URL',
 				'help': 'The URL to post to to ensure data reaches this stream.',
 				'key': 'post_url'
+			},
+			{
+				'name': 'Secret',
+				'help': 'In the HTTP post, include the header "??" with \
+this value so GATD knows that the request came from you.',
+				'key': 'secret'
 			}
 		]
 	},
@@ -184,7 +197,18 @@ socket.io server.',
 	}
 }
 
+# TODO: make this real
+def receiver_udp_ipv6_parameters (block):
+	ip = ipaddress.ip_address(os.urandom(16))
+	for p in block['parameters']:
+		if p['key'] == 'dst_addr':
+			p['value'] = str(ip)
 
+
+
+block_parameters_fns = {
+	'receiver_udp_ipv6': receiver_udp_ipv6_parameters
+}
 
 
 @view_config(route_name='home', renderer='templates/home.jinja2')
@@ -216,14 +240,16 @@ def editor_block (request):
 	if block_name not in blocks:
 		return {'status': 'error'}
 
-	block = blocks[block_name]
+	block = copy.deepcopy(blocks[block_name])
+	block['uuid'] = str(uuid.uuid4())
 
+	if block_name in block_parameters_fns:
+		block_parameters_fns[block_name](block)
 
-	return {'name': block['name'],
-			'options': {
-				'source_group': block['source_group'],
-				'target_group': block['target_group']
-			},
+	block_html = pyramid.renderers.render('templates/block_popup.jinja2', {'block': block})
+
+	return {'block': block,
+	        'html': block_html,
 			'status': 'success'}
 
 
