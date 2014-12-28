@@ -61,9 +61,18 @@ function new_block (name, block_uuid, html, options) {
 
 	$(new_block).append(html);
 
+	// Initialize the popup
+	$('#block_'+block_uuid+'_popup').popup({
+		positionTo: "origin"
+	});
+
 	$(new_block).dblclick(function () {
-		$('#block_'+block_uuid+'_popup').show();
-	})
+		var position = $(this).position();
+		$('#block_'+block_uuid+'_popup').popup('open', {
+			x: position.left,
+			y: position.top
+		});
+	});
 
 }
 

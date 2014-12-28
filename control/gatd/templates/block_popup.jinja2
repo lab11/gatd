@@ -1,4 +1,7 @@
-<div id="block_{{ block.uuid }}_popup" class="block_popup" data-blockid="{{ block.uuid }}" style="display:none;">
+<div id="block_{{ block.uuid }}_popup" class="block_popup" data-blockid="{{ block.uuid }}" data-role="popup">
+
+  <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right ui-link ui-btn ui-btn-b ui-icon-delete ui-btn-icon-notext ui-shadow ui-corner-all">Close</a>
+
 
   <h2>{{ block.name }}</h2>
   <p>{{ block.help }}</p>
@@ -31,7 +34,7 @@
         {% if type == 'string' or type == 'int' %}
         <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-2 control-label">{{ setting.name }}</label>
         <div class="col-sm-10">
-          <input type="text" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}">
+          <input type="text" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" {% if 'default' in setting %}value="{{ setting.default }}"{% endif %}>
         </div>
 
         {% elif type == 'bool' %}

@@ -146,7 +146,7 @@ a:after {
 }
 
 #footerwrap h1 {
-    color: white;
+    color: whiteø;
 }
 
 #footerwrap h2 {
@@ -230,5 +230,13 @@ a:after {
   color: #505050;
   background-color: #eaeaea;
   padding: 15px;
+}
+
+
+/* Editor Popups */
+
+.block_popup {
+    background-color: white;
+    padding: 20px;
 }
 
