@@ -23,6 +23,12 @@ function new_block (name, block_uuid, html, options) {
 
 	$("#gatd-editor").append(new_block);
 
+	if ('icon' in options) {
+		var icon = $('<span>', {class: 'fa fa-'+options.icon})
+		            .html('&nbsp;');
+		new_block.prepend(icon);
+	}
+
 
 	jsp.draggable($(new_block));
 
@@ -74,6 +80,11 @@ function new_block (name, block_uuid, html, options) {
 		});
 	});
 
+	// Initialize tooltips
+	$('#block_'+block_uuid+'_popup .tooltipster').tooltipster({
+		theme: 'tooltipster-light',
+	});
+
 }
 
 function save_profile () {
@@ -121,7 +132,10 @@ jsPlumb.ready(function() {
 				return;
 			}
 			var opts = {'source_group': j.block.source_group,
-			            'target_group': j.block.target_group}
+			            'target_group': j.block.target_group};
+			if ('icon' in j.block) {
+				opts.icon = j.block.icon;
+			}
 			new_block(j.block.name, j.block.uuid, j.html, opts);
 		});
 	});

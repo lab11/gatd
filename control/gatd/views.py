@@ -115,7 +115,8 @@ for duplicates.',
 		'name': 'MongoDB',
 		'help': 'Store packets in a MongoDB database.',
 		'target_group': 'b',
-		'source_group': 'c'
+		'source_group': 'c',
+		'icon': 'database'
 	},
 
 	'database_timeseries': {

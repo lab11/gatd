@@ -12,6 +12,9 @@
 
     {% for param in block.parameters %}
     <div>
+      {% if 'help' in param %}
+      <span class="tooltipster fa fa-info" title="{{ param.help }}"></span>
+      {% endif %}
       <span>{{ param.name }}:</span> {{ param.value }}
     </div>
     {% endfor %}
@@ -30,20 +33,26 @@
       {% set type = setting.type|default('string') %}
 
       <div class="form-group">
-
-        {% if type == 'string' or type == 'int' %}
-        <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-2 control-label">{{ setting.name }}</label>
-        <div class="col-sm-10">
-          <input type="text" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" {% if 'default' in setting %}value="{{ setting.default }}"{% endif %}>
+        
+        {% if 'help' in setting %}
+        <div class="col-sm-1 control-label">
+          <span class="tooltipster fa fa-info" title="{{ setting.help }}"></span>
         </div>
-
-        {% elif type == 'bool' %}
-        <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-2 control-label">{{ setting.name }}</label>
-        <div class="col-sm-10">
-          <input type="checkbox" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}">
-        </div>
-
         {% endif %}
+
+        <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-3 control-label">{{ setting.name }}</label>
+
+        <div class="col-sm-8">
+
+          {% if type == 'string' or type == 'int' %}
+          <input type="text" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" {% if 'default' in setting %}value="{{ setting.default }}"{% endif %}>
+
+          {% elif type == 'bool' %}
+          <input type="checkbox" class="form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}">
+
+          {% endif %}
+
+        </div>
 
       </div>
 
