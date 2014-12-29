@@ -167,31 +167,7 @@ html .ui-btn.ui-checkbox-on.ui-checkbox-on:after {
 /* Font
 -----------------------------------------------------------------------------------------------------------*/
 
-html {
-	font-size: 100%;
-}
-body,
-input,
-select,
-textarea,
-button,
-.ui-btn {
-	font-size: 1em;
-	line-height: 1.3;
-	font-family: sans-serif /*{global-font-family}*/;
-}
-legend,
-.ui-input-text input,
-.ui-input-search input {
-	color: inherit;
-	text-shadow: inherit;
-}
-/* Form labels (overrides font-weight bold in bars, and mini font-size) */
-.ui-mobile label,
-div.ui-controlgroup-label {
-	font-weight: normal;
-	font-size: 16px;
-}
+
 
 /* Separators
 -----------------------------------------------------------------------------------------------------------*/

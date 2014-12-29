@@ -4,6 +4,17 @@
 GATD: Get All The Data / Lab11 / University of Michigan
 {% endblock %}
 
+{% block nav %}
+<div class="navbar-collapse collapse">
+  <ul class="nav navbar-nav">
+    <li class="active"><a href="#home" class="smothscroll">Home</a></li>
+    <li><a href="#desc" class="smothscroll">Overview</a></li>
+    <li><a href="#showcase" class="smothScroll">Building Blocks</a></li>
+    <li><a href="#contact" class="smothScroll">Get Started</a></li>
+  </ul>
+</div><!--/.nav-collapse -->
+{% endblock %}
+
 {% block body %}
 
   <section id="home" name="home"></section>
@@ -87,7 +98,7 @@ GATD: Get All The Data / Lab11 / University of Michigan
         <h1 class="centered">Build with Blocks</h1>
         <br>
         <div class="col-lg-7 col-lg-offset-1">
-          <img class="img-responsive" src="static/img/app-bg.png" alt="">
+          <img class="img-responsive" src="static/img/blocks.png" alt="">
         </div>
         <div class="col-lg-3">
           <h3>Create Your Profile</h3>

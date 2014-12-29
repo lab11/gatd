@@ -2,50 +2,60 @@
 
 var jsp;
 
-/*
-options: {
-	source_group: [a,b,c],
-	target_group: [a,b,c]
-}
-*/
-function new_block (name, block_uuid, html, options) {
+
+function new_block (uuid) {
 	var colors = {
 		'a': '#5696BC',
 		'b': '#E04836',
 		'c': '#F39D41'
 	}
 
-	var new_block = $('<div>', {class: 'w ui-draggable'})
-	                 .text(name)
-	                 .attr('data-blockid', block_uuid);
-	var new_source = $('<div>', {class: 'source-group'});
-	var new_target = $('<div>', {class: 'target-group'});
+	var new_block = $('#'+uuid);
 
-	$("#gatd-editor").append(new_block);
+	// Initialize the popup
+	$('#block_'+uuid+'_popup').popup({
+		positionTo: "origin"
+	});
 
-	if ('icon' in options) {
-		var icon = $('<span>', {class: 'fa fa-'+options.icon})
-		            .html('&nbsp;');
-		new_block.prepend(icon);
-	}
+	//  Make the popup appear on dbl click
+	$('#'+uuid).dblclick(function () {
+		var position = $(this).position();
+		$('#block_'+uuid+'_popup').popup('open', {
+			x: position.left,
+			y: position.top
+		});
+	});
 
+	// Initialize tooltips
+	$('#block_'+uuid+'_popup .tooltipster').tooltipster({
+		theme: 'tooltipster-light',
+	});
 
-	jsp.draggable($(new_block));
+	// Make the block dragable
+	jsp.draggable(uuid);
 
-	if ('source_group' in options && options['source_group'] != null) {
-		new_source.addClass('group-'+options['source_group']);
-		$(new_block).append(new_source);
+	var source_group = new_block.attr('data-source-group');
+	var target_group = new_block.attr('data-target-group');
 
+	// Setup arrow properties
+	if (source_group) {
 		jsp.makeSource($(new_block), {
 			filter: '.source-group', // make the block the source but only work from the little square
 			anchor: "AutoDefault",   // use the best anchor, but only in the middle of each side
 			connector:[ "Flowchart", { cornerRadius:5 } ], // make the connectors straight lines with 90 degree bends
-			connectorStyle:{ strokeStyle: colors[options['source_group']],
+			connectorStyle:{ strokeStyle: colors[source_group],
 			                 lineWidth: 2,
 			                 outlineColor: "transparent",
-			                 outlineWidth: 4
+			                 outlineWidth: 4,
+			                 dashstyle: "0"
 			               },
-			scope: options['source_group'],
+			connectorHoverStyle:{ strokeStyle: colors[source_group],
+			                 lineWidth: 2,
+			                 outlineColor: "transparent",
+			                 outlineWidth: 4,
+			                 dashstyle: "2 2"
+			               },
+			scope: source_group,
 			maxConnections: 5,
 			onMaxConnections: function(info, e) {
 				alert("Maximum connections (" + info.maxConnections + ") reached");
@@ -53,52 +63,93 @@ function new_block (name, block_uuid, html, options) {
 		});
 	}
 
-	if ('target_group' in options && options['target_group'] != null) {
-		new_target.addClass('group-'+options['target_group']);
-		$(new_block).append(new_target);
-
+	if (target_group) {
 		jsp.makeTarget($(new_block), {
 			dropOptions: {hoverClass:"dragHover"},
 			anchor: "AutoDefault",
 			allowLoopback: false,
-			scope: options['target_group']
+			scope: target_group
 		});
 	}
-
-	$(new_block).append(html);
-
-	// Initialize the popup
-	$('#block_'+block_uuid+'_popup').popup({
-		positionTo: "origin"
-	});
-
-	$(new_block).dblclick(function () {
-		var position = $(this).position();
-		$('#block_'+block_uuid+'_popup').popup('open', {
-			x: position.left,
-			y: position.top
-		});
-	});
-
-	// Initialize tooltips
-	$('#block_'+block_uuid+'_popup .tooltipster').tooltipster({
-		theme: 'tooltipster-light',
-	});
 
 }
 
 function save_profile () {
 	var blocks = [];
+	var connections = [];
 
-	// {
-	// 	'block_id': 
-	// 	'top': 
-	// 	'left':
-	// 	'settings': [
-	// 	],
-	// 	'parameters': [
-	// 	]
-	// }
+	var connection_ids = {};
+
+	// Add all blocks
+	$('.block').each(function () {
+		//console.log($(this));
+
+		var block = Object();
+		block.uuid = $(this).attr('id');
+		block.type = $(this).attr('data-type');
+
+		var pos = $(this).position()
+		block.top = pos.top;
+		block.left = pos.left;
+
+		var popup = $('#block_'+block.uuid+'_popup');
+
+		// Save all of the parameters
+		popup.find('.parameter').each(function () {
+			var key = $(this).attr('data-key');
+			var val = $(this).attr('data-value');
+			block[key] = val;
+		});
+
+		// Get the value of each setting
+		popup.find('.setting').each(function () {
+			var key = $(this).attr('data-key');
+			var val = $(this).val();
+			block[key] = val;
+		});
+
+		blocks.push(block);
+	});
+
+	// Add all unique connections
+	var duplicates = {};
+	var existing_connections = jsp.getAllConnections();
+	for (var i=0; i<existing_connections.length; i++) {
+		var src = existing_connections[i].sourceId;
+		var tar = existing_connections[i].targetId;
+
+		var dupe_check = src+tar;
+		if (dupe_check in duplicates) {
+			continue;
+		}
+		duplicates[dupe_check] = true;
+
+		var connection = Object();
+		connection.source_uuid = src;
+		connection.target_uuid = tar;
+
+		connections.push(connection);
+
+		// Keep track of all blocks that are connected so we can get rid of
+		// floating blocks that aren't connected to anything.
+		connection_ids[src] = true;
+		connection_ids[tar] = true;
+	}
+
+	// Remove any blocks that aren't connected to anything.
+	var blocks_len = blocks.length;
+	while (blocks_len--) {
+		if (!(blocks[blocks_len].uuid in connection_ids)) {
+			blocks.splice(blocks_len, 1);
+		}
+	}
+
+	var profile = Object();
+
+	profile.blocks = blocks;
+	profile.connections = connections;
+
+	return profile;
 }
 
 
@@ -109,19 +160,52 @@ jsPlumb.ready(function() {
 		Endpoint:           ["Dot", {radius:2}],
 		HoverPaintStyle:    {strokeStyle:"#1e8151", lineWidth:2 },
 		ConnectionOverlays: [
-		                      ["Arrow", {
-		                                  location: 1,
-		                                  id:       "arrow",
-		                                  length:   10,
-		                                  foldback: 1
-		                                }],
-		                      // ["Label", {
-		                      //             label:    "FOO",
-		                      //             id:       "label",
-		                      //             cssClass: "aLabel" }]
+			["Arrow", {
+				location: 1,
+				id:       "arrow",
+				length:   10,
+				foldback: 1
+			}],
+    		["Label", {
+    			label: 'X',
+				cssClass: 'aLabel',
+				id:"delete"
+			}]
 		                    ],
 		Container:          "gatd-editor"
 	});
+
+	// When a connection is created, update the attributes of the overlay
+	// label so we can associate a click on it to the correct connection.
+	jsp.bind("connection", function(info) {
+		 $(info.connection.getOverlay("delete").canvas)
+		  .attr('data-tar', info.connection.targetId)
+		  .attr('data-src', info.connection.sourceId)
+		  .attr('data-scope', info.connection.scope);
+	});
+
+	// Delete connection when the label is clicked
+	$('#gatd-editor').on('click', '.aLabel', function () {
+		var src = $(this).attr('data-src');
+		var tar = $(this).attr('data-tar');
+		var scope = $(this).attr('data-scope');
+
+		$.each(jsp.getConnections({scope:scope, source:src, target:tar}), function(i,v) {
+			jsp.detach(v);
+		});
+	});
+
+	// Iterate through all saved blocks
+	$('.block').each(function () {
+		new_block($(this).attr('id'));
+	});
+
+	// Connect blocks
+	$('.connection').each(function () {
+		var src = $(this).attr('data-src');
+		var tar = $(this).attr('data-tar');
+		jsp.connect({source:src, target:tar});
+	})
 
 	$(".gatd-editor-button").click(function () {
 		var block_type = $(this).attr('data-block');
@@ -131,21 +215,26 @@ jsPlumb.ready(function() {
 				console.log('Error occurred getting block.');
 				return;
 			}
-			var opts = {'source_group': j.block.source_group,
-			            'target_group': j.block.target_group};
-			if ('icon' in j.block) {
-				opts.icon = j.block.icon;
-			}
-			new_block(j.block.name, j.block.uuid, j.html, opts);
+			$("#gatd-editor").append(j.html);
+			new_block(j.block.uuid);
 		});
 	});
 
+	$('#gatd-editor-save').click(function () {
+		var data = save_profile();
 
-	// new_block('UDP Receiver (IPv6)', {'source_group':'a'});
-	// new_block('Formatter', {'source_group': 'b',
-	// 	                    'target_group': 'a'});
-	// new_block('Processor', {'source_group': 'b',
-	// 	                    'target_group': 'a'});
-	// new_block('Mongo DB', {'source_group': 'c',
- //                           'target_group': 'b'})
+		$.ajax({
+			type: 'POST',
+			url: '/editor/save',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			success: function () {
+				console.log('saved');
+			}
+		})
+		.fail(function () {
+			console.log('fail');
+		});
+	})
+
 });
