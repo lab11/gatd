@@ -47,7 +47,7 @@ class gatdPostHandler (http.server.BaseHTTPRequestHandler):
 		pkt['src_addr'] = str(src_addr)
 		pkt['src_port'] = src_port
 		pkt['time_utc_iso'] = now
-		pkt['data'] = {'data':    post_body,
+		pkt['data'] = {'body':    post_body,
 		               'headers': dict(self.headers)}
 
 		amqp_chan.basic_publish(exchange='xch_receiver_http_post',
