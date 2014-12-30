@@ -66,6 +66,22 @@ class ForkingHTTPServer(socketserver.ForkingMixIn, http.server.HTTPServer):
 		BaseHTTPServer.HTTPServer.finish_request(self, request, client_address)
 
 try:
+	# Make sure the exchange exists
+	amqp_conn = pika.BlockingConnection(
+					pika.ConnectionParameters(
+						host=gatdConfig.rabbitmq.HOST,
+						port=gatdConfig.rabbitmq.PORT,
+						credentials=pika.PlainCredentials(
+							gatdConfig.receiver_http_post.RMQ_USERNAME,
+							gatdConfig.receiver_http_post.RMQ_PASSWORD)
+				))
+	amqp_chan = amqp_conn.channel();
+
+	amqp_chan.exchange_declare(exchange='xch_receiver_http_post',
+	                           exchange_type='direct',
+	                           durable='true')
+	amqp_chan.close()
+
 	# Create a web server and define the handler to manage the incoming request
 	server = ForkingHTTPServer(('', 25101), gatdPostHandler)
 

@@ -11,18 +11,19 @@ import xsocket
 import gatdConfig
 import gatdLog
 
-l = gatdLog.getLogger('recv-UDP-ipv6')
+l = gatdLog.getLogger('recv-UDP-ipv4')
 
-setproctitle.setproctitle('gatd:recv-udp6')
+setproctitle.setproctitle('gatd:recv-udp4')
 
 
 def receive ():
 
 	# Create a UDP socket to listen for incoming packets
 	s = xsocket.xsocket(family=socket.AF_INET6, type=socket.SOCK_DGRAM)
-	s.bind(("::", gatdConfig.receiver_udp_ipv6.PORT))
+	s.bind(("::", gatdConfig.receiver_udp_ipv4.PORT))
 
-	l.info('Created xsocket to listen for UDP packets on port {}'.format(gatdConfig.receiver_udp_ipv6.PORT))
+	l.info('Created xsocket to listen for UDP packets on port {}'\
+		.format(gatdConfig.receiver_udp_ipv4.PORT))
 
 	while True:
 		data, src, dst = s.recvfromto()
@@ -33,6 +34,14 @@ def receive ():
 
 		dst_addr = ipaddress.ip_address(dst[0])
 
+		if len(data) < 36:
+			l.warn('Received packet that is too short. src:{}, len:{}'\
+				.format(src_addr, len(data)))
+			continue
+
+		uuid = data[0:36]
+		data = data[36:]
+
 		pkt = {}
 		pkt['src_addr'] = str(src_addr)
 		pkt['src_port'] = src_port
@@ -40,25 +49,13 @@ def receive ():
 		pkt['data'] = data
 
 		# Send the packet to the queue
-		amqp_chan.basic_publish(exchange='xch_receiver_udp_ipv6',
+		amqp_chan.basic_publish(exchange='xch_receiver_udp_ipv4',
 		                        body=pkt,
-		                        routing_key=str(dst_addr))
+		                        routing_key=uuid)
 
 
 # Setup the connection to RabbitMQ
 def pika_on_channel (amqp_chan):
-
-	# Create the receive exchange if it doesn't exist.
-	amqp_chan.exchange_declare(exchange='xch_receiver_udp_ipv6',
-	                           exchange_type='direct',
-	                           durable='true')
-
-	# Make sure there is a queue for unknown packets
-	amqp_chan.queue_declare(queue='receive-unknown',
-	                        durable=True)
-	amqp_chan.queue_bind(queue='receive-unknown',
-	                     exchange='xch_receiver_udp_ipv6',
-	                     routing_key='unknown')
 
 	while True:
 		try:
