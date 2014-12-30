@@ -172,6 +172,16 @@ it to the box or by specifying a URL where the code can be downloaded.''',
 		]
 	},
 
+	'formatter_json': {
+		'name': 'Formatter (JSON)',
+		'help': '''
+Automatically parse incoming data as JSON. This block understands data from
+any of the input blocks and will interpret the data as JSON and expand the data
+into a full object.''',
+		'target_group': 'a',
+		'source_group': 'b'
+	},
+
 	'database_mongo': {
 		'name': 'MongoDB',
 		'help': 'Store packets in a MongoDB database.',
@@ -199,6 +209,19 @@ it to the box or by specifying a URL where the code can be downloaded.''',
 				'key':  'code'
 			}
 		]
+	},
+
+	'meta_info_simple': {
+		'name': 'Meta Info (Simple)',
+		'help': '''
+This block adds data from a static list to incoming packets. For instance, if
+the incoming data is from sensors, you may wish to add the sensor's location to
+the data packet. This block would let you create a list of sensor IDs and
+locations and will automatically add the correct location key:value pair to
+the data packet. To use, you specify the key:value pair that may be in the
+data packet and the key:value pair to add to the packet if it is.''',
+		'target_group': 'b',
+		'source_group': 'b'
 	},
 
 	'streamer_socketio': {
@@ -312,10 +335,6 @@ def replayer_parameters (block):
 			p['value'] = 'http://replay.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
 
-# def receiver_http_post (block):
-
-
-
 block_parameters_fns = {
 	'receiver_udp_ipv6': receiver_udp_ipv6_parameters,
 	'receiver_udp_ipv4': receiver_udp_ipv4_parameters,
@@ -325,6 +344,28 @@ block_parameters_fns = {
 	'queryer': queryer_parameters,
 	'replayer': replayer_parameters,
 }
+
+
+def init_rabbitmq ():
+
+	amqp_conn = pika.BlockingConnection(
+					pika.ConnectionParameters(
+						host=gatdConfig.rabbitmq.HOST,
+						port=gatdConfig.rabbitmq.PORT,
+						credentials=pika.PlainCredentials(
+							gatdConfig.control.USERNAME,
+							gatdConfig.control.PASSWORD)
+				))
+	amqp_chan = amqp_conn.channel();
+
+
+	for block_name, block in blocks.items():
+		# Create the output exchange if this block can output packets
+		if block['source_group']:
+			thischannel.exchange_declare('xch_{}'.format(block_name),
+			                             exchange_type='direct',
+			                             durable=True)
+		
 
 
 @view_config(route_name='home', renderer='templates/home.jinja2')
@@ -340,14 +381,23 @@ def editor (request):
 	                                 'receiver_http_post',
 	                                 'queryer_http_get']),
 					 ('Receiver Helpers', ['deduplicator']),
-					 ('Formatters', ['formatter_python']),
-					 ('Processors', ['processor_python']),
+					 ('Formatters', ['formatter_python', 'formatter_json']),
+					 ('Processors', ['processor_python', 'meta_info_simple']),
 					 ('Storage', ['database_mongo']),
 					 ('Viewers', ['streamer_socketio', 'viewer', 'queryer', 'replayer'])
-					 ]
+					]
 
 	profile = list(request.db['conf_profiles'].find())[-1]
-	print(profile['blocks'])
+	
+
+
+	#### DELETE
+	if 'uuid' not in profile:
+		profile['uuid'] = str(uuid.uuid4())
+
+
+
+
 
 	block_html = ''
 	for block_values in profile['blocks']:
@@ -366,7 +416,8 @@ def editor (request):
 
 	return {'blocks': blocks,
 			'block_buttons': block_buttons,
-			'profile': block_html, 
+			'profile': profile,
+			'profile_html': block_html, 
 			'connections': profile['connections']}
 
 @view_config(route_name='editor_block', renderer='json')
@@ -395,15 +446,23 @@ def editor_block (request):
              request_method='POST',
              renderer='json')
 def editor_save(request):
-	# print(request.POST['blocks'])
-	# print(request.POST['connections'])
-	print(request.json_body)
-
 	data = request.json_body
 
-	print(data['blocks'])
+	# Do some validation on the editor blob
+	if 'uuid' not in data:
+		print('No UUID in profile')
+	else:
 
-	request.db['conf_profiles'].insert(data)
+		# Save the current profile in the history collection
+		# so we have a save history
+		request.db['conf_profiles_history'].insert(data)
+
+		# Update (or add) the profile to the main profiles
+		# collection. .save() will use update if _id is present.
+		old = request.db['conf_profiles'].find_one({'uuid': data['uuid']})
+		if old:
+			data['_id'] = old['_id']
+		request.db['conf_profiles'].save(data)
 
 
 

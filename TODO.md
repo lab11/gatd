@@ -1,22 +1,4 @@
-Things to add to or fix in GATD
-===============================
+TODO / Testing
+==============
 
-Keys
-----
-
-All `_` prefaced keys are reserved.
-
-- `profile_id` -> `_profile_id`
-- `time` -> `_time` and make required
-- `address` -> `_ip_address` and make required
-
-Formatters
-----------
-
-- Add a way to test a new formatter
-
-Other
------
-
-- Make time UTC
-
+- [ ] Verify that JSON formatter works with input from all 4 input sources

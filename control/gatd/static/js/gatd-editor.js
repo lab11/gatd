@@ -146,6 +146,7 @@ function save_profile () {
 
 	var profile = Object();
 
+	profile.uuid = $('gatd-editor').attr('data-profile-uuid');
 	profile.blocks = blocks;
 	profile.connections = connections;
 

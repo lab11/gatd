@@ -35,9 +35,9 @@ def httpGET (url, block_uuid):
 	if r.status_code == 200:
 		pkt = {}
 		pkt['time_utc_iso'] = now
-		pkt['data'] = {'body': r.text,
+		pkt['data'] = {'body':    r.text,
 		               'headers': r.headers,
-		               'url': url}
+		               'url':     url}
 
 		# Connect to rabbitmq
 		amqp_conn = pika.BlockingConnection(

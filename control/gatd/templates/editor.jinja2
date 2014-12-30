@@ -42,8 +42,8 @@ GATD - Editor
   </div>
 
   <div class="row">
-    <div id="gatd-editor" class="col-lg-10">
-      {{ profile|safe }}
+    <div id="gatd-editor" class="col-lg-10" data-profile-uuid="{{ profile.uuid }}">
+      {{ profile_html|safe }}
 
       {% for connection in connections %}
       <span class="connection" data-src="{{ connection.source_uuid }}" data-tar="{{ connection.target_uuid }}"></span>
