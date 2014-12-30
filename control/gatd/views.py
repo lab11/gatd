@@ -152,7 +152,9 @@ bits of the source IPv6 addresses are the same.',
 
 	'formatter_python': {
 		'name': 'Formatter (Python)',
-		'help': 'Process raw packets using Python code',
+		'help': '''
+Process raw packets using Python code. The code can be specified by copying
+it to the box or by specifying a URL where the code can be downloaded.''',
 		'target_group': 'a',
 		'source_group': 'b',
 		'settings': [
@@ -161,6 +163,11 @@ bits of the source IPv6 addresses are the same.',
 				'help': 'The code for the formatter.',
 				'key':  'code',
 				'type': 'textarea'
+			},
+			{
+				'name': 'Python Code URL',
+				'help': 'URL that points to a python file to use for the formatter.',
+				'key': 'code_url'
 			}
 		]
 	},
@@ -284,7 +291,7 @@ def receiver_http_post_parameters (block):
 def streamer_socketio_parameters (block):
 	for p in block['parameters']:
 		if p['key'] == 'url':
-			p['value'] = 'http://streams.{}/{}'\
+			p['value'] = 'http://socketio.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
 
 def viewer_parameters (block):
