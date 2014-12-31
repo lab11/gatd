@@ -8,6 +8,15 @@ import uuid
 
 from pyramid.view import view_config
 import pyramid.renderers
+import pyramid.httpexceptions
+import pyramid.security
+
+import arrow
+import authomatic
+import authomatic.adapters
+
+import gatd.login_keys
+
 
 sys.path.append(os.path.abspath('../gatd'))
 import gatdConfig
@@ -363,23 +372,116 @@ def init_rabbitmq ():
 		# Create the output exchange if this block can output packets
 		if block['source_group']:
 			thischannel.exchange_declare('xch_{}'.format(block_name),
-			                             exchange_type='direct',
-			                             durable=True)
-		
+										 exchange_type='direct',
+										 durable=True)
 
 
-@view_config(route_name='home', renderer='templates/home.jinja2')
+
+
+################################################################################
+### Authentication View                                                      ###
+################################################################################
+
+@view_config(route_name='login')
+def login (request):
+	response = pyramid.response.Response()
+
+	provider_name = request.matchdict.get('provider_name')
+
+	# request.registry.settings['chezbetty.email'])
+	amatic = authomatic.Authomatic(config=gatd.login_keys.CONFIG,
+	                               secret='fdsakjlfd',
+	                               debug=True)
+
+	result = amatic.login(authomatic.adapters.WebObAdapter(request, response), provider_name)
+
+	if (not result) or (result.error) or (not result.user):
+		# Handle all of the error cases
+		response.write(pyramid.renderers.render('templates/loggedin_fail.jinja2', {}))
+		return response
+
+
+	if provider_name == 'github':
+		token = result.user.data['access_token']
+
+
+	if not (result.user.name and result.user.id):
+		# Need to issue an update request to get more information about the user
+		result.user.update()
+
+	# Check to see if we already know about this user
+	user = request.db['conf_users'].find_one({'token': token})
+
+	if not user:
+		user = {}
+		user['created_time_utc_iso'] = arrow.utcnow().isoformat()
+		user['token'] = token
+
+	user['name'] = result.user.name
+	user['email'] = result.user.email
+
+	# Save/update this user
+	#  if new: add user
+	#  if existing: update info in case it changed
+	userid = request.db['conf_users'].save(user)
+
+	# Tell Pyramids about this now logged in user
+	headers = pyramid.security.remember(request, str(userid))
+
+	# Need to send the cookies to the client so we know about this user
+	response.headers.extend(headers)
+
+	# Add the basic "logged in" page to the response
+	response.write(pyramid.renderers.render('templates/loggedin.jinja2', {}))
+
+	# Return response. We have to do this for the authomatic magic to work.
+	# It is not ideal, but I think I will do an HTML redirect and move on with
+	# my life.
+	return response
+
+
+
+
+
+
+@view_config(route_name='home',
+             renderer='templates/home.jinja2')
 def home (request):
 	return {}
 
-@view_config(route_name='editor', renderer='templates/editor.jinja2')
+
+@view_config(route_name='profiles',
+             renderer='templates/profiles.jinja2',
+             permission='loggedin')
+def profiles (request):
+	print({'_userid':str(request.user['_id'])})
+	profiles = request.db['conf_profiles'].find({'_userid':str(request.user['_id'])})
+	return {'profiles': profiles}
+
+
+@view_config(route_name='profile_new',
+             permission='loggedin')
+def profile_new (request):
+	profile = {}
+	profile['name']    = 'New Profile'
+	profile['uuid']    = str(uuid.uuid4())
+	profile['_userid'] = str(request.user['_id'])
+
+	request.db['conf_profiles'].save(profile)
+
+	return pyramid.httpexceptions.HTTPFound(location=request.route_url('editor', uuid=profile['uuid']))
+
+
+@view_config(route_name='editor',
+             renderer='templates/editor.jinja2',
+             permission='loggedin')
 def editor (request):
 
 
 	block_buttons = [('Data Input', ['receiver_udp_ipv6',
-	                                 'receiver_udp_ipv4',
-	                                 'receiver_http_post',
-	                                 'queryer_http_get']),
+									 'receiver_udp_ipv4',
+									 'receiver_http_post',
+									 'queryer_http_get']),
 					 ('Receiver Helpers', ['deduplicator']),
 					 ('Formatters', ['formatter_python', 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_info_simple']),
@@ -387,20 +489,16 @@ def editor (request):
 					 ('Viewers', ['streamer_socketio', 'viewer', 'queryer', 'replayer'])
 					]
 
-	profile = list(request.db['conf_profiles'].find())[-1]
-	
+	profile_uuid = request.matchdict.get('uuid')
+	profile = request.db['conf_profiles'].find_one({'_userid': str(request.user['_id']),
+	                                                'uuid': profile_uuid})
 
-
-	#### DELETE
-	if 'uuid' not in profile:
-		profile['uuid'] = str(uuid.uuid4())
-
-
-
-
+	if not profile:
+		#request.session.flash('Could not find that profile.', 'error')
+		return pyramid.httpexceptions.HTTPFound(location=request.route_url('profiles'))
 
 	block_html = ''
-	for block_values in profile['blocks']:
+	for block_values in profile.get('blocks', []):
 		block = copy.deepcopy(blocks[block_values['type']])
 		block.update(block_values)
 
@@ -417,8 +515,9 @@ def editor (request):
 	return {'blocks': blocks,
 			'block_buttons': block_buttons,
 			'profile': profile,
-			'profile_html': block_html, 
-			'connections': profile['connections']}
+			'profile_html': block_html,
+			'connections': profile.get('connections', [])}
+
 
 @view_config(route_name='editor_block', renderer='json')
 def editor_block (request):
@@ -439,12 +538,14 @@ def editor_block (request):
 	block_html = pyramid.renderers.render('templates/block_popup.jinja2', {'block': block})
 
 	return {'block': block,
-	        'html': block_html,
+			'html': block_html,
 			'status': 'success'}
 
+
 @view_config(route_name='editor_save',
-             request_method='POST',
-             renderer='json')
+			 request_method='POST',
+			 renderer='json',
+			 permission='loggedin')
 def editor_save(request):
 	data = request.json_body
 
@@ -453,15 +554,19 @@ def editor_save(request):
 		print('No UUID in profile')
 	else:
 
+		data['_userid'] = str(request.user['_id'])
+
 		# Save the current profile in the history collection
 		# so we have a save history
 		request.db['conf_profiles_history'].insert(data)
 
 		# Update (or add) the profile to the main profiles
 		# collection. .save() will use update if _id is present.
-		old = request.db['conf_profiles'].find_one({'uuid': data['uuid']})
+		old = request.db['conf_profiles'].find_one({'uuid': data['uuid'],
+		                                            '_userid': data['_userid']})
 		if old:
 			data['_id'] = old['_id']
+
 		request.db['conf_profiles'].save(data)
 
 

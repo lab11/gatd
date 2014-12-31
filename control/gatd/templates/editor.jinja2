@@ -18,12 +18,12 @@ GATD - Editor
 <link href="{{'gatd:static/css/tooltipster.css'|static_url}}" rel="stylesheet">
 <link href="{{'gatd:static/css/tooltipster-light.css'|static_url}}" rel="stylesheet">
 <link href="{{'gatd:static/css/gatd-editor.css'|static_url}}" rel="stylesheet">
-  
+
 <div style="margin: 10px 50px 0 50px;">
   <div class="well well-sm">
     <div class="row">
       <div class="col-lg-5">
-        <h1>Edit your data profile.</h1>
+        <h1>Edit Profile: <span id="profile-name">{{ profile.name }}</span></h1>
       </div>
 
       <div class="col-lg-2 instructions" style="text-align:center;">
@@ -50,7 +50,7 @@ GATD - Editor
       {% endfor %}
     </div>
     <div id="gatd-editor-buttons" class="col-lg-2">
-      
+
 
       <div class="btn-group-vertical" role="group">
 
@@ -67,12 +67,12 @@ GATD - Editor
             <button type="button" class="gatd-editor-button btn btn-default" data-block="{{ button }}">Add {{ blocks[button]['name'] }}</button>
           {% endfor %}
 
-        
+
         {% endfor %}
 
       </div>
 
-      
+
     </div>
   </div>
 </div>

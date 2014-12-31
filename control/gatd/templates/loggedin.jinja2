@@ -1,0 +1,20 @@
+{% extends "base.jinja2" %}
+
+{% block nav %}
+<div class="navbar-collapse collapse">
+  <ul class="nav navbar-nav">
+    <li><a href="/">Home</a></li>
+    <li><a href="/profiles">Profiles</a></li>
+  </ul>
+</div><!--/.nav-collapse -->
+{% endblock %}
+
+{% block body %}
+<div class="container">
+	<h1>Successfully Logged in</h1>
+</div>
+
+<script type="text/javascript">
+window.location.replace('/profiles')
+</script>
+{% endblock %}
