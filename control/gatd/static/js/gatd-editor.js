@@ -240,6 +240,23 @@ jsPlumb.ready(function() {
 		.fail(function () {
 			console.log('fail');
 		});
-	})
+	});
+
+	$('#gatd-editor-upload').click(function () {
+		var data = save_profile();
+
+		$.ajax({
+			type: 'POST',
+			url: '/editor/saveupload',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			success: function () {
+				console.log('saved');
+			}
+		})
+		.fail(function () {
+			console.log('fail');
+		});
+	});
 
 });

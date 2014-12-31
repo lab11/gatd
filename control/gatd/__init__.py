@@ -79,6 +79,7 @@ def main(global_config, **settings):
 
 	config.add_route('editor_block', '/editor/block/{block}')
 	config.add_route('editor_save',  '/editor/save')
+	config.add_route('editor_saveupload',  '/editor/saveupload')
 	config.add_route('editor',       '/editor/{uuid}')
 
 	config.scan()

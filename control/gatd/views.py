@@ -4,6 +4,7 @@ import copy
 import ipaddress
 import os
 import sys
+import unittest
 import uuid
 
 from pyramid.view import view_config
@@ -32,6 +33,7 @@ send UDP packets to to be collected by GATD. The entire UDP payload will be
 collected and included in the stream for later processing.''',
 		'target_group': None,
 		'source_group': 'a',
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'Destination Address',
@@ -60,6 +62,7 @@ as ASCII bytes at the very beginning of the packet.
 ''',
 		'target_group': None,
 		'source_group': 'a',
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'Destination Address',
@@ -85,6 +88,7 @@ packet.',
 		'help': 'Listens for HTTP posts and captures the POST data.',
 		'target_group': None,
 		'source_group': 'a',
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'POST URL',
@@ -110,6 +114,7 @@ and the number of seconds between each request.
 ''',
 		'target_group': None,
 		'source_group': 'a',
+		'single_instance': False,
 		'settings': [
 			{
 				'name': 'URL',
@@ -139,6 +144,7 @@ packet is a duplicate.
 ''',
 		'target_group': 'a',
 		'source_group': 'a',
+		'single_instance': False,
 		'settings': [
 			{
 				'name': 'Time',
@@ -166,6 +172,7 @@ Process raw packets using Python code. The code can be specified by copying
 it to the box or by specifying a URL where the code can be downloaded.''',
 		'target_group': 'a',
 		'source_group': 'b',
+		'single_instance': False,
 		'settings': [
 			{
 				'name': 'Python Code',
@@ -188,7 +195,8 @@ Automatically parse incoming data as JSON. This block understands data from
 any of the input blocks and will interpret the data as JSON and expand the data
 into a full object.''',
 		'target_group': 'a',
-		'source_group': 'b'
+		'source_group': 'b',
+		'single_instance': False
 	},
 
 	'database_mongo': {
@@ -196,14 +204,16 @@ into a full object.''',
 		'help': 'Store packets in a MongoDB database.',
 		'target_group': 'b',
 		'source_group': 'c',
-		'icon': 'database'
+		'icon': 'database',
+		'single_instance': False
 	},
 
 	'database_timeseries': {
 		'name': 'Time Series DB',
 		'help': 'Store packets in a time series database.',
 		'target_group': 'b',
-		'source_group': None
+		'source_group': None,
+		'single_instance': False
 	},
 
 	'processor_python': {
@@ -211,6 +221,7 @@ into a full object.''',
 		'help': 'Manipulate packets with a Python script.',
 		'target_group': 'b',
 		'source_group': 'b',
+		'single_instance': False,
 		'settings': [
 			{
 				'name': 'Python Code',
@@ -230,7 +241,8 @@ locations and will automatically add the correct location key:value pair to
 the data packet. To use, you specify the key:value pair that may be in the
 data packet and the key:value pair to add to the packet if it is.''',
 		'target_group': 'b',
-		'source_group': 'b'
+		'source_group': 'b',
+		'single_instance': False
 	},
 
 	'streamer_socketio': {
@@ -238,6 +250,7 @@ data packet and the key:value pair to add to the packet if it is.''',
 		'help': 'Stream packets using the Socket.IO protocol.',
 		'target_group': 'b',
 		'source_group': None,
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'Stream URL',
@@ -253,6 +266,7 @@ socket.io server.',
 		'help': 'Get a glimse into the most recent packets for this stream.',
 		'target_group': 'b',
 		'source_group': None,
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'URL',
@@ -267,6 +281,7 @@ socket.io server.',
 		'help': 'Issue queries to the database to retrieve historical data.',
 		'target_group': 'c',
 		'source_group': None,
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'URL',
@@ -281,6 +296,7 @@ socket.io server.',
 		'help': 'Stream old data packets as if they were new.',
 		'target_group': 'c',
 		'source_group': None,
+		'single_instance': True,
 		'parameters': [
 			{
 				'name': 'URL',
@@ -355,7 +371,13 @@ block_parameters_fns = {
 }
 
 
-def init_rabbitmq ():
+################################################################################
+### GATD Block Processes                                                     ###
+################################################################################
+
+running = {}
+
+def init_rabbitmq_exchanges ():
 
 	amqp_conn = pika.BlockingConnection(
 					pika.ConnectionParameters(
@@ -369,11 +391,81 @@ def init_rabbitmq ():
 
 
 	for block_name, block in blocks.items():
-		# Create the output exchange if this block can output packets
+		# Create the output exchange if this block can output packets.
+		# There is no harm in declaring an exchange that already exists
 		if block['source_group']:
 			thischannel.exchange_declare('xch_{}'.format(block_name),
 										 exchange_type='direct',
 										 durable=True)
+
+
+def init_single_instance_blocks ():
+	# Start all of the single instance blocks
+	running['global'] = {}
+
+	for block_name, block in blocks.items():
+		if block['single_instance']:
+			cmd = {
+				'cmd': 'python3 {}'.format(block_name),
+				'numprocesses': 1
+			}
+			running['global'][block_name] = circus.get_arbiter([cmd])
+			running['global'][block_name].start()
+
+# Take a given block and distill all of the unique features from it.
+# This is used to tell if the block changed from one upload to the next
+# so we know if we should re-start the process.
+def create_block_snapshot (block, connections):
+	snap = {}
+
+	# Iterate through all connections this block is involved in
+	snap['source_conns'] = set()
+	snap['target_conns'] = set()
+	for connection in connections:
+		if connection['source_uuid'] == block['uuid']:
+			snap['source_conns'].add(connection['target_uuid'])
+		if connection['target_uuid'] == block['uuid']:
+			snap['target_conns'].add(connection['source_uuid'])
+
+	# Save all settings for this block
+	snap['settings'] = {}
+	for setting in blocks[block['type']].get('settings', []):
+		snap['settings'][setting['key']] = block[setting['key']]
+
+	return snap
+
+# This function causes GATD to start executing the profile
+def run_profile (profile):
+
+	comparer = unittest.TestCase()
+
+	print('Uploading profile "{}"'.format(profile['name']))
+
+	processes = running.setdefault(profile['uuid'], {})
+
+	for block in profile['blocks']:
+		if block['uuid'] in processes:
+			bprocess = processes[block['uuid']]
+			print('Block {} ({}) already running'.format(block['type'], block['uuid']))
+
+			snap = create_block_snapshot(block, profile['connections'])
+
+			try:
+				comparer.assertEqual(snap, bprocess['snapshot'])
+			except:
+				print('Block {} ({}) has changed. Restart!'.format(block['type'], block['uuid']))
+				#bprocess['cmd'].stop()
+				#bprocess['cmd'] = start_block(block, profile['connections'])
+				bprocess['snapshot'] = snap
+			else:
+				print('Block {} ({}) is the same. Just let it ride.'.format(block['type'], block['uuid']))
+
+		else:
+			print('Block {} ({}) is new'.format(block['type'], block['uuid']))
+			bprocess = processes.setdefault(block['uuid'], {})
+
+			bprocess['snapshot'] = create_block_snapshot(block, profile['connections'])
+			#bprocess['cmd'] = start_block(block, profile['connections'])
 
 
 
@@ -460,7 +552,8 @@ def home (request):
              permission='loggedin')
 def profiles (request):
 	profiles = request.db['conf_profiles'].find({'_userid':str(request.user['_id'])})
-	return {'profiles': profiles}
+	return {'profiles': profiles,
+	        'user': request.user}
 
 
 @view_config(route_name='profile_new',
@@ -572,6 +665,36 @@ def editor_save(request):
 			data['_id'] = old['_id']
 
 		request.db['conf_profiles'].save(data)
+
+
+@view_config(route_name='editor_saveupload',
+			 request_method='POST',
+			 renderer='json',
+			 permission='loggedin')
+def editor_saveupload(request):
+	data = request.json_body
+
+	# Do some validation on the editor blob
+	if 'uuid' not in data:
+		print('No UUID in profile')
+	else:
+
+		data['_userid'] = str(request.user['_id'])
+
+		# Save the current profile in the history collection
+		# so we have a save history
+		request.db['conf_profiles_history'].insert(data)
+
+		# Update (or add) the profile to the main profiles
+		# collection. .save() will use update if _id is present.
+		old = request.db['conf_profiles'].find_one({'uuid': data['uuid'],
+		                                            '_userid': data['_userid']})
+		if old:
+			data['_id'] = old['_id']
+
+		request.db['conf_profiles'].save(data)
+
+		run_profile(data)
 
 
 

@@ -216,10 +216,10 @@ a:after {
 }
 
 .signin-github {
-  background-color: #000;
+  background-color: #222;
 }
 .signin-github:hover {
-  background-color: #444;
+  background-color: #000;
 }
 .signin-github .fa-github {
   color: #505050;
@@ -237,6 +237,16 @@ a:after {
   color: #505050;
   background-color: #eaeaea;
   padding: 15px;
+}
+
+.profile-button {
+  display: block;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.profile-button .profile-name {
+  font-size: 30px;
 }
 
 

@@ -15,11 +15,26 @@ GATD: Profiles
 
 {% block body %}
 
-<h1>woah</h1>
+
 <div class="container">
-	{% for profile in profiles %}
-	<a href="/editor/{{ profile.uuid }}">{{ profile.name }}</a><br />
-	{% endfor %}
+
+	<div class="well">
+		<h1>Welcome{% if user.name %} {{ user.name }}{% else %}, well, umm, we don't know your name...{% endif %}</h1>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			Profiles
+		</div>
+		<div class="panel-body">
+			{% for profile in profiles %}
+			<a href="/editor/{{ profile.uuid }}" class="profile-button">
+				<span class="fa fa-code-fork fa-3x fa-border fa-fw"></span>
+				<span class="profile-name">{{ profile.name }}</span>
+			</a>
+			{% endfor %}
+		</span>
+	</a>
 
 
 	<a class="btn btn-default btn-large" href="/profile/new">Create New Profile</a>
