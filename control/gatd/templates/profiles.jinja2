@@ -1,5 +1,9 @@
 {% extends "base.jinja2" %}
 
+{% block title %}
+GATD: Profiles
+{% endblock %}
+
 {% block nav %}
 <div class="navbar-collapse collapse">
   <ul class="nav navbar-nav">
@@ -14,7 +18,7 @@
 <h1>woah</h1>
 <div class="container">
 	{% for profile in profiles %}
-	<a href="/editor/{{ profile.uuid }}">fdsafd {{ profile.name }}</a><br />
+	<a href="/editor/{{ profile.uuid }}">{{ profile.name }}</a><br />
 	{% endfor %}
 
 

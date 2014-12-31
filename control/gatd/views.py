@@ -403,7 +403,12 @@ def login (request):
 
 	if provider_name == 'github':
 		token = result.user.data['access_token']
-
+	elif provider_name == 'twitter':
+		token = result.user.data['oauth_token_secret']
+	else:
+		print(result.user.data)
+		return response
+	print(token)
 
 	if not (result.user.name and result.user.id):
 		# Need to issue an update request to get more information about the user
@@ -454,7 +459,6 @@ def home (request):
              renderer='templates/profiles.jinja2',
              permission='loggedin')
 def profiles (request):
-	print({'_userid':str(request.user['_id'])})
 	profiles = request.db['conf_profiles'].find({'_userid':str(request.user['_id'])})
 	return {'profiles': profiles}
 

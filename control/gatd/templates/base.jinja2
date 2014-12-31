@@ -16,14 +16,14 @@
 
     <!-- Custom styles for this template -->
     <link href="{{'gatd:static/css/main.css'|static_url}}" rel="stylesheet">
-    
+
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
-    
+
     <script src="{{'gatd:static/js/jquery.min.js'|static_url}}"></script>
     <script src="{{'gatd:static/js/smoothscroll.js'|static_url}}"></script>
     <script src="{{'gatd:static/js/jquery.mobile.custom.min.js'|static_url}}"></script>
-    
+
 
   </head>
 
@@ -48,9 +48,12 @@
 	{% block body %}{% endblock %}
 
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{'gatd:static/js/bootstrap.js'|static_url}}"></script>
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="{{'gatd:static/js/bootstrap.js'|static_url}}"></script>
+
+  {% block bottom_includes %}{% endblock %}
+
   </body>
 </html>

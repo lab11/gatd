@@ -15,6 +15,7 @@ GATD - Editor
 
 {% block body %}
 
+<link href="{{'gatd:static/css/bootstrap-editable.css'|static_url}}" rel="stylesheet">
 <link href="{{'gatd:static/css/tooltipster.css'|static_url}}" rel="stylesheet">
 <link href="{{'gatd:static/css/tooltipster-light.css'|static_url}}" rel="stylesheet">
 <link href="{{'gatd:static/css/gatd-editor.css'|static_url}}" rel="stylesheet">
@@ -23,7 +24,7 @@ GATD - Editor
   <div class="well well-sm">
     <div class="row">
       <div class="col-lg-5">
-        <h1>Edit Profile: <span id="profile-name">{{ profile.name }}</span></h1>
+        <h1>Edit Profile: <span id="profile-name" data-placement="bottom" data-title="Enter a new profile name">{{ profile.name }}</span></h1>
       </div>
 
       <div class="col-lg-2 instructions" style="text-align:center;">
@@ -77,6 +78,11 @@ GATD - Editor
   </div>
 </div>
 
+{% endblock %}
+
+{% block bottom_includes %}
+
+<script src="/static/js/bootstrap-editable.min.js"></script>
 <script src="/static/js/jquery.tooltipster.min.js"></script>
 <script src="/static/js/dom.jsPlumb-1.7.2.js"></script>
 <script src="/static/js/gatd-editor.js"></script>

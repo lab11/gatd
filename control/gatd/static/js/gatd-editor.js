@@ -207,7 +207,10 @@ jsPlumb.ready(function() {
 		var src = $(this).attr('data-src');
 		var tar = $(this).attr('data-tar');
 		jsp.connect({source:src, target:tar});
-	})
+	});
+
+	// Make profile name editable
+	$('#profile-name').editable();
 
 	$(".gatd-editor-button").click(function () {
 		var block_type = $(this).attr('data-block');

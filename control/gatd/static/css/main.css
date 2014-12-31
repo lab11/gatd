@@ -80,7 +80,7 @@ a:after {
 	margin-top: 30px;
 	color: white;
 	font-size: 70px;
-	
+
 }
 
 #headerwrap h3 {
@@ -175,20 +175,24 @@ a:after {
     text-align:left;
 }
 .sns-signin a {
-  margin-bottom: 22px;
+  margin-bottom: 15px;
   display: block;
   color: #ffffff;
 }
 .sns-signin a span {
   margin-left: 30px;
 }
-.signin-facebook {
-  background-color: #3e4764;
+
+.signin {
   -webkit-transition: background-color 300ms linear;
   -moz-transition: background-color 300ms linear;
   -o-transition: background-color 300ms linear;
   -ms-transition: background-color 300ms linear;
   transition: background-color 300ms linear;
+}
+
+.signin-facebook {
+  background-color: #3e4764;
 }
 .signin-facebook:hover {
   background-color: #235B97;
@@ -198,13 +202,9 @@ a:after {
   background-color: #eaeaea;
   padding: 15px 19px 15px 18px;
 }
+
 .signin-google-plus {
   background-color: #e66060;
-  -webkit-transition: background-color 300ms linear;
-  -moz-transition: background-color 300ms linear;
-  -o-transition: background-color 300ms linear;
-  -ms-transition: background-color 300ms linear;
-  transition: background-color 300ms linear;
 }
 .signin-google-plus:hover {
   background-color: #EC574B;
@@ -217,16 +217,23 @@ a:after {
 
 .signin-github {
   background-color: #000;
-  -webkit-transition: background-color 300ms linear;
-  -moz-transition: background-color 300ms linear;
-  -o-transition: background-color 300ms linear;
-  -ms-transition: background-color 300ms linear;
-  transition: background-color 300ms linear;
 }
 .signin-github:hover {
   background-color: #444;
 }
 .signin-github .fa-github {
+  color: #505050;
+  background-color: #eaeaea;
+  padding: 15px;
+}
+
+.signin-twitter {
+  background-color: #55ACEE;
+}
+.signin-twitter:hover {
+  background-color: #55A9FF;
+}
+.signin-twitter .fa-twitter {
   color: #505050;
   background-color: #eaeaea;
   padding: 15px;
