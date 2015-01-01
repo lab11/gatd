@@ -43,6 +43,7 @@ def receive ():
 		data = data[36:]
 
 		pkt = {}
+		pkt['src'] = 'receiver_udp_ipv4'
 		pkt['src_addr'] = str(src_addr)
 		pkt['src_port'] = src_port
 		pkt['time_utc_iso'] = now
@@ -73,8 +74,8 @@ amqp_conn = pika.SelectConnection(
 					host=gatdConfig.rabbitmq.HOST,
 					port=gatdConfig.rabbitmq.PORT,
 					credentials=pika.PlainCredentials(
-						gatdConfig.receiver_udp_ipv6.RMQ_USERNAME,
-						gatdConfig.receiver_udp_ipv6.RMQ_PASSWORD)),
+						gatdConfig.blocks.RMQ_USERNAME,
+						gatdConfig.blocks.RMQ_PASSWORD)),
 				pika_on_connection
 			)
 amqp_conn.ioloop.start()

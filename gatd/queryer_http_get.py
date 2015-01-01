@@ -34,10 +34,11 @@ def httpGET (url, block_uuid):
 
 	if r.status_code == 200:
 		pkt = {}
+		pkt['src'] = 'query_http_get'
 		pkt['time_utc_iso'] = now
-		pkt['data'] = {'body':    r.text,
-		               'headers': r.headers,
-		               'url':     url}
+		pkt['headers'] = r.headers
+		pkt['http_get_url'] = url
+		pkt['data'] = r.text
 
 		# Connect to rabbitmq
 		amqp_conn = pika.BlockingConnection(

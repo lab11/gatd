@@ -199,6 +199,18 @@ into a full object.''',
 		'single_instance': False
 	},
 
+	'formatter_contenttype': {
+		'name': 'Formatter (Content-Type)',
+		'help': '''
+Automatically parse incoming data based on the Content-Type header from HTTP headers.
+This block will only work with data streams that came from an HTTP like source
+and that included the "Content-Type" field in their response/POST headers.
+''',
+		'target_group': 'a',
+		'source_group': 'b',
+		'single_instance': False
+	},
+
 	'database_mongo': {
 		'name': 'MongoDB',
 		'help': 'Store packets in a MongoDB database.',
@@ -306,6 +318,12 @@ socket.io server.',
 		]
 	}
 }
+
+# These are other processes that need to be running for GATD to work.
+# They are not user added blocks per se, which is why they are here.
+global_blocks = [
+	'streamer_socketio_public'
+]
 
 def receiver_udp_ipv6_parameters (block):
 	ip = ipaddress.ip_address(os.urandom(16))
@@ -580,7 +598,9 @@ def editor (request):
 									 'receiver_http_post',
 									 'queryer_http_get']),
 					 ('Receiver Helpers', ['deduplicator']),
-					 ('Formatters', ['formatter_python', 'formatter_json']),
+					 ('Formatters', ['formatter_python',
+					                 'formatter_contenttypem',
+					                 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_info_simple']),
 					 ('Storage', ['database_mongo']),
 					 ('Viewers', ['streamer_socketio', 'viewer', 'queryer', 'replayer'])

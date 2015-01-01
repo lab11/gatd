@@ -34,6 +34,7 @@ def receive ():
 		dst_addr = ipaddress.ip_address(dst[0])
 
 		pkt = {}
+		pkt['src'] = 'receiver_udp_ipv6'
 		pkt['src_addr'] = str(src_addr)
 		pkt['src_port'] = src_port
 		pkt['time_utc_iso'] = now
