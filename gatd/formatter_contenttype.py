@@ -2,9 +2,7 @@
 import json
 import urllib.parse
 
-import setproctitle
 import werkzeug
-setproctitle.setproctitle('gatd:form:ct')
 
 import gatdLog
 import formatter
@@ -12,6 +10,8 @@ import formatter
 l = gatdLog.getLogger('formatter-ct')
 
 def format (data, meta):
+
+	l.info('Formatting packet.')
 
 	if 'headers' in meta:
 		ct_header = None
@@ -27,28 +27,35 @@ def format (data, meta):
 			# as that type
 
 			try:
+				l.info('Content: {} Type: {}'.format(data, ct[0]))
+
 				if ct[0] == 'application/json':
+					if type(data) == bytes:
+						data = data.decode('utf-8')
+
+					# JSON can be a string (invalid), list (only valid if each
+					# element is a dict), or a dict (the normal case)
 					ret = json.loads(data, strict=False)
 
-					# JSON can be just a string or list. If so, force it into
-					# a dict
-					if type(ret) != dict:
-						ret = {'data': ret}
-
-
 				elif ct[0] == 'text/plain':
-					ret = {'body': data}
+					if type(data) == bytes:
+						data = data.decode('utf-8')
+					ret = {'body': data.decode('utf-8')}
 
-
-				elif ct[0] == 'application/x-www-form-urlencoded'
+				elif ct[0] == 'application/x-www-form-urlencoded':
+					if type(data) == bytes:
+						data = data.decode('utf-8')
 					ret = urllib.parse.parse_qs(data, keep_blank_values=True)
 
+				else:
+					ret = None
 
+				l.info(ret)
 				return ret
 
 			except:
 				# On any exception dump the packet
-				return None
+				l.exception('Error interpretting data')
 
 		else:
 			l.warn('Could not find header "Content-Type".')

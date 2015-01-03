@@ -39,13 +39,15 @@ def save (args, channel, method, prop, body):
 		l.exception('Other exception in saving to mongo')
 
 
+try:
+	mdb = connect_mongodb()
 
-mdb = connect_mongodb()
+	# Start the connection to rabbitmq
 
-# Start the connection to rabbitmq
+	description = 'Save to MongoDB'
+	settings = []
+	parameters = []
 
-description = 'Save to MongoDB'
-settings = []
-parameters = []
-
-gatdBlock.start_block(l, description, settings, parameters, save)
+	gatdBlock.start_block(l, description, settings, parameters, save)
+except:
+	l.exception('Mongo died')

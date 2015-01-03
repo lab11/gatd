@@ -4,6 +4,7 @@ import copy
 import ipaddress
 import json
 import os
+import pprint
 import sys
 import unittest
 import uuid
@@ -95,42 +96,69 @@ block_parameters_fns = {
 ### GATD Block Processes                                                     ###
 ################################################################################
 
-running = {}
+# # running = {}
 
-# def init_rabbitmq_exchanges ():
+# # def init_rabbitmq_exchanges ():
 
-# 	amqp_conn = pika.BlockingConnection(
-# 					pika.ConnectionParameters(
-# 						host=gatdConfig.rabbitmq.HOST,
-# 						port=gatdConfig.rabbitmq.PORT,
-# 						credentials=pika.PlainCredentials(
-# 							gatdConfig.control.USERNAME,
-# 							gatdConfig.control.PASSWORD)
-# 				))
-# 	amqp_chan = amqp_conn.channel();
-
-
-# 	for block_name, block in gatd.blocks.blocks.items():
-# 		# Create the output exchange if this block can output packets.
-# 		# There is no harm in declaring an exchange that already exists
-# 		if block['source_group']:
-# 			thischannel.exchange_declare('xch_{}'.format(block_name),
-# 										 exchange_type='direct',
-# 										 durable=True)
+# # 	amqp_conn = pika.BlockingConnection(
+# # 					pika.ConnectionParameters(
+# # 						host=gatdConfig.rabbitmq.HOST,
+# # 						port=gatdConfig.rabbitmq.PORT,
+# # 						credentials=pika.PlainCredentials(
+# # 							gatdConfig.control.USERNAME,
+# # 							gatdConfig.control.PASSWORD)
+# # 				))
+# # 	amqp_chan = amqp_conn.channel();
 
 
-# def init_single_instance_blocks ():
-# 	# Start all of the single instance blocks
-# 	running['global'] = {}
+# # 	for block_name, block in gatd.blocks.blocks.items():
+# # 		# Create the output exchange if this block can output packets.
+# # 		# There is no harm in declaring an exchange that already exists
+# # 		if block['source_group']:
+# # 			thischannel.exchange_declare('xch_{}'.format(block_name),
+# # 										 exchange_type='direct',
+# # 										 durable=True)
 
-# 	for block_name, block in gatd.blocks.blocks.items():
-# 		if block['single_instance']:
-# 			cmd = {
-# 				'cmd': 'python3 {}'.format(block_name),
-# 				'numprocesses': 1
+
+# # def init_single_instance_blocks ():
+# # 	# Start all of the single instance blocks
+# # 	running['global'] = {}
+
+# # 	for block_name, block in gatd.blocks.blocks.items():
+# # 		if block['single_instance']:
+# # 			cmd = {
+# # 				'cmd': 'python3 {}'.format(block_name),
+# # 				'numprocesses': 1
+# # 			}
+# # 			running['global'][block_name] = circus.get_arbiter([cmd])
+# # 			running['global'][block_name].start()
+
+
+
+
+
+
+
+
+
+# Structure of "running profiles"
+# {
+# 	uuid: <uuid>,
+# 	blocks: {
+# 		<uuid>: {
+# 			type: <type>,
+# 			source_uuids: [<uuid>],
+# 			settings: {
+# 				<key>: <value>
 # 			}
-# 			running['global'][block_name] = circus.get_arbiter([cmd])
-# 			running['global'][block_name].start()
+# 		}
+# 	}
+# }
+
+
+
+
+
 
 # Take a given block and distill all of the unique features from it.
 # This is used to tell if the block changed from one upload to the next
@@ -155,17 +183,71 @@ def create_block_snapshot (block, connections):
 
 	return snap
 
+
+def create_running_profile (profile):
+
+	rp = {'uuid': profile['uuid'],
+	      'blocks': {}}
+
+	for block in profile['blocks']:
+		newblock = rp['blocks'][block['uuid']] = {}
+
+		newblock['type'] = block['type']
+
+		# Add all connections that go into the current block
+		newblock['source_uuids'] = []
+		for connection in profile['connections']:
+			if connection['target_uuid'] == block['uuid']:
+				newblock['source_uuids'].append(connection['source_uuid'])
+
+		# Keep track of all settings for the current block
+		newblock['settings'] = {}
+		for setting in gatd.blocks.blocks[block['type']].get('settings', []):
+			newblock['settings'][setting['key']] = block[setting['key']]
+
+	return rp
+
+
+
+
+
 # This function causes GATD to start executing the profile
-def run_profile (profile):
+def run_profile (request, profile):
 
-	comparer = unittest.TestCase()
+	def create_queue (src, dst, block_prototype, profile):
+		queue_name = '{}_{}'.format(src, dst)
+		exchange_name = 'xch_scope_{}'.format(block_prototype['target_group'])
 
-	print('Uploading profile "{}"'.format(profile['name']))
+		# If we specified a special routing key (as in the IPv6 UDP
+		# receiver, which filters on dest address) then use that as
+		# the routing key. Else, just use the uuid of the source block.
+		if 'routing_key' in block_prototype:
+			fields = block_prototype['routing_key'].split('.')
+
+			# Need to get the value out of the source block
+			for srcblk in profile['blocks']:
+				if srcblk['uuid'] == src:
+					routing_key = srcblk[fields[0]][fields[1]]
+					break
+			else:
+				print('  Could not find the source block. Something is wrong.')
+		else:
+			routing_key = src
+
+		print('  Creating queue ({}) from ({}) with key ({})'.format(queue_name, exchange_name, routing_key))
+
+		# Make queues for all of the inputs to this block
+		amqp_chan.queue_declare(queue=queue_name,
+		                        durable=True)
+		amqp_chan.queue_bind(queue=queue_name,
+		                     exchange=exchange_name,
+		                     routing_key=routing_key)
+
+
 
 	if profile['uuid'] != '9e5026f5-bdd0-466a-be5b-0fea8f35f2bb':
 		return
 
-	processes = running.setdefault(profile['uuid'], {})
 
 	# Need a pika connection for creating queues
 	amqp_conn = pika.BlockingConnection(
@@ -182,111 +264,264 @@ def run_profile (profile):
 	# Get a circus connection too
 	circus_client = circus.client.CircusClient(endpoint='tcp://127.0.0.1:5555')
 
-	# Iterate through all blocks in this profile
-	for block in profile['blocks']:
+	# Use this to compare settings if need be
+	comparer = unittest.TestCase()
+	pp = pprint.PrettyPrinter()
+
+
+	print('####')
+	print('#### Uploading profile "{}"'.format(profile['name']))
+	print('####')
+
+
+	# Start by getting the stored copy of what is currently executing
+	existing = request.db['conf_profiles_running'].find_one({'uuid':profile['uuid']})
+
+	print('existing')
+	pp.pprint(existing)
+
+	# Get a "running profile" for the profile we just saved
+	newprofi = create_running_profile(profile)
+
+	print('newprofi')
+	pp.pprint(newprofi)
+
+	# Start by removing old blocks
+	if existing:
+		for block_uuid,content in existing['blocks'].items():
+			if block_uuid not in newprofi['blocks']:
+
+				print('Block {} ({}) is no longer present'.format(content['type'], block_uuid))
+
+				# Check to see if this is a single instance (global) block
+				# or it runs on a per-profile based. If it's per-profile,
+				# stop the process
+				block_prototype = gatd.blocks.blocks[content['type']]
+				if block_prototype['single_instance'] == False:
+					print('  stopping block.')
+					to_circus = {
+						'command': 'rm',
+						'properties': {
+							'name': block_uuid,
+							'waiting': True
+						}
+					}
+					circus_client.call(to_circus)
+
+				# Delete all queues that went to this block
+				for src in content['source_uuids']:
+					queue_name = '{}_{}'.format(src, block_uuid)
+					print('  removing queue {}'.format(queue_name))
+					amqp_chan.queue_delete(queue=queue_name)
+
+
+	# Iterate through the new blocks, detecting changes
+	for block_uuid,content in newprofi['blocks'].items():
+		print('Processing block {} ({})'.format(content['type'], block_uuid))
+
 
 		changed = False
+		block_prototype = gatd.blocks.blocks[content['type']]
 
-		# Get more info about this block
-		block_prototype = gatd.blocks.blocks[block['type']]
+		if (not existing) or (block_uuid not in existing['blocks']):
+			print('  new')
 
-		# Get the distilled version of the block
-		snap = create_block_snapshot(block, profile['connections'])
+			# Create queues for this block
+			for src in content['source_uuids']:
+				create_queue(src, block_uuid, block_prototype, profile)
 
-		# Check to see if we have seen this block before
-		if block['uuid'] in processes:
-			print('Block {} ({}) already running'.format(block['type'], block['uuid']))
-			bprocess = processes[block['uuid']]
-
-			# Check if the block changed since last time
-			try:
-				comparer.assertEqual(snap, bprocess['snapshot'])
-			except:
-				changed = True
-				print('Block {} ({}) has changed. Restart!'.format(block['type'], block['uuid']))
-			else:
-				print('Block {} ({}) is the same. Just let it ride.'.format(block['type'], block['uuid']))
-
-		else:
-			# This is a new block so we need to start it
-			print('Block {} ({}) is new'.format(block['type'], block['uuid']))
 			changed = True
 
-			bprocess = processes.setdefault(block['uuid'], {})
-			bprocess['snapshot'] = snap
+		else:
+			print('  existing')
 
-		if changed:
-			if bprocess.get('started', False):
-				print('Stopping block')
+			# Check if there are queues to be deleted
+			for src in existing['blocks'][block_uuid]['source_uuids']:
+				if src not in content['source_uuids']:
+					queue_name = '{}_{}'.format(src, block_uuid)
+					print('  queue {} no longer exists. Deleting.'.format(queue_name))
+					amqp_chan.queue_delete(queue=queue_name)
+					changed = True
+
+			# Check if there are queues to be added
+			for src in content['source_uuids']:
+				if src not in existing['blocks'][block_uuid]['source_uuids']:
+					create_queue(src, block_uuid, block_prototype, profile)
+					changed = True
+
+			# If the queues stayed the same, check to see if any settings changed
+			if not changed:
+				try:
+					comparer.assertEqual(content['settings'], existing['blocks'][block_uuid]['settings'])
+				except Exception as e:
+					print(e)
+					changed = True
+
+			# If something changed, stop the existing process
+			if changed and not block_prototype['single_instance']:
+				print('  changed. Stopping.')
 				to_circus = {
 					'command': 'rm',
 					'properties': {
-						'name': block['uuid']
+						'name': block_uuid,
+						'waiting': True
 					}
 				}
 				circus_client.call(to_circus)
 
-
-			#                make these queues
-			#
-			#   | source_conn[0] | --|    |-------|
-			#   | source_conn[1] | -----> | block |
-			#   | source_conn[2] | --|    |-------|
-			#
-			for src_uuid in snap['sources']:
-
-				queue_name = '{}_{}'.format(src_uuid, block['uuid'])
-				exchange_name = 'xch_scope_{}'.format(block_prototype['target_group'])
-
-				# If we specified a special routing key (as in the IPv6 UDP
-				# receiver, which filters on dest address) then use that as
-				# the routing key. Else, just use the uuid of the source block.
-				if 'routing_key' in block_prototype:
-					fields = block_prototype['routing_key'].split('.')
-
-					# Need to get the value out of the source block
-					for srcblk in profile['blocks']:
-						if srcblk['uuid'] == src_uuid:
-							routing_key = srcblk[fields[0]][fields[1]]
-							break
-					else:
-						print('Could not find the source block. Something is wrong.')
-				else:
-					routing_key = src_uuid
-
-				print('Creating queue ({}) from ({}) with key ({})'.format(queue_name, exchange_name, routing_key))
-
-				# Make queues for all of the inputs to this block
-				amqp_chan.queue_declare(queue=queue_name,
-				                        durable=True)
-				amqp_chan.queue_bind(queue=queue_name,
-				                     exchange=exchange_name,
-				                     routing_key=routing_key)
-
-			# If this is a single instance block (meaning there is one
-			# process that runs globally) then we don't need to restart it.
-			if block_prototype['single_instance']:
-				continue
+		# If there is reason to, start the process
+		if changed and not block_prototype['single_instance']:
+			print('  changed. Starting.')
 
 			cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
 				.format(path=os.path.abspath('../gatd'),
-				        block_type=block['type'],
-				        block_uuid=block['uuid'],
-				        sources=' '.join(snap['sources']))
+				        block_type=content['type'],
+				        block_uuid=block_uuid,
+				        sources=' '.join(content['source_uuids']))
 
-			print('CMD: {}'.format(cmd))
+			print('  cmd: {}'.format(cmd))
 
-			# Actually start the block
 			to_circus = {
 				'command': 'add',
 				'properties': {
 					'cmd': cmd,
-					'name': block['uuid'],
+					'name': block_uuid,
 					'start': True
 				}
 			}
 			circus_client.call(to_circus)
-			bprocess['started'] = True
+
+
+	# Save the running profile we just executed for next time
+	if existing:
+		newprofi['_id'] = existing['_id']
+	request.db['conf_profiles_running'].save(newprofi)
+
+
+
+
+
+	# print('Uploading profile "{}"'.format(profile['name']))
+
+
+
+	# processes = running.setdefault(profile['uuid'], {})
+
+
+
+	# # Iterate through all blocks in this profile
+	# for block in profile['blocks']:
+
+	# 	print('Processing block {} ({})'.format(block['type'], block['uuid']))
+
+	# 	changed = False
+
+	# 	# Get more info about this block
+	# 	block_prototype = gatd.blocks.blocks[block['type']]
+
+	# 	# Get the distilled version of the block
+	# 	snap = create_block_snapshot(block, profile['connections'])
+
+	# 	# Check to see if we have seen this block before
+	# 	if block['uuid'] in processes:
+	# 		print('  already running')
+	# 		bprocess = processes[block['uuid']]
+
+	# 		# Check if the block changed since last time
+	# 		try:
+	# 			comparer.assertEqual(snap, bprocess['snapshot'])
+	# 		except:
+	# 			changed = True
+	# 			print('  has changed.')
+	# 		else:
+	# 			print('  is the same. Just let it ride.')
+
+	# 	else:
+	# 		# This is a new block so we need to start it
+	# 		print('  is new')
+	# 		changed = True
+
+	# 		bprocess = processes.setdefault(block['uuid'], {})
+
+	# 	bprocess['snapshot'] = snap
+
+	# 	if changed:
+	# 		if bprocess.get('started', False):
+	# 			print('  stopping block')
+	# 			to_circus = {
+	# 				'command': 'rm',
+	# 				'properties': {
+	# 					'name': block['uuid'],
+	# 					'waiting': True
+	# 				}
+	# 			}
+	# 			circus_client.call(to_circus)
+
+
+	# 		#                make these queues
+	# 		#
+	# 		#   | source_conn[0] | --|    |-------|
+	# 		#   | source_conn[1] | -----> | block |
+	# 		#   | source_conn[2] | --|    |-------|
+	# 		#
+	# 		for src_uuid in snap['sources']:
+
+	# 			queue_name = '{}_{}'.format(src_uuid, block['uuid'])
+	# 			exchange_name = 'xch_scope_{}'.format(block_prototype['target_group'])
+
+	# 			# If we specified a special routing key (as in the IPv6 UDP
+	# 			# receiver, which filters on dest address) then use that as
+	# 			# the routing key. Else, just use the uuid of the source block.
+	# 			if 'routing_key' in block_prototype:
+	# 				fields = block_prototype['routing_key'].split('.')
+
+	# 				# Need to get the value out of the source block
+	# 				for srcblk in profile['blocks']:
+	# 					if srcblk['uuid'] == src_uuid:
+	# 						routing_key = srcblk[fields[0]][fields[1]]
+	# 						break
+	# 				else:
+	# 					print('  Could not find the source block. Something is wrong.')
+	# 			else:
+	# 				routing_key = src_uuid
+
+	# 			print('  Creating queue ({}) from ({}) with key ({})'.format(queue_name, exchange_name, routing_key))
+
+	# 			# Make queues for all of the inputs to this block
+	# 			amqp_chan.queue_declare(queue=queue_name,
+	# 			                        durable=True)
+	# 			amqp_chan.queue_bind(queue=queue_name,
+	# 			                     exchange=exchange_name,
+	# 			                     routing_key=routing_key)
+
+	# 		# If this is a single instance block (meaning there is one
+	# 		# process that runs globally) then we don't need to restart it.
+	# 		if block_prototype['single_instance']:
+	# 			continue
+
+	# 		cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
+	# 			.format(path=os.path.abspath('../gatd'),
+	# 			        block_type=block['type'],
+	# 			        block_uuid=block['uuid'],
+	# 			        sources=' '.join(snap['sources']))
+
+	# 		print('  CMD: {}'.format(cmd))
+
+
+	# 		# Actually start the block
+	# 		to_circus = {
+	# 			'command': 'add',
+	# 			'properties': {
+	# 				'cmd': cmd,
+	# 				'name': block['uuid'],
+	# 				'start': True
+	# 			}
+	# 		}
+	# 		circus_client.call(to_circus)
+	# 		bprocess['started'] = True
+
+	# 	print('')
+	# 	print('')
 
 
 
@@ -517,7 +752,7 @@ def editor_saveupload(request):
 
 		request.db['conf_profiles'].save(data)
 
-		run_profile(data)
+		run_profile(request, data)
 
 
 
