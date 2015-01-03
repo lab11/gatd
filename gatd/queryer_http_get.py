@@ -59,7 +59,7 @@ def httpGET (url, block_uuid):
 							))
 		amqp_chan = amqp_conn.channel();
 
-		amqp_chan.basic_publish(exchange='xch_queryer_http_get',
+		amqp_chan.basic_publish(exchange='xch_scope_a',
 		                        body=pkt_pickle,
 		                        routing_key=block_uuid)
 		amqp_chan.close()
@@ -86,22 +86,22 @@ except:
 l.info('Started with UUID:{}, URL:{}, interval:{}'.format(block_uuid, url, interval))
 
 
-# Make sure the exchange exists
-amqp_conn = pika.BlockingConnection(
-				pika.ConnectionParameters(
-					host=gatdConfig.rabbitmq.HOST,
-					port=gatdConfig.rabbitmq.PORT,
-					virtual_host=gatdConfig.rabbitmq.VHOST,
-					credentials=pika.PlainCredentials(
-						gatdConfig.blocks.RMQ_USERNAME,
-						gatdConfig.blocks.RMQ_PASSWORD)
-			))
-amqp_chan = amqp_conn.channel();
+# # Make sure the exchange exists
+# amqp_conn = pika.BlockingConnection(
+# 				pika.ConnectionParameters(
+# 					host=gatdConfig.rabbitmq.HOST,
+# 					port=gatdConfig.rabbitmq.PORT,
+# 					virtual_host=gatdConfig.rabbitmq.VHOST,
+# 					credentials=pika.PlainCredentials(
+# 						gatdConfig.blocks.RMQ_USERNAME,
+# 						gatdConfig.blocks.RMQ_PASSWORD)
+# 			))
+# amqp_chan = amqp_conn.channel();
 
-amqp_chan.exchange_declare(exchange='xch_queryer_http_get',
-                           exchange_type='direct',
-                           durable='true')
-amqp_chan.close()
+# amqp_chan.exchange_declare(exchange='xch_queryer_http_get',
+#                            exchange_type='direct',
+#                            durable='true')
+# amqp_chan.close()
 
 sched = apscheduler.schedulers.asyncio.AsyncIOScheduler(standalone=True)
 sched.add_executor('processpool')

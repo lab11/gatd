@@ -108,10 +108,10 @@ def check_packet (channel, method, prop, body):
 
 
 	if not duplicate:
-		for target in routing_keys:
-			channel.basic_publish(exchange='xch_deduplicator',
-			                      body=body,
-			                      routing_key=target)
+		# for target in routing_keys:
+		channel.basic_publish(exchange='xch_scope_a',
+		                      body=body,
+		                      routing_key=args.uuid)
 
 	# Ack all packets
 	channel.basic_ack(delivery_tag=method.delivery_tag)

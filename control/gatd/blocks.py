@@ -11,6 +11,7 @@ collected and included in the stream for later processing.''',
 		'target_group': None,
 		'source_group': 'a',
 		'single_instance': True,
+		'routing_key': 'parameters.dst_addr',
 		'parameters': [
 			{
 				'name': 'Destination Address',
@@ -173,7 +174,7 @@ any of the input blocks and will interpret the data as JSON and expand the data
 into a full object.''',
 		'target_group': 'a',
 		'source_group': 'b',
-		'single_instance': False
+		'single_instance': False,
 	},
 
 	'formatter_contenttype': {
@@ -185,16 +186,16 @@ and that included the "Content-Type" field in their response/POST headers.
 ''',
 		'target_group': 'a',
 		'source_group': 'b',
-		'single_instance': False
+		'single_instance': False,
 	},
 
-	'database_mongo': {
+	'database_mongodb': {
 		'name': 'MongoDB',
 		'help': 'Store packets in a MongoDB database.',
 		'target_group': 'b',
 		'source_group': 'c',
 		'icon': 'database',
-		'single_instance': False
+		'single_instance': False,
 	},
 
 	'database_timeseries': {
@@ -202,7 +203,7 @@ and that included the "Content-Type" field in their response/POST headers.
 		'help': 'Store packets in a time series database.',
 		'target_group': 'b',
 		'source_group': None,
-		'single_instance': False
+		'single_instance': False,
 	},
 
 	'processor_python': {
@@ -231,7 +232,7 @@ the data packet. To use, you specify the key:value pair that may be in the
 data packet and the key:value pair to add to the packet if it is.''',
 		'target_group': 'b',
 		'source_group': 'b',
-		'single_instance': False
+		'single_instance': False,
 	},
 
 	'streamer_socketio': {

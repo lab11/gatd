@@ -1,22 +1,20 @@
 
 import copy
+import pickle
 
 import arrow
 
 import gatdBlock
-
 
 def start_formatting(l, description, settings, parameters, callback):
 
 	# This function handles getting packets from scope 'a' (the receive scope)
 	# into a structure that can be formatted before eventually calling the
 	# formatter.
-	def formatter_callback (channel, method, prop, body):
+	def formatter_callback (args, channel, method, prop, body):
 		try:
-
 			# Prepare the metadata for the formatter
 			meta = {}
-
 
 			meta['time_utc_iso'] = body['time_utc_iso']
 			meta['input_src']    = body['src']
@@ -43,17 +41,17 @@ def start_formatting(l, description, settings, parameters, callback):
 						l.warn('Formatter did not return a dict.')
 					else:
 						item['_gatd'] = meta
-						for target in routing_keys:
-							channel.basic_publish(exchange='xch_formatter',
-							                      body=item,
-							                      routing_key=target)
+						# for target in routing_keys:
+						channel.basic_publish(exchange='xch_scope_b',
+						                      body=pickle.dumps(item),
+						                      routing_key=str(args.uuid))
 
 			elif type(ret) == dict:
 				ret['_gatd'] = meta
-				for target in routing_keys:
-					channel.basic_publish(exchange='xch_formatter',
-					                      body=ret,
-					                      routing_key=target)
+				# for target in routing_keys:
+				channel.basic_publish(exchange='xch_scope_b',
+				                      body=pickle.dumps(ret),
+				                      routing_key=str(args.uuid))
 			elif ret == None:
 				l.info('Formatter decided to drop packet or did not return anything.')
 

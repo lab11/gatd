@@ -56,7 +56,7 @@ def receive (amqp_chan):
 		l.debug('Sending packet key:{} len:{}'.format(uuid, len(data)))
 
 		# Send the packet to the queue
-		amqp_chan.basic_publish(exchange='xch_receiver_udp_ipv4',
+		amqp_chan.basic_publish(exchange='xch_scope_a',
 		                        body=pkt_pickle,
 		                        routing_key=uuid)
 

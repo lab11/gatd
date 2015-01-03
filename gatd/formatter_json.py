@@ -1,9 +1,6 @@
 
 import json
 
-import setproctitle
-setproctitle.setproctitle('gatd:form:json')
-
 import gatdLog
 import formatter
 
@@ -11,7 +8,11 @@ l = gatdLog.getLogger('formatter-json')
 
 def format (data, meta):
 
+	l.debug(data)
+
 	try:
+		if type(data) == bytes:
+			data = data.decode('utf-8')
 		ret = json.loads(data, strict=False)
 
 		# JSON can be just a string or list. If so, force it into
@@ -32,6 +33,5 @@ settings = []
 parameters = []
 
 description = '''Parse packets as JSON'''
-
 
 formatter.start_formatting(l, description, settings, parameters, format)

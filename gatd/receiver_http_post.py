@@ -64,7 +64,7 @@ class gatdPostHandler (http.server.BaseHTTPRequestHandler):
 
 			l.debug('Sending packet to rabbitmq key:{} length:{}'.format(receiver_id, len(pkt_pickle)))
 
-			amqp_chan.basic_publish(exchange='xch_receiver_http_post',
+			amqp_chan.basic_publish(exchange='xch_scope_a',
 			                        body=pkt_pickle,
 			                        routing_key=receiver_id)
 
@@ -88,22 +88,22 @@ class ForkingHTTPServer(socketserver.ForkingMixIn, http.server.HTTPServer):
 		http.server.HTTPServer.finish_request(self, request, client_address)
 
 try:
-	# Make sure the exchange exists
-	amqp_conn = pika.BlockingConnection(
-					pika.ConnectionParameters(
-						host=gatdConfig.rabbitmq.HOST,
-						port=gatdConfig.rabbitmq.PORT,
-						virtual_host=gatdConfig.rabbitmq.VHOST,
-						credentials=pika.PlainCredentials(
-							gatdConfig.blocks.RMQ_USERNAME,
-							gatdConfig.blocks.RMQ_PASSWORD)
-				))
-	amqp_chan = amqp_conn.channel();
+	# # Make sure the exchange exists
+	# amqp_conn = pika.BlockingConnection(
+	# 				pika.ConnectionParameters(
+	# 					host=gatdConfig.rabbitmq.HOST,
+	# 					port=gatdConfig.rabbitmq.PORT,
+	# 					virtual_host=gatdConfig.rabbitmq.VHOST,
+	# 					credentials=pika.PlainCredentials(
+	# 						gatdConfig.blocks.RMQ_USERNAME,
+	# 						gatdConfig.blocks.RMQ_PASSWORD)
+	# 			))
+	# amqp_chan = amqp_conn.channel();
 
-	amqp_chan.exchange_declare(exchange='xch_receiver_http_post',
-	                           exchange_type='direct',
-	                           durable='true')
-	amqp_chan.close()
+	# amqp_chan.exchange_declare(exchange='xch_receiver_http_post',
+	#                            exchange_type='direct',
+	#                            durable='true')
+	# amqp_chan.close()
 
 	# Create a web server and define the handler to manage the incoming request
 	server = ForkingHTTPServer(('', 25101), gatdPostHandler)

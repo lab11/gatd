@@ -1,18 +1,12 @@
 
-
 import pika
 import pymongo
-import setproctitle
-
-setproctitle.setproctitle('gatd:db:mon')
 
 import gatdBlock
+import gatdConfig
 import gatdLog
 
 l = gatdLog.getLogger('mongodb')
-
-args = None
-routing_keys = None
 
 def connect_mongodb ():
 	# get a mongo connection
@@ -25,7 +19,8 @@ def connect_mongodb ():
 	return mdb
 
 
-def save (channel, method, prop, body):
+def save (args, channel, method, prop, body):
+	global mdb
 
 	try:
 		# No magic here, just try to insert the record into the capped collection

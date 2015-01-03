@@ -47,7 +47,7 @@ def receive (amqp_chan):
 		l.debug('Sending packet to rabbitmq with routing key:{}'.format(str(dst_addr)))
 
 		# Send the packet to the queue
-		amqp_chan.basic_publish(exchange='xch_receiver_udp_ipv6',
+		amqp_chan.basic_publish(exchange='xch_scope_a',
 		                        body=pkt_pickle,
 		                        routing_key=str(dst_addr))
 
@@ -56,9 +56,9 @@ def receive (amqp_chan):
 def pika_on_channel (amqp_chan):
 
 	# Create the receive exchange if it doesn't exist.
-	amqp_chan.exchange_declare(exchange='xch_receiver_udp_ipv6',
-	                           exchange_type='direct',
-	                           durable='true')
+	# amqp_chan.exchange_declare(exchange='xch_receiver_udp_ipv6',
+	#                            exchange_type='direct',
+	#                            durable='true')
 
 	# # Make sure there is a queue for unknown packets
 	# amqp_chan.queue_declare(queue='receive-unknown',

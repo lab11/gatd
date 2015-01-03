@@ -2,6 +2,7 @@
 import base64
 import copy
 import ipaddress
+import json
 import os
 import sys
 import unittest
@@ -15,6 +16,8 @@ import pyramid.security
 import arrow
 import authomatic
 import authomatic.adapters
+import circus.client
+import pika
 
 import gatd.login_keys
 import gatd.blocks
@@ -94,55 +97,56 @@ block_parameters_fns = {
 
 running = {}
 
-def init_rabbitmq_exchanges ():
+# def init_rabbitmq_exchanges ():
 
-	amqp_conn = pika.BlockingConnection(
-					pika.ConnectionParameters(
-						host=gatdConfig.rabbitmq.HOST,
-						port=gatdConfig.rabbitmq.PORT,
-						credentials=pika.PlainCredentials(
-							gatdConfig.control.USERNAME,
-							gatdConfig.control.PASSWORD)
-				))
-	amqp_chan = amqp_conn.channel();
-
-
-	for block_name, block in gatd.blocks.blocks.items():
-		# Create the output exchange if this block can output packets.
-		# There is no harm in declaring an exchange that already exists
-		if block['source_group']:
-			thischannel.exchange_declare('xch_{}'.format(block_name),
-										 exchange_type='direct',
-										 durable=True)
+# 	amqp_conn = pika.BlockingConnection(
+# 					pika.ConnectionParameters(
+# 						host=gatdConfig.rabbitmq.HOST,
+# 						port=gatdConfig.rabbitmq.PORT,
+# 						credentials=pika.PlainCredentials(
+# 							gatdConfig.control.USERNAME,
+# 							gatdConfig.control.PASSWORD)
+# 				))
+# 	amqp_chan = amqp_conn.channel();
 
 
-def init_single_instance_blocks ():
-	# Start all of the single instance blocks
-	running['global'] = {}
+# 	for block_name, block in gatd.blocks.blocks.items():
+# 		# Create the output exchange if this block can output packets.
+# 		# There is no harm in declaring an exchange that already exists
+# 		if block['source_group']:
+# 			thischannel.exchange_declare('xch_{}'.format(block_name),
+# 										 exchange_type='direct',
+# 										 durable=True)
 
-	for block_name, block in gatd.blocks.blocks.items():
-		if block['single_instance']:
-			cmd = {
-				'cmd': 'python3 {}'.format(block_name),
-				'numprocesses': 1
-			}
-			running['global'][block_name] = circus.get_arbiter([cmd])
-			running['global'][block_name].start()
+
+# def init_single_instance_blocks ():
+# 	# Start all of the single instance blocks
+# 	running['global'] = {}
+
+# 	for block_name, block in gatd.blocks.blocks.items():
+# 		if block['single_instance']:
+# 			cmd = {
+# 				'cmd': 'python3 {}'.format(block_name),
+# 				'numprocesses': 1
+# 			}
+# 			running['global'][block_name] = circus.get_arbiter([cmd])
+# 			running['global'][block_name].start()
 
 # Take a given block and distill all of the unique features from it.
 # This is used to tell if the block changed from one upload to the next
 # so we know if we should re-start the process.
+# Because of how we setup the routing keys in the rabbitmq queues, we only care
+# about inputs to this block. If the inputs change we need to read from more
+# queues, but we always send to the same exchange with the same routing key
+# (the UUID of the sending block) regardless of the number of output queues.
 def create_block_snapshot (block, connections):
 	snap = {}
 
 	# Iterate through all connections this block is involved in
-	snap['source_conns'] = set()
-	snap['target_conns'] = set()
+	snap['sources'] = set()
 	for connection in connections:
-		if connection['source_uuid'] == block['uuid']:
-			snap['source_conns'].add(connection['target_uuid'])
 		if connection['target_uuid'] == block['uuid']:
-			snap['target_conns'].add(connection['source_uuid'])
+			snap['sources'].add(connection['source_uuid'])
 
 	# Save all settings for this block
 	snap['settings'] = {}
@@ -158,31 +162,131 @@ def run_profile (profile):
 
 	print('Uploading profile "{}"'.format(profile['name']))
 
+	if profile['uuid'] != '9e5026f5-bdd0-466a-be5b-0fea8f35f2bb':
+		return
+
 	processes = running.setdefault(profile['uuid'], {})
 
+	# Need a pika connection for creating queues
+	amqp_conn = pika.BlockingConnection(
+					pika.ConnectionParameters(
+						host=gatdConfig.rabbitmq.HOST,
+						port=gatdConfig.rabbitmq.PORT,
+						virtual_host=gatdConfig.rabbitmq.VHOST,
+						credentials=pika.PlainCredentials(
+							gatdConfig.blocks.RMQ_USERNAME,
+							gatdConfig.blocks.RMQ_PASSWORD)
+				))
+	amqp_chan = amqp_conn.channel();
+
+	# Get a circus connection too
+	circus_client = circus.client.CircusClient(endpoint='tcp://127.0.0.1:5555')
+
+	# Iterate through all blocks in this profile
 	for block in profile['blocks']:
+
+		changed = False
+
+		# Get more info about this block
+		block_prototype = gatd.blocks.blocks[block['type']]
+
+		# Get the distilled version of the block
+		snap = create_block_snapshot(block, profile['connections'])
+
+		# Check to see if we have seen this block before
 		if block['uuid'] in processes:
-			bprocess = processes[block['uuid']]
 			print('Block {} ({}) already running'.format(block['type'], block['uuid']))
+			bprocess = processes[block['uuid']]
 
-			snap = create_block_snapshot(block, profile['connections'])
-
+			# Check if the block changed since last time
 			try:
 				comparer.assertEqual(snap, bprocess['snapshot'])
 			except:
+				changed = True
 				print('Block {} ({}) has changed. Restart!'.format(block['type'], block['uuid']))
-				#bprocess['cmd'].stop()
-				#bprocess['cmd'] = start_block(block, profile['connections'])
-				bprocess['snapshot'] = snap
 			else:
 				print('Block {} ({}) is the same. Just let it ride.'.format(block['type'], block['uuid']))
 
 		else:
+			# This is a new block so we need to start it
 			print('Block {} ({}) is new'.format(block['type'], block['uuid']))
-			bprocess = processes.setdefault(block['uuid'], {})
+			changed = True
 
-			bprocess['snapshot'] = create_block_snapshot(block, profile['connections'])
-			#bprocess['cmd'] = start_block(block, profile['connections'])
+			bprocess = processes.setdefault(block['uuid'], {})
+			bprocess['snapshot'] = snap
+
+		if changed:
+			if bprocess.get('started', False):
+				print('Stopping block')
+				to_circus = {
+					'command': 'rm',
+					'properties': {
+						'name': block['uuid']
+					}
+				}
+				circus_client.call(to_circus)
+
+
+			#                make these queues
+			#
+			#   | source_conn[0] | --|    |-------|
+			#   | source_conn[1] | -----> | block |
+			#   | source_conn[2] | --|    |-------|
+			#
+			for src_uuid in snap['sources']:
+
+				queue_name = '{}_{}'.format(src_uuid, block['uuid'])
+				exchange_name = 'xch_scope_{}'.format(block_prototype['target_group'])
+
+				# If we specified a special routing key (as in the IPv6 UDP
+				# receiver, which filters on dest address) then use that as
+				# the routing key. Else, just use the uuid of the source block.
+				if 'routing_key' in block_prototype:
+					fields = block_prototype['routing_key'].split('.')
+
+					# Need to get the value out of the source block
+					for srcblk in profile['blocks']:
+						if srcblk['uuid'] == src_uuid:
+							routing_key = srcblk[fields[0]][fields[1]]
+							break
+					else:
+						print('Could not find the source block. Something is wrong.')
+				else:
+					routing_key = src_uuid
+
+				print('Creating queue ({}) from ({}) with key ({})'.format(queue_name, exchange_name, routing_key))
+
+				# Make queues for all of the inputs to this block
+				amqp_chan.queue_declare(queue=queue_name,
+				                        durable=True)
+				amqp_chan.queue_bind(queue=queue_name,
+				                     exchange=exchange_name,
+				                     routing_key=routing_key)
+
+			# If this is a single instance block (meaning there is one
+			# process that runs globally) then we don't need to restart it.
+			if block_prototype['single_instance']:
+				continue
+
+			cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
+				.format(path=os.path.abspath('../gatd'),
+				        block_type=block['type'],
+				        block_uuid=block['uuid'],
+				        sources=' '.join(snap['sources']))
+
+			print('CMD: {}'.format(cmd))
+
+			# Actually start the block
+			to_circus = {
+				'command': 'add',
+				'properties': {
+					'cmd': cmd,
+					'name': block['uuid'],
+					'start': True
+				}
+			}
+			circus_client.call(to_circus)
+			bprocess['started'] = True
 
 
 
@@ -301,7 +405,7 @@ def editor (request):
 					                 'formatter_contenttype',
 					                 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_info_simple']),
-					 ('Storage', ['database_mongo']),
+					 ('Storage', ['database_mongodb']),
 					 ('Viewers', ['streamer_socketio', 'viewer', 'queryer', 'replayer'])
 					]
 

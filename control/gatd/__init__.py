@@ -4,10 +4,16 @@ import pyramid.authentication
 import pyramid.authorization
 import pyramid.security
 
+import os
+import sys
 import urllib.parse
 
 import bson.objectid
+import pika
 import pymongo
+
+sys.path.append(os.path.abspath('../gatd'))
+import gatdConfig
 
 class RootFactory ():
     __name__ = None
@@ -22,6 +28,31 @@ class RootFactory ():
 def get_permission (userid, request):
 	return ['loggedin']
 
+
+
+def create_exchanges ():
+	exchanges = [
+		'xch_scope_a',
+		'xch_scope_b',
+	]
+
+	# Need a pika connection for creating queues
+	amqp_conn = pika.BlockingConnection(
+					pika.ConnectionParameters(
+						host=gatdConfig.rabbitmq.HOST,
+						port=gatdConfig.rabbitmq.PORT,
+						virtual_host=gatdConfig.rabbitmq.VHOST,
+						credentials=pika.PlainCredentials(
+							gatdConfig.blocks.RMQ_USERNAME,
+							gatdConfig.blocks.RMQ_PASSWORD)
+				))
+	amqp_chan = amqp_conn.channel();
+
+	for exchange in exchanges:
+			amqp_chan.exchange_declare(exchange=exchange,
+			                           exchange_type='direct',
+			                           durable='true')
+	amqp_chan.close()
 
 
 
@@ -57,7 +88,7 @@ def main(global_config, **settings):
 		return request.db['conf_users'].find_one({'_id': bson.objectid.ObjectId(login)})
 	config.add_request_method(add_user, 'user', reify=True)
 
-
+	create_exchanges()
 
 	authorization_policy = pyramid.authorization.ACLAuthorizationPolicy()
 	authn_policy = pyramid.authentication.AuthTktAuthenticationPolicy(
