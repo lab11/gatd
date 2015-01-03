@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import ipaddress
+import pickle
 import socket
+import sys
 
 import arrow
 import pika
@@ -16,7 +18,7 @@ l = gatdLog.getLogger('recv-UDP-ipv6')
 setproctitle.setproctitle('gatd:recv-udp6')
 
 
-def receive ():
+def receive (amqp_chan):
 
 	# Create a UDP socket to listen for incoming packets
 	s = xsocket.xsocket(family=socket.AF_INET6, type=socket.SOCK_DGRAM)
@@ -40,9 +42,13 @@ def receive ():
 		pkt['time_utc_iso'] = now
 		pkt['data'] = data
 
+		pkt_pickle = pickle.dumps(pkt)
+
+		l.debug('Sending packet to rabbitmq with routing key:{}'.format(str(dst_addr)))
+
 		# Send the packet to the queue
 		amqp_chan.basic_publish(exchange='xch_receiver_udp_ipv6',
-		                        body=pkt,
+		                        body=pkt_pickle,
 		                        routing_key=str(dst_addr))
 
 
@@ -54,16 +60,20 @@ def pika_on_channel (amqp_chan):
 	                           exchange_type='direct',
 	                           durable='true')
 
-	# Make sure there is a queue for unknown packets
-	amqp_chan.queue_declare(queue='receive-unknown',
-	                        durable=True)
-	amqp_chan.queue_bind(queue='receive-unknown',
-	                     exchange='xch_receiver_udp_ipv6',
-	                     routing_key='unknown')
+	# # Make sure there is a queue for unknown packets
+	# amqp_chan.queue_declare(queue='receive-unknown',
+	#                         durable=True)
+	# amqp_chan.queue_bind(queue='receive-unknown',
+	#                      exchange='xch_receiver_udp_ipv6',
+	#                      routing_key='unknown')
 
 	while True:
 		try:
-			receive()
+			receive(amqp_chan)
+		except KeyboardInterrupt:
+			l.info('ctrl+c, exiting')
+			amqp_chan.close()
+			sys.exit(0)
 		except:
 			l.exception('Error occurred in UDP receive loop.')
 
@@ -76,9 +86,10 @@ amqp_conn = pika.SelectConnection(
 				pika.ConnectionParameters(
 					host=gatdConfig.rabbitmq.HOST,
 					port=gatdConfig.rabbitmq.PORT,
+					virtual_host=gatdConfig.rabbitmq.VHOST,
 					credentials=pika.PlainCredentials(
-						gatdConfig.receiver_udp_ipv6.RMQ_USERNAME,
-						gatdConfig.receiver_udp_ipv6.RMQ_PASSWORD)),
+						gatdConfig.blocks.RMQ_USERNAME,
+						gatdConfig.blocks.RMQ_PASSWORD)),
 				pika_on_connection
 			)
 amqp_conn.ioloop.start()
