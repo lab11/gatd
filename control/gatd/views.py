@@ -599,7 +599,7 @@ def editor (request):
 									 'queryer_http_get']),
 					 ('Receiver Helpers', ['deduplicator']),
 					 ('Formatters', ['formatter_python',
-					                 'formatter_contenttypem',
+					                 'formatter_contenttype',
 					                 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_info_simple']),
 					 ('Storage', ['database_mongo']),

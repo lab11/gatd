@@ -31,10 +31,10 @@ def start_block (l, description, settings, parameters, callback):
 	                    nargs=1,
 	                    required=True)
 	parser.add_argument('--source_uuid',
-	                    nargs='+',
+	                    nargs='*',
 	                    type=uuid.UUID)
 	parser.add_argument('--target_uuid',
-	                    nargs='+',
+	                    nargs='*',
 	                    type=uuid.UUID)
 
 	args = parser.parse_args()
