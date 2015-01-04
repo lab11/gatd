@@ -36,6 +36,32 @@ function new_block (uuid) {
 	// 	theme: 'tooltipster-light',
 	// });
 
+
+
+	$(new_block).each(function() {
+		$(this).popover({
+			content: function () {
+				var p = $(this).find('.block_popup_content').html();
+				$(this).find('.block_popup_content').html('');
+				return p;
+			},
+			html: true,
+			placement: 'auto',
+			trigger: 'manual',
+			title: $(this).find('.block_popup_title').html(),
+			// container: $(new_block)
+		});
+	});
+
+
+
+		// Initialize tooltips
+	$(new_block).find('.tooltipster').tooltipster({
+		theme: 'tooltipster-light',
+	});
+
+
+
 	// Make the block dragable
 	jsp.draggable(uuid);
 
@@ -100,7 +126,7 @@ function save_profile () {
 		var popup = $('#block_'+block.uuid+'_popup');
 
 		// Save all of the parameters
-		popup.find('.parameter').each(function () {
+		$(this).find('.parameter').each(function () {
 			var key = $(this).attr('data-key');
 			var val = $(this).attr('data-value');
 			block[key] = val;
@@ -237,6 +263,8 @@ jsPlumb.ready(function() {
 	});
 
 	$('#gatd-editor-save').click(function () {
+		$('#gatd-editor .popover .close').trigger('click');
+
 		var data = save_profile();
 
 		$.ajax({
@@ -254,6 +282,8 @@ jsPlumb.ready(function() {
 	});
 
 	$('#gatd-editor-upload').click(function () {
+		$('#gatd-editor .popover .close').trigger('click');
+
 		var data = save_profile();
 
 		$.ajax({
@@ -272,26 +302,55 @@ jsPlumb.ready(function() {
 	});
 
 
-	$('.block').each(function() {
-		var pop = $(this).find('.block_popup');
-		$(this).popover({
-			content: pop.find('.block_popup_content').html(),
-			html: true,
-			placement: 'auto',
-			trigger: 'manual',
-			title: pop.find('.block_popup_title').html(),
-		});
-		$(this).find('.block_popup').remove();
-	});
+	// $('.block').each(function() {
+	// 	var pop = $(this).find('.block_popup');
+	// 	$(this).popover({
+	// 		content: pop.find('.block_popup_content').html(),
+	// 		html: true,
+	// 		placement: 'auto',
+	// 		trigger: 'manual',
+	// 		title: pop.find('.block_popup_title').html(),
+	// 	});
+	// 	$(this).find('.block_popup').remove();
+	// });
 
 	$('#gatd-editor').on('click', '.popover .close', function () {
+
+		// 		$(this).on('hide.bs.popover', function () {
+		// 	$(this).find('.block_popup_content').html($(this).find('.popover-content').html());
+		// 	console.log($(this).find('.popover-content'));
+		// });
+
 		var popid = $(this).attr('data-popover-id');
-		$('#'+popid).popover('hide');
+		var block = $('#'+popid);
+
+		$(block).find('.block_popup_settings').find("input,select,textarea").each(function() {
+			if ($(this).is("[type='radio']") || $(this).is("[type='checkbox']")) {
+				if ($(this).prop("checked")) {
+					$(this).attr("checked", "checked");
+				}
+			} else {
+				if ($(this).is("select")) {
+					$(this).find(":selected").attr("selected", "selected");
+				} else {
+					$(this).attr("value", $(this).val());
+				}
+			}
+		});
+
+		// console.log($(block).find('.popover-content').html())
+
+		console.log($(this))
+		console.log($(this).parents('.popover'))
+
+		$(block).find('.block_popup_content').html($(this).parents('.popover').find('.popover-content').html());
+
+		$(block).popover('hide');
 	});
 
-		// Initialize tooltips
-	$('.tooltipster').tooltipster({
-		theme: 'tooltipster-light',
-	});
+	// 	// Initialize tooltips
+	// $('.tooltipster').tooltipster({
+	// 	theme: 'tooltipster-light',
+	// });
 
 });

@@ -13,6 +13,14 @@
   <div class="target-group group-{{ block.target_group }}"></div>
   {% endif %}
 
+<!--   {% if 'parameters' in block %}
+    {% for param in block.parameters %}
+      <div class="parameter-save hidden" data-key="{{ param.key }}" data-value="{{ param.value }}"></div>
+    {% endfor %}
+  {% endif %} -->
+
+
+
   <div class="block_popup" data-title="{{ block.name }}" style="display:none;">
 
     <div class="block_popup_title">
@@ -75,7 +83,7 @@
                 <input type="text" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}" value="{{ val }}">
 
                 {% elif type == 'bool' %}
-                <input type="checkbox" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">
+                <input type="checkbox" class="setting" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">
 
                 {% elif type == 'textarea' %}
                 <textarea class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">{{ val }}</textarea>

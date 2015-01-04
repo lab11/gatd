@@ -2,17 +2,14 @@
 
 import pika
 import pymongo
-import setproctitle
-
-setproctitle.setproctitle('gatd:str:sio')
 
 import gatdBlock
+import gatdConfig
 import gatdLog
 
 l = gatdLog.getLogger('streamer-socketio')
 
-args = None
-routing_keys = None
+mdb = None
 
 def connect_mongodb ():
 	# get a mongo connection
@@ -25,7 +22,8 @@ def connect_mongodb ():
 	return mdb
 
 
-def save (channel, method, prop, body):
+def save (args, channel, method, prop, body):
+	global mdb
 
 	try:
 		# No magic here, just try to insert the record into the capped collection
@@ -44,19 +42,24 @@ def save (channel, method, prop, body):
 		l.exception('Other exception in streamer')
 
 
+def init (args):
+	global mdb
+	mdb = connect_mongodb()
 
-mdb = connect_mongodb()
-
-# Make sure that the capped collection exists
-mdb.create_collection(name=str(args.uuid),
-                      capped=True,
-                      size=1073741824) # 1.0 GB in bytes
+	try:
+		# Make sure that the capped collection exists
+		mdb.create_collection(name=str(args.uuid),
+		                      capped=True,
+		                      size=1073741824) # 1.0 GB in bytes
+	except pymongo.errors.CollectionInvalid:
+		# Already exists
+		pass
 
 
 # Start the connection to rabbitmq
 
 description = 'Socket.io Streaming'
 settings = []
-parameters = ['url']
+parameters = [('url', str)]
 
-gatdBlock.start_block(l, description, settings, parameters, save)
+gatdBlock.start_block(l, description, settings, parameters, save, init=init)

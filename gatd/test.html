@@ -1,0 +1,19 @@
+<html>
+<head>
+<script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
+</head>
+
+<body>
+<h1>test</h1>
+
+<script type="text/javascript">
+
+var socket = io('http://memristor-v1.eecs.umich.edu:25004/b0d2962d-659f-4e53-be24-255420e6b02f');
+  socket.on('packet', function (data) {
+    console.log(data);
+  });
+
+</script>
+
+</body>
+</html>

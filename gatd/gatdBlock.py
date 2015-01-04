@@ -12,7 +12,7 @@ import gatdConfig
 #    uuid        | block |       uuid
 #                ---------
 #
-def start_block (l, description, settings, parameters, callback):
+def start_block (l, description, settings, parameters, callback, init=None):
 	# Use global values so we can "return" things from this function,
 	# even though this function doesn't ever return
 	global args#, routing_keys
@@ -49,6 +49,9 @@ def start_block (l, description, settings, parameters, callback):
 	l.info('  uuid: {}'.format(args.uuid))
 	l.info('  source-uuid: {}'.format(args.source_uuid))
 	# l.info('  target-uuid: {}'.format(args.target_uuid))
+
+	if init:
+		init(args)
 
 	# Pre-enumerate all of the routing keys that we send packets to
 	# routing_keys = []

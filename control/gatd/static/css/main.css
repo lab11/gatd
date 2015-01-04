@@ -250,18 +250,5 @@ a:after {
 }
 
 
-/* Editor Popups */
 
-.popover {
-  max-width: 500px !important;
-}
-
-.block_popup {
-    background-color: white;
-    padding: 20px;
-}
-
-.tooltipster {
-    cursor: help;
-}
 

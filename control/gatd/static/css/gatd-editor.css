@@ -2,7 +2,7 @@
 	margin-top:5em;
 }
 
-.block { 	
+.block {
 	padding:16px;
 	padding-right:30px;
 	padding-left:22px;
@@ -51,7 +51,7 @@
 
 .aLabel {
 	opacity:0.8;
-	padding:0.3em;				
+	padding:0.3em;
 	border-radius:0.5em;
 	border:1px solid #346789;
 	cursor:pointer;
@@ -117,4 +117,26 @@ path { cursor:pointer; }
 
 .block_popup p {
 	line-height: 1.2em;
+}
+
+/* Editor Popups */
+
+.popover {
+  max-width: 800px !important;
+  min-width: 500px !important;
+  z-index:888;
+  opacity: 0.9;
+}
+
+.block:hover .popover {
+  color:#555;
+}
+
+.block_popup {
+    background-color: white;
+    padding: 20px;
+}
+
+.tooltipster {
+    cursor: help;
 }

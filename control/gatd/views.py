@@ -168,21 +168,21 @@ block_parameters_fns = {
 # about inputs to this block. If the inputs change we need to read from more
 # queues, but we always send to the same exchange with the same routing key
 # (the UUID of the sending block) regardless of the number of output queues.
-def create_block_snapshot (block, connections):
-	snap = {}
+# def create_block_snapshot (block, connections):
+# 	snap = {}
 
-	# Iterate through all connections this block is involved in
-	snap['sources'] = set()
-	for connection in connections:
-		if connection['target_uuid'] == block['uuid']:
-			snap['sources'].add(connection['source_uuid'])
+# 	# Iterate through all connections this block is involved in
+# 	snap['sources'] = set()
+# 	for connection in connections:
+# 		if connection['target_uuid'] == block['uuid']:
+# 			snap['sources'].add(connection['source_uuid'])
 
-	# Save all settings for this block
-	snap['settings'] = {}
-	for setting in gatd.blocks.blocks[block['type']].get('settings', []):
-		snap['settings'][setting['key']] = block[setting['key']]
+# 	# Save all settings for this block
+# 	snap['settings'] = {}
+# 	for setting in gatd.blocks.blocks[block['type']].get('settings', []):
+# 		snap['settings'][setting['key']] = block[setting['key']]
 
-	return snap
+# 	return snap
 
 
 def create_running_profile (profile):
@@ -206,6 +206,11 @@ def create_running_profile (profile):
 		for setting in gatd.blocks.blocks[block['type']].get('settings', []):
 			newblock['settings'][setting['key']] = block[setting['key']]
 
+		# Keep track of all parameters for the current block (for convenience)
+		newblock['parameters'] = {}
+		for param in gatd.blocks.blocks[block['type']].get('parameters', []):
+			newblock['parameters'][param['key']] = block[param['key']]
+
 	return rp
 
 
@@ -214,6 +219,7 @@ def create_running_profile (profile):
 
 # This function causes GATD to start executing the profile
 def run_profile (request, profile):
+	print(profile)
 
 	def create_queue (src, dst, block_prototype, profile):
 		queue_name = '{}_{}'.format(src, dst)
@@ -384,7 +390,14 @@ def run_profile (request, profile):
 			print('  cmd: {}'.format(cmd))
 
 			cmd_args = []
+
+			# Add settings
 			for k,v in content['settings'].items():
+				cmd_args.append('--{}'.format(k))
+				cmd_args.append(shlex.quote(v))
+
+			# Add arguments
+			for k,v in content['parameters'].items():
 				cmd_args.append('--{}'.format(k))
 				cmd_args.append(shlex.quote(v))
 

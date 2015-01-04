@@ -240,7 +240,7 @@ data packet and the key:value pair to add to the packet if it is.''',
 		'help': 'Stream packets using the Socket.IO protocol.',
 		'target_group': 'b',
 		'source_group': None,
-		'single_instance': True,
+		'single_instance': False,
 		'parameters': [
 			{
 				'name': 'Stream URL',
