@@ -13,23 +13,28 @@ function new_block (uuid) {
 	var new_block = $('#'+uuid);
 
 	// Initialize the popup
-	$('#block_'+uuid+'_popup').popup({
-		positionTo: "origin"
-	});
+	// $('#block_'+uuid+'_popup').popup({
+	// 	positionTo: "origin"
+	// });
+	// $('#block_'+uuid+'_popup').css('display', 'block');
 
 	//  Make the popup appear on dbl click
 	$('#'+uuid).dblclick(function () {
-		var position = $(this).position();
-		$('#block_'+uuid+'_popup').popup('open', {
-			x: position.left,
-			y: position.top
-		});
+
+		$(this).popover('show');
+
+
+		// var position = $(this).position();
+		// $('#block_'+uuid+'_popup').popup('open', {
+		// 	x: position.left,
+		// 	y: position.top
+		// });
 	});
 
-	// Initialize tooltips
-	$('#block_'+uuid+'_popup .tooltipster').tooltipster({
-		theme: 'tooltipster-light',
-	});
+	// // Initialize tooltips
+	// $('#block_'+uuid+'_popup .tooltipster').tooltipster({
+	// 	theme: 'tooltipster-light',
+	// });
 
 	// Make the block dragable
 	jsp.draggable(uuid);
@@ -212,6 +217,12 @@ jsPlumb.ready(function() {
 	// Make profile name editable
 	$('#profile-name').editable();
 
+	// Setup save popups
+	// $('#popup-editor-save').popup({
+	// 	overlayTheme: "b"
+	// });
+	// $('#popup-editor-save').css('display', 'block');
+
 	$(".gatd-editor-button").click(function () {
 		var block_type = $(this).attr('data-block');
 		$.ajax('/editor/block/'+block_type, {'dataType': 'json'})
@@ -234,7 +245,7 @@ jsPlumb.ready(function() {
 			data: JSON.stringify(data),
 			contentType: 'application/json',
 			success: function () {
-				console.log('saved');
+				$('#modal-profile-save').modal('hide');
 			}
 		})
 		.fail(function () {
@@ -250,13 +261,37 @@ jsPlumb.ready(function() {
 			url: '/editor/saveupload',
 			data: JSON.stringify(data),
 			contentType: 'application/json',
-			success: function () {
-				console.log('saved');
+			success: function (data) {
+				console.log(data);
+				$('#modal-profile-upload').modal('hide');
 			}
 		})
 		.fail(function () {
 			console.log('fail');
 		});
+	});
+
+
+	$('.block').each(function() {
+		var pop = $(this).find('.block_popup');
+		$(this).popover({
+			content: pop.find('.block_popup_content').html(),
+			html: true,
+			placement: 'auto',
+			trigger: 'manual',
+			title: pop.find('.block_popup_title').html(),
+		});
+		$(this).find('.block_popup').remove();
+	});
+
+	$('#gatd-editor').on('click', '.popover .close', function () {
+		var popid = $(this).attr('data-popover-id');
+		$('#'+popid).popover('hide');
+	});
+
+		// Initialize tooltips
+	$('.tooltipster').tooltipster({
+		theme: 'tooltipster-light',
 	});
 
 });

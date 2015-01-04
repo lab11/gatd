@@ -5,6 +5,7 @@ import ipaddress
 import json
 import os
 import pprint
+import shlex
 import sys
 import unittest
 import uuid
@@ -249,6 +250,7 @@ def run_profile (request, profile):
 		return
 
 
+
 	# Need a pika connection for creating queues
 	amqp_conn = pika.BlockingConnection(
 					pika.ConnectionParameters(
@@ -381,10 +383,18 @@ def run_profile (request, profile):
 
 			print('  cmd: {}'.format(cmd))
 
+			cmd_args = []
+			for k,v in content['settings'].items():
+				cmd_args.append('--{}'.format(k))
+				cmd_args.append(shlex.quote(v))
+
+			print('  args: {}'.format(cmd_args))
+
 			to_circus = {
 				'command': 'add',
 				'properties': {
 					'cmd': cmd,
+					'args': cmd_args,
 					'name': block_uuid,
 					'start': True
 				}
@@ -753,6 +763,8 @@ def editor_saveupload(request):
 		request.db['conf_profiles'].save(data)
 
 		run_profile(request, data)
+
+		return {'status': 'success'}
 
 
 

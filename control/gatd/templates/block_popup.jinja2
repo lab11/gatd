@@ -13,80 +13,89 @@
   <div class="target-group group-{{ block.target_group }}"></div>
   {% endif %}
 
-  <div id="block_{{ block.uuid }}_popup" class="block_popup" data-role="popup">
+  <div class="block_popup" data-title="{{ block.name }}" style="display:none;">
 
-    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right ui-link ui-btn ui-btn-b ui-icon-delete ui-btn-icon-notext ui-shadow ui-corner-all">Close</a>
-
-
-    <h2>{{ block.name }}</h2>
-    <p>{{ block.help }}</p>
-
-    {% if 'parameters' in block %}
-    <div class="block_popup_parameters">
-      <h3>Parameters</h3>
-
-      {% for param in block.parameters %}
-      <div class="parameter" data-key="{{ param.key }}" data-value="{{ param.value }}">
-        {% if 'help' in param %}
-        <span class="tooltipster fa fa-info" title="{{ param.help }}"></span>
-        {% endif %}
-        <span>{{ param.name }}:</span> {{ param.value }}
-      </div>
-      {% endfor %}
-
+    <div class="block_popup_title">
+      {{ block.name }}
+      <button type="button" class="close fa fa-close fa-2x" data-popover-id="{{ block.uuid }}" aria-label="Close"></button>
     </div>
-    {% endif %}
 
-    {% if 'settings' in block %}
-    <div class="block_popup_settings">
-      <h3>Settings</h3>
-      <p>Configure this block.</p>
+    <div class="block_popup_content">
 
-      <form class="form-horizontal">
+      <div id="block_{{ block.uuid }}_popup" data-role="popup">
 
-      {% for setting in block.settings %}
-        {% set type = setting.type|default('string') %}
+        <p>{{ block.help }}</p>
 
-        <div class="form-group">
-          
-          {% if 'help' in setting %}
-          <div class="col-sm-1 control-label">
-            <span class="tooltipster fa fa-info" title="{{ setting.help }}"></span>
-          </div>
-          {% endif %}
+        {% if 'parameters' in block %}
+        <div class="block_popup_parameters">
+          <h3>Parameters</h3>
 
-          <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-3 control-label">{{ setting.name }}</label>
-
-          <div class="col-sm-8">
-            {% if 'value' in setting %}
-              {% set val = setting.value %}
-            {% elif 'default' in setting %}
-              {% set val = setting.default %}
-            {% else %}
-              {% set val = '' %}
+          {% for param in block.parameters %}
+          <div class="parameter" data-key="{{ param.key }}" data-value="{{ param.value }}">
+            {% if 'help' in param %}
+            <span class="tooltipster fa fa-info" title="{{ param.help }}"></span>
             {% endif %}
-
-            {% if type == 'string' or type == 'int' %}
-            <input type="text" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}" value="{{ val }}">
-
-            {% elif type == 'bool' %}
-            <input type="checkbox" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">
-
-            {% elif type == 'textarea' %}
-            <textarea class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">{{ val }}</textarea>
-
-            {% endif %}
-
+            <span>{{ param.name }}:</span> {{ param.value }}
           </div>
+          {% endfor %}
 
         </div>
+        {% endif %}
 
-      {% endfor %}
+        {% if 'settings' in block %}
+        <div class="block_popup_settings">
+          <h3>Settings</h3>
+          <p>Configure this block.</p>
 
-      </form>
-      
+          <form class="form-horizontal">
+
+          {% for setting in block.settings %}
+            {% set type = setting.type|default('string') %}
+
+            <div class="form-group">
+
+              {% if 'help' in setting %}
+              <div class="col-sm-1 control-label">
+                <span class="tooltipster fa fa-info" title="{{ setting.help }}"></span>
+              </div>
+              {% endif %}
+
+              <label for="block_{{ block.uuid }}_setting_{{ setting.key }}" class="col-sm-3 control-label">{{ setting.name }}</label>
+
+              <div class="col-sm-8">
+                {% if 'value' in setting %}
+                  {% set val = setting.value %}
+                {% elif 'default' in setting %}
+                  {% set val = setting.default %}
+                {% else %}
+                  {% set val = '' %}
+                {% endif %}
+
+                {% if type == 'string' or type == 'int' %}
+                <input type="text" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}" value="{{ val }}">
+
+                {% elif type == 'bool' %}
+                <input type="checkbox" class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">
+
+                {% elif type == 'textarea' %}
+                <textarea class="setting form-control" id="block_{{ block.uuid }}_setting_{{ setting.key }}" data-key="{{ setting.key}}">{{ val }}</textarea>
+
+                {% endif %}
+
+              </div>
+
+            </div>
+
+          {% endfor %}
+
+          </form>
+
+        </div>
+        {% endif %}
+
+      </div>
+
     </div>
-    {% endif %}
 
   </div>
 

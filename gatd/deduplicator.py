@@ -1,18 +1,17 @@
 
 import argparse
 import ipaddress
+import pickle
 import uuid
 
 import arrow
 import pika
-import setproctitle
 
 import gatdBlock
 import gatdLog
 
 l = gatdLog.getLogger('dedup')
 
-setproctitle.setproctitle('gatd:dedup')
 
 #
 # Returns true if the packet is unique, false if it is a duplicate
@@ -46,7 +45,7 @@ time_hashes = {}
 
 # Call this function on the incoming data message to check if it is
 # a duplicate or not
-def check_packet (channel, method, prop, body):
+def check_packet (args, channel, method, prop, body):
 #def check_packet (self, port, addr, data, time):
 
 	duplicate = False
@@ -80,7 +79,7 @@ def check_packet (channel, method, prop, body):
 	time_hashes[time] = key
 
 	# Get rid of old packets from the dicts to reduce memory usage
-	now = arrow.utcnow.timestamp
+	now = arrow.utcnow().timestamp
 	while True:
 		if len(timestamps) == 0:
 			break
@@ -110,8 +109,8 @@ def check_packet (channel, method, prop, body):
 	if not duplicate:
 		# for target in routing_keys:
 		channel.basic_publish(exchange='xch_scope_a',
-		                      body=body,
-		                      routing_key=args.uuid)
+		                      body=pickle.dumps(body),
+		                      routing_key=str(args.uuid))
 
 	# Ack all packets
 	channel.basic_ack(delivery_tag=method.delivery_tag)
@@ -123,61 +122,7 @@ settings = [
 ]
 parameters = []
 
-# Global arguments
-args = None
-routing_keys = None
 
 gatdBlock.start_block(l, 'Deduplicate', settings, parameters, check_packet)
 
-# parser = argparse.ArgumentParser(description='Deduplicate')
-# parser.add_argument('--uuid',
-#                     type=uuid.UUID,
-#                     nargs=1,
-#                     required=True)
-# parser.add_argument('--time',
-#                     type=int,
-#                     nargs=1,
-#                     required=True)
-# parser.add_argument('--compare_addresses',
-#                     nargs=1,
-#                     required=True)
-# parser.add_argument('--source_uuid',
-#                     nargs='+',
-#                     type=uuid.UUID)
-# parser.add_argument('--target_uuid',
-#                     nargs='+',
-#                     type=uuid.UUID)
-
-# args = parser.parse_args()
-
-# # Pre-enumerate all of the routing keys that we send packets to
-# routing_keys = []
-# for target in args.target_uuid:
-# 	routing_keys.append('{}_{}'.format(args.uuid, str(target)))
-
-# # Setup the connection to RabbitMQ
-# def pika_on_channel (amqp_chan):
-
-# 	for src in args.source_uuid:
-# 		queue_name = '{}_{}'.format(str(src), str(args.uuid))
-
-# 		l.info('Deduplicating packets from queue {}'.format(queue_name))
-
-# 		amqp_chan.basic_consume(check_packet,
-# 		                        queue=queue_name,
-# 		                        no_ack=False)
-
-# def pika_on_connection (unused_connection):
-# 	amqp_conn.channel(pika_on_channel)
-
-# amqp_conn = pika.SelectConnection(
-# 				pika.ConnectionParameters(
-# 					host=gatdConfig.rabbitmq.HOST,
-# 					port=gatdConfig.rabbitmq.PORT,
-# 					credentials=pika.PlainCredentials(
-# 						gatdConfig.deduplicator.RMQ_USERNAME,
-# 						gatdConfig.deduplicator.RMQ_PASSWORD)),
-# 				pika_on_connection
-# 			)
-# amqp_conn.ioloop.start()
 
