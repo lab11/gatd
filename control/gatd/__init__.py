@@ -104,6 +104,8 @@ def main(global_config, **settings):
 
 	config.add_route('login', '/login/{provider_name}')
 
+	config.add_route('socketio_test', '/socketio/test')
+
 	config.add_route('profiles',    '/profiles')
 	config.add_route('profile_new', '/profile/new')
 

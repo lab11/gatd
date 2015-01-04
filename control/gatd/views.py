@@ -626,6 +626,13 @@ def home (request):
 	return {}
 
 
+@view_config(route_name='socketio_test',
+             renderer='templates/socketio_test.jinja2')
+def socketio_test (request):
+	return {}
+
+
+
 @view_config(route_name='profiles',
              renderer='templates/profiles.jinja2',
              permission='loggedin')

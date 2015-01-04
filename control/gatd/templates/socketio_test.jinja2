@@ -1,0 +1,56 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+GATD - Stream Test
+{% endblock %}
+
+{% block nav %}
+<div class="navbar-collapse collapse">
+  <ul class="nav navbar-nav">
+    <li><a href="/">Home</a></li>
+  </ul>
+</div><!--/.nav-collapse -->
+{% endblock %}
+
+
+{% block body %}
+
+
+<div class="container">
+
+<h1>Test a socket.io Streamer</h1>
+
+<div class="well">
+  <label>Enter the UUID of the socket.io streamer block</label>
+  <input type="text" id="streamer-uuid" name="streamer-uuid">
+  <button type="button" id="streamer-start" name="streamer-start">Start Streaming</button>
+</div>
+
+<div><pre id="packets"></pre></div>
+
+
+
+<script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
+<script type="text/javascript">
+
+$('#streamer-start').click(function () {
+  stream($('#streamer-uuid').val());
+});
+
+function stream (uuid) {
+  var socket = io('http://memristor-v1.eecs.umich.edu:25004/'+uuid);
+  socket.on('connect', function () {
+    socket.emit('query', {});
+  });
+  socket.on('packet', function (data) {
+    var text = JSON.stringify(data, null, 2) + '\n';
+
+    $('#packets').prepend(text);
+  });
+
+}
+
+</script>
+
+
+{% endblock %}
