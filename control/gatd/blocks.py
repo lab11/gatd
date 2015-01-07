@@ -272,6 +272,7 @@ socket.io server.',
 		'target_group': 'c',
 		'source_group': None,
 		'single_instance': True,
+		'virtual_queues': True,
 		'parameters': [
 			{
 				'name': 'URL',
@@ -287,6 +288,7 @@ socket.io server.',
 		'target_group': 'c',
 		'source_group': None,
 		'single_instance': True,
+		'virtual_queues': True,
 		'parameters': [
 			{
 				'name': 'URL',
