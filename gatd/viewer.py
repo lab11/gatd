@@ -7,7 +7,7 @@ import gatdBlock
 import gatdConfig
 import gatdLog
 
-l = gatdLog.getLogger('streamer-socketio')
+l = gatdLog.getLogger('viewer')
 
 mdb = None
 
