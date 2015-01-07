@@ -9,7 +9,6 @@
 	position:absolute;
 	border: 1px solid black;
 	z-index:4;
-	border-radius:1em;
 	border:1px solid #2e6f9a;
 	box-shadow: 2px 2px 19px #e0e0e0;
 	-o-box-shadow: 2px 2px 19px #e0e0e0;
@@ -52,7 +51,7 @@
 .aLabel {
 	opacity:0.8;
 	padding:0.3em;
-	border-radius:0.5em;
+	border-radius:8px;
 	border:1px solid #346789;
 	cursor:pointer;
 	display: none;
