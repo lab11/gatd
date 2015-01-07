@@ -256,7 +256,7 @@ socket.io server.',
 		'help': 'Get a glimse into the most recent packets for this stream.',
 		'target_group': 'b',
 		'source_group': None,
-		'single_instance': True,
+		'single_instance': False,
 		'parameters': [
 			{
 				'name': 'URL',
@@ -300,5 +300,6 @@ socket.io server.',
 # These are other processes that need to be running for GATD to work.
 # They are not user added blocks per se, which is why they are here.
 global_blocks = [
-	'streamer_socketio_public'
+	'streamer_socketio_public',
+	'viewer_public'
 ]

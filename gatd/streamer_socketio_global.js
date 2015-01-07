@@ -55,21 +55,20 @@ var namespace_connection = function (socket) {
 	});
 }
 
+
+
+// Create the socket.io server
+io = sio.listen(config.streamer_socketio.port)
+
+// Allow for namespaces to be created dynamically
 var socketio_connect_fn;
 var transparently_create_namespace = function (name) {
-	console.log('NEW NAMESPACE');
 	// Check if this namespace exists already
 	if (!this.server.nsps[name]) {
-		console.log('ALREADY NAMESPACE');
 		this.server.of(name, namespace_connection);
 	}
-
 	socketio_connect_fn.apply(this, arguments);
 }
-
-
-
-io = sio.listen(config.streamer_socketio.port)
 
 io.use(function(socket, next) {
 	// Splice in our namespace function
@@ -80,13 +79,3 @@ io.use(function(socket, next) {
 
 	return next();
 });
-
-// io.of('/makethiswork').on('connection', function (socket) {
-// 	// console.log(socket.nsp);
-// 	console.log('connect');
-//   socket.emit('news', { hello: 'world' });
-//   socket.on('my other event', function (data) {
-//     console.log(data);
-//   });
-// });
-

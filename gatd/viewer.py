@@ -1,4 +1,5 @@
 
+
 import pika
 import pymongo
 
@@ -6,7 +7,10 @@ import gatdBlock
 import gatdConfig
 import gatdLog
 
-l = gatdLog.getLogger('mongodb')
+l = gatdLog.getLogger('streamer-socketio')
+
+mdb = None
+
 
 def connect_mongodb ():
 	# get a mongo connection
@@ -18,13 +22,26 @@ def connect_mongodb ():
 
 	return mdb
 
-
 def save (args, channel, method, prop, body):
 	global mdb
 
 	try:
-		# No magic here, just try to insert the record into the capped collection
-		mdb[str(args.uuid)].insert(body)
+		query = {'uuid': str(args.uuid)}
+		push  = {'$push': {
+					'packets': {
+						'$each': [body],
+						'$slice': -10
+					}
+				}}
+
+		l.debug('Adding packet to viewer (uuid:{})'.format(args.uuid))
+
+		existing = mdb['viewer'].find_one(query)
+		if not existing:
+			l.debug('First packet for this stream.')
+			mdb['viewer'].insert(query)
+
+		mdb['viewer'].update(query, push, upsert=True)
 
 		channel.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -36,7 +53,7 @@ def save (args, channel, method, prop, body):
 		mdb = connect_mongodb()
 
 	except:
-		l.exception('Other exception in saving to mongo')
+		l.exception('Other exception in viewer')
 
 
 try:
@@ -44,9 +61,9 @@ try:
 
 	# Start the connection to rabbitmq
 
-	description = 'Save to MongoDB'
+	description = 'Save recent packets for the viewer'
 	settings = []
-	parameters = []
+	parameters = [('url', str)]
 
 	gatdBlock.start_block(l, description, settings, parameters, save)
 except:
