@@ -72,12 +72,6 @@ packet.',
 				'name': 'POST URL',
 				'help': 'The URL to post to to ensure data reaches this stream.',
 				'key': 'post_url'
-			},
-			{
-				'name': 'Secret',
-				'help': 'In the HTTP post, include the header "??" with \
-this value so GATD knows that the request came from you.',
-				'key': 'secret'
 			}
 		]
 	},
@@ -338,6 +332,6 @@ websocket server.',
 # These are other processes that need to be running for GATD to work.
 # They are not user added blocks per se, which is why they are here.
 global_blocks = [
-	'streamer_socketio_public',
-	'viewer_public'
+	'streamer_socketio_global',
+	'viewer_global'
 ]

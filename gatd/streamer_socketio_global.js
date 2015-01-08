@@ -1,13 +1,13 @@
 #!/usr/bin/env nodejs
 
+var path = require('path');
 var fs = require('fs');
 var sio = require('socket.io');
 var mc = require('mongodb').MongoClient;
 var ini = require('simple-ini');
 
-
 var config = new ini(function() {
-						return fs.readFileSync('./gatd.config', 'utf-8');
+						return fs.readFileSync(path.resolve(__dirname, 'gatd.config'), 'utf-8');
 			}, {'delimiter': ':',
 				'comments': '#',
 				'ignoreWhitespace': true});

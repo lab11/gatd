@@ -9,8 +9,12 @@ import sys
 import urllib.parse
 
 import bson.objectid
+import circus.client
 import pika
 import pymongo
+
+import gatd.blocks
+import gatd.views
 
 sys.path.append(os.path.abspath('../gatd'))
 import gatdConfig
@@ -30,7 +34,7 @@ def get_permission (userid, request):
 
 
 
-def create_exchanges ():
+def init_exchanges ():
 	exchanges = [
 		'xch_scope_a',
 		'xch_scope_b',
@@ -53,6 +57,32 @@ def create_exchanges ():
 			                           exchange_type='direct',
 			                           durable='true')
 	amqp_chan.close()
+
+def init_profiles (db):
+	circus_client = circus.client.CircusClient(endpoint='tcp://{host}:{port}'\
+		.format(host=gatdConfig.circus.HOST, port=gatdConfig.circus.PORT))
+
+	# Get the state that is supposed to exist
+	profile_cursor = db['conf_profiles_running'].find()
+
+	for profile in profile_cursor:
+
+		if profile['uuid'] != '9e5026f5-bdd0-466a-be5b-0fea8f35f2bb':
+			return
+
+		for block_uuid,content in profile['blocks'].items():
+
+			block_prototype = gatd.blocks.blocks[content['type']]
+			if block_prototype['single_instance']:
+				continue
+
+			exists = gatd.views.query_block_exists(block_uuid, circus_client)
+
+			if not exists:
+				block_prototype = gatd.blocks.blocks[content['type']]
+				gatd.views.start_block(block_uuid, content, block_prototype, circus_client)
+
+
 
 
 
@@ -88,7 +118,9 @@ def main(global_config, **settings):
 		return request.db['conf_users'].find_one({'_id': bson.objectid.ObjectId(login)})
 	config.add_request_method(add_user, 'user', reify=True)
 
-	create_exchanges()
+	# Init the actual GATD components
+	init_exchanges()
+	init_profiles(add_db(None))
 
 	authorization_policy = pyramid.authorization.ACLAuthorizationPolicy()
 	authn_policy = pyramid.authentication.AuthTktAuthenticationPolicy(

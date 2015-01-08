@@ -7,15 +7,12 @@ import sys
 
 import arrow
 import pika
-import setproctitle
 import xsocket
 
 import gatdConfig
 import gatdLog
 
 l = gatdLog.getLogger('recv-UDP-ipv6')
-
-setproctitle.setproctitle('gatd:recv-udp6')
 
 
 def receive (amqp_chan):

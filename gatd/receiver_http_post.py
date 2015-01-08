@@ -7,9 +7,6 @@ import socketserver
 
 import arrow
 import pika
-import setproctitle
-
-setproctitle.setproctitle('gatd:recv-httpp')
 
 import gatdConfig
 import gatdLog

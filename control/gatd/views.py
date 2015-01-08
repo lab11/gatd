@@ -104,6 +104,67 @@ block_parameters_fns = {
 ### GATD Block Processes                                                     ###
 ################################################################################
 
+def start_block (uuid, block, block_prototype, circus_client):
+	cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
+		.format(path=os.path.abspath('../gatd'),
+		        block_type=block_prototype.get('script', block['type']),
+		        block_uuid=uuid,
+		        sources=' '.join(block['source_uuids']))
+
+	print('  cmd: {}'.format(cmd))
+
+	cmd_args = []
+
+	# Add settings
+	for k,v in block['settings'].items():
+		cmd_args.append('--{}'.format(k))
+		cmd_args.append(shlex.quote(v))
+
+	# Add arguments
+	for k,v in block['parameters'].items():
+		cmd_args.append('--{}'.format(k))
+		cmd_args.append(shlex.quote(v))
+
+	# Add "hidden" arguments. These are needed to run the block
+	# but aren't shown to the user.
+	for param in block_prototype.get('hidden_parameters', []):
+		cmd_args.append('--{}'.format(param['key']))
+		cmd_args.append(shlex.quote(param['value']))
+
+	print('  args: {}'.format(cmd_args))
+
+	to_circus = {
+		'command': 'add',
+		'properties': {
+			'cmd': cmd,
+			'args': cmd_args,
+			'name': uuid,
+			'start': True
+		}
+	}
+	circus_client.call(to_circus)
+
+def stop_block (uuid, circus_client):
+	to_circus = {
+		'command': 'rm',
+		'properties': {
+			'name': uuid,
+			'waiting': True
+		}
+	}
+	circus_client.call(to_circus)
+
+def query_block_exists (uuid, circus_client):
+	to_circus = {
+		'command': 'status',
+		'properties': {
+			'name': uuid
+		}
+	}
+	response = circus_client.call(to_circus)
+	return response['status'] != 'error'
+
+
 def create_running_profile (profile):
 
 	rp = {'uuid': profile['uuid'],
@@ -232,7 +293,8 @@ def run_profile (request, profile):
 	amqp_chan = amqp_conn.channel();
 
 	# Get a circus connection too
-	circus_client = circus.client.CircusClient(endpoint='tcp://127.0.0.1:5555')
+	circus_client = circus.client.CircusClient(endpoint='tcp://{host}:{port}'\
+		.format(host=gatdConfig.circus.HOST, port=gatdConfig.circus.PORT))
 
 	# Use this to compare settings if need be
 	comparer = unittest.TestCase()
@@ -269,14 +331,7 @@ def run_profile (request, profile):
 				block_prototype = gatd.blocks.blocks[content['type']]
 				if block_prototype['single_instance'] == False:
 					print('  stopping block.')
-					to_circus = {
-						'command': 'rm',
-						'properties': {
-							'name': block_uuid,
-							'waiting': True
-						}
-					}
-					circus_client.call(to_circus)
+					stop_block(block_uuid, circus_client)
 
 				# Delete all queues that went to this block
 				for src in content['source_uuids']:
@@ -326,57 +381,14 @@ def run_profile (request, profile):
 			# If something changed, stop the existing process
 			if changed and not block_prototype['single_instance']:
 				print('  changed. Stopping.')
-				to_circus = {
-					'command': 'rm',
-					'properties': {
-						'name': block_uuid,
-						'waiting': True
-					}
-				}
-				circus_client.call(to_circus)
+				stop_block(block_uuid, circus_client)
 
 		# If there is reason to, start the process
 		if changed and not block_prototype['single_instance']:
 			print('  changed. Starting.')
+			start_block(block_uuid, content, block_prototype, circus_client)
 
-			cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
-				.format(path=os.path.abspath('../gatd'),
-				        block_type=block_prototype.get('script', content['type']),
-				        block_uuid=block_uuid,
-				        sources=' '.join(content['source_uuids']))
 
-			print('  cmd: {}'.format(cmd))
-
-			cmd_args = []
-
-			# Add settings
-			for k,v in content['settings'].items():
-				cmd_args.append('--{}'.format(k))
-				cmd_args.append(shlex.quote(v))
-
-			# Add arguments
-			for k,v in content['parameters'].items():
-				cmd_args.append('--{}'.format(k))
-				cmd_args.append(shlex.quote(v))
-
-			# Add "hidden" arguments. These are needed to run the block
-			# but aren't shown to the user.
-			for param in block_prototype.get('hidden_parameters', []):
-				cmd_args.append('--{}'.format(param['key']))
-				cmd_args.append(shlex.quote(param['value']))
-
-			print('  args: {}'.format(cmd_args))
-
-			to_circus = {
-				'command': 'add',
-				'properties': {
-					'cmd': cmd,
-					'args': cmd_args,
-					'name': block_uuid,
-					'start': True
-				}
-			}
-			circus_client.call(to_circus)
 
 
 	# Save the running profile we just executed for next time
@@ -486,6 +498,7 @@ def profile_new (request):
 	profile['name']    = 'New Profile'
 	profile['uuid']    = str(uuid.uuid4())
 	profile['_userid'] = str(request.user['_id'])
+	profile['deleted'] = False
 
 	request.db['conf_profiles'].save(profile)
 

@@ -1,0 +1,20 @@
+<html>
+<head>
+</head>
+
+<body>
+<h1>test websocket</h1>
+
+<script type="text/javascript">
+
+var ws = new WebSocket('ws://memristor-v1.eecs.umich.edu:25007/eab69186-d72d-47dc-851c-5fdff986bb09');
+  ws.onopen = function (evt) {
+  	ws.send(JSON.stringify({}));
+  };
+  ws.onmessage = function (evt) {
+  	console.log(evt.data);
+  };
+</script>
+
+</body>
+</html>
