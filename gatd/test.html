@@ -8,7 +8,7 @@
 
 <script type="text/javascript">
 
-var socket = io('http://memristor-v1.eecs.umich.edu:25004/b0d2962d-659f-4e53-be24-255420e6b02f');
+var socket = io('http://socketio.gatd.io:80/b0d2962d-659f-4e53-be24-255420e6b02f');
   socket.on('connect', function () {
   	socket.emit('query', {});
   });
