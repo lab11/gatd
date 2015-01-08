@@ -68,7 +68,11 @@ GATD - Editor
           <button class="btn btn-success">{{ button_group[0] }}</button>
 
           {% for button in button_group[1] %}
-            <button type="button" class="gatd-editor-button btn btn-default" data-block="{{ button }}">Add {{ blocks[button]['name'] }}</button>
+            <button type="button" class="gatd-editor-button btn btn-default" data-block="{{ button }}">
+              {% if blocks[button]['target_group'] %}<div class="gatd-editor-button-target group-{{ blocks[button]['target_group'] }}"></div>{% endif %}
+              {% if blocks[button]['source_group'] %}<div class="gatd-editor-button-source group-{{ blocks[button]['source_group'] }}"></div>{% endif %}
+              Add {{ blocks[button]['name'] }}
+            </button>
           {% endfor %}
 
 

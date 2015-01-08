@@ -323,8 +323,10 @@ jsPlumb.ready(function() {
 
 		var popid = $(this).attr('data-popover-id');
 		var block = $('#'+popid);
+		console.log(block);
 
-		$(block).find('.block_popup_settings').find("input,select,textarea").each(function() {
+		$(this).parents('.popover').find("input,select,textarea").each(function() {
+			console.log($(this))
 			if ($(this).is("[type='radio']") || $(this).is("[type='checkbox']")) {
 				if ($(this).prop("checked")) {
 					$(this).attr("checked", "checked");
@@ -333,6 +335,7 @@ jsPlumb.ready(function() {
 				if ($(this).is("select")) {
 					$(this).find(":selected").attr("selected", "selected");
 				} else {
+					console.log($(this).val());
 					$(this).attr("value", $(this).val());
 				}
 			}

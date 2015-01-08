@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import asyncio
 import pickle
 import sys
@@ -9,8 +10,6 @@ import arrow
 import apscheduler.schedulers.asyncio
 import pika
 import requests
-import setproctitle
-setproctitle.setproctitle('gatd-q: httpget')
 
 # Enable logging in case apscheduler catches an error
 # import logging
@@ -25,94 +24,104 @@ request_header = {'User-Agent': 'GATD-queryer'}
 
 def httpGET (url, block_uuid):
 	try:
-		r = requests.get(url, headers=request_header, timeout=1)
-	except Exception:
-		# Something went wrong
-		l.warn('Could not get HTTP page: {}'.format(url))
-		return
+		try:
+			r = requests.get(url, headers=request_header, timeout=1)
+		except Exception:
+			# Something went wrong
+			l.warn('Could not get HTTP page: {}'.format(url))
+			return
 
-	now = arrow.utcnow().isoformat()
+		now = arrow.utcnow().isoformat()
 
-	l.info('got HTTP page: {}'.format(url))
+		l.info('got HTTP page: {}'.format(url))
 
-	if r.status_code == 200:
-		pkt = {}
-		pkt['src'] = 'query_http_get'
-		pkt['time_utc_iso'] = now
-		pkt['headers'] = r.headers
-		pkt['http_get_url'] = url
-		pkt['data'] = r.text
+		if r.status_code == 200:
+			pkt = {}
+			pkt['src'] = 'query_http_get'
+			pkt['time_utc_iso'] = now
+			pkt['headers'] = dict(r.headers)
+			pkt['http_get_url'] = url
+			pkt['data'] = r.text
 
-		pkt_pickle = pickle.dumps(pkt)
+			pkt_pickle = pickle.dumps(pkt)
 
-		l.debug('sending page. key:{} len:{}'.format(block_uuid, len(r.text)))
+			l.debug('sending page. key:{} len:{}'.format(block_uuid, len(r.text)))
 
-		# Connect to rabbitmq
-		amqp_conn = pika.BlockingConnection(
-								pika.ConnectionParameters(
-									host=gatdConfig.rabbitmq.HOST,
-									port=gatdConfig.rabbitmq.PORT,
-									virtual_host=gatdConfig.rabbitmq.VHOST,
-									credentials=pika.PlainCredentials(
-										gatdConfig.blocks.RMQ_USERNAME,
-										gatdConfig.blocks.RMQ_PASSWORD)
-							))
-		amqp_chan = amqp_conn.channel();
+			# Connect to rabbitmq
+			amqp_conn = pika.BlockingConnection(
+									pika.ConnectionParameters(
+										host=gatdConfig.rabbitmq.HOST,
+										port=gatdConfig.rabbitmq.PORT,
+										virtual_host=gatdConfig.rabbitmq.VHOST,
+										credentials=pika.PlainCredentials(
+											gatdConfig.blocks.RMQ_USERNAME,
+											gatdConfig.blocks.RMQ_PASSWORD)
+								))
+			amqp_chan = amqp_conn.channel();
 
-		amqp_chan.basic_publish(exchange='xch_scope_a',
-		                        body=pkt_pickle,
-		                        routing_key=block_uuid)
-		amqp_chan.close()
+			amqp_chan.basic_publish(exchange='xch_scope_a',
+			                        body=pkt_pickle,
+			                        routing_key=block_uuid)
+			amqp_chan.close()
+
+	except:
+		l.exception('Error in HTTP GET')
 
 
-if len(sys.argv) < 4:
-	l.error('Not enough arguments.')
-	l.error('usage: {} <block uuid> <URL> <interval (seconds)>'.format(sys.argv[0]))
-	sys.exit(1)
+parser = argparse.ArgumentParser(description='HTTP Get Query')
 
-block_uuid = sys.argv[1]
+parser.add_argument('--url',
+                    type=str,
+                    required=True)
+
+parser.add_argument('--interval',
+                    type=int,
+                    required=True)
+
+parser.add_argument('--uuid',
+                    type=uuid.UUID,
+                    required=True)
+parser.add_argument('--source_uuid',
+                    nargs='*',
+                    type=uuid.UUID)
+
+args = parser.parse_args()
+
+# if len(sys.argv) < 4:
+# 	l.error('Not enough arguments.')
+# 	l.error('usage: {} <block uuid> <URL> <interval (seconds)>'.format(sys.argv[0]))
+# 	sys.exit(1)
+
+# block_uuid = sys.argv[1]
+# try:
+# 	u = uuid.UUID(block_uuid)
+# except:
+# 	l.exception('Block UUID is an invalid UUID ({})'.format(sys.argv[1]))
+# 	sys.exit(1)
+# url = sys.argv[2]
+# try:
+# 	interval = int(sys.argv[3])
+# except:
+# 	l.error('Interval ({}) must be an integer.'.format(sys.argv[3]))
+# 	sys.exit(1)
+
+# l.info('Started with UUID:{}, URL:{}, interval:{}'.format(block_uuid, url, interval))
+
 try:
-	u = uuid.UUID(block_uuid)
+	sched = apscheduler.schedulers.asyncio.AsyncIOScheduler(standalone=True)
+	sched.add_executor('processpool')
+	sched.add_job(func=httpGET,
+	              trigger='interval',
+	              seconds=args.interval,
+	              kwargs={'url':args.url, 'block_uuid':str(args.uuid)})
+
+	sched.start()
 except:
-	l.exception('Block UUID is an invalid UUID ({})'.format(sys.argv[1]))
-	sys.exit(1)
-url = sys.argv[2]
-try:
-	interval = int(sys.argv[3])
-except:
-	l.error('Interval ({}) must be an integer.'.format(sys.argv[3]))
-	sys.exit(1)
-
-l.info('Started with UUID:{}, URL:{}, interval:{}'.format(block_uuid, url, interval))
-
-
-# # Make sure the exchange exists
-# amqp_conn = pika.BlockingConnection(
-# 				pika.ConnectionParameters(
-# 					host=gatdConfig.rabbitmq.HOST,
-# 					port=gatdConfig.rabbitmq.PORT,
-# 					virtual_host=gatdConfig.rabbitmq.VHOST,
-# 					credentials=pika.PlainCredentials(
-# 						gatdConfig.blocks.RMQ_USERNAME,
-# 						gatdConfig.blocks.RMQ_PASSWORD)
-# 			))
-# amqp_chan = amqp_conn.channel();
-
-# amqp_chan.exchange_declare(exchange='xch_queryer_http_get',
-#                            exchange_type='direct',
-#                            durable='true')
-# amqp_chan.close()
-
-sched = apscheduler.schedulers.asyncio.AsyncIOScheduler(standalone=True)
-sched.add_executor('processpool')
-sched.add_job(func=httpGET,
-              trigger='interval',
-              seconds=interval,
-              kwargs={'url':url, 'block_uuid':block_uuid})
-
-sched.start()
+	l.exception('No good')
 
 try:
 	asyncio.get_event_loop().run_forever()
 except KeyboardInterrupt:
 	l.info('ctrl+c, exiting')
+except:
+	l.exception('Error')

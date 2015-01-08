@@ -404,7 +404,6 @@ def login (request):
 	else:
 		print(result.user.data)
 		return response
-	print(token)
 
 	if not (result.user.name and result.user.id):
 		# Need to issue an update request to get more information about the user

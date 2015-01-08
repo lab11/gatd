@@ -15,7 +15,6 @@ import gatdConfig
 def start_block (l, description, settings, parameters, callback, init=None):
 	# Use global values so we can "return" things from this function,
 	# even though this function doesn't ever return
-	global args#, routing_keys
 
 	parser = argparse.ArgumentParser(description=description)
 
