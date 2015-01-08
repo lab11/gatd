@@ -64,6 +64,12 @@ def streamer_socketio_parameters (block):
 			p['value'] = 'http://socketio.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
 
+def streamer_websocket_parameters (block):
+	for p in block['parameters']:
+		if p['key'] == 'url':
+			p['value'] = 'http://websocket.{}/{}'\
+			.format(gatdConfig.gatd.HOST, block['uuid'])
+
 def viewer_parameters (block):
 	for p in block['parameters']:
 		if p['key'] == 'url':
@@ -87,6 +93,7 @@ block_parameters_fns = {
 	'receiver_udp_ipv4': receiver_udp_ipv4_parameters,
 	'receiver_http_post': receiver_http_post_parameters,
 	'streamer_socketio': streamer_socketio_parameters,
+	'streamer_websocket': streamer_websocket_parameters,
 	'viewer': viewer_parameters,
 	'queryer': queryer_parameters,
 	'replayer': replayer_parameters,
@@ -334,7 +341,7 @@ def run_profile (request, profile):
 
 			cmd = 'python3 {path}/{block_type}.py --uuid {block_uuid} --source_uuid {sources}'\
 				.format(path=os.path.abspath('../gatd'),
-				        block_type=content['type'],
+				        block_type=block_prototype.get('script', content['type']),
 				        block_uuid=block_uuid,
 				        sources=' '.join(content['source_uuids']))
 
@@ -351,6 +358,12 @@ def run_profile (request, profile):
 			for k,v in content['parameters'].items():
 				cmd_args.append('--{}'.format(k))
 				cmd_args.append(shlex.quote(v))
+
+			# Add "hidden" arguments. These are needed to run the block
+			# but aren't shown to the user.
+			for param in block_prototype.get('hidden_parameters', []):
+				cmd_args.append('--{}'.format(param['key']))
+				cmd_args.append(shlex.quote(param['value']))
 
 			print('  args: {}'.format(cmd_args))
 
@@ -489,13 +502,17 @@ def editor (request):
 									 'receiver_udp_ipv4',
 									 'receiver_http_post',
 									 'queryer_http_get']),
-					 ('Receiver Helpers', ['deduplicator']),
+					 ('Receiver Helpers', ['deduplicator', 'queue_combine_a']),
 					 ('Formatters', ['formatter_python',
 					                 'formatter_contenttype',
 					                 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_info_simple']),
 					 ('Storage', ['database_mongodb']),
-					 ('Viewers', ['streamer_socketio', 'viewer', 'queryer', 'replayer'])
+					 ('Viewers', ['streamer_socketio',
+					              'streamer_websocket',
+					              'viewer',
+					              'queryer',
+					              'replayer'])
 					]
 
 	profile_uuid = request.matchdict.get('uuid')

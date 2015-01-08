@@ -7,7 +7,7 @@ import gatdBlock
 import gatdConfig
 import gatdLog
 
-l = gatdLog.getLogger('streamer-socketio')
+l = gatdLog.getLogger('streamer')
 
 mdb = None
 
@@ -58,7 +58,7 @@ def init (args):
 
 # Start the connection to rabbitmq
 
-description = 'Socket.io Streaming'
+description = 'Streaming'
 settings = []
 parameters = [('url', str)]
 

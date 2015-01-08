@@ -67,6 +67,7 @@ function new_block (uuid) {
 
 	var source_group = new_block.attr('data-source-group');
 	var target_group = new_block.attr('data-target-group');
+	var target_group_max_conn = new_block.attr('data-target-group-max-conn');
 
 	// Setup arrow properties
 	if (source_group) {
@@ -86,11 +87,7 @@ function new_block (uuid) {
 			                 outlineWidth: 4,
 			                 dashstyle: "2 2"
 			               },
-			scope: source_group,
-			maxConnections: 5,
-			onMaxConnections: function(info, e) {
-				alert("Maximum connections (" + info.maxConnections + ") reached");
-			}
+			scope: source_group
 		});
 	}
 
@@ -99,7 +96,11 @@ function new_block (uuid) {
 			dropOptions: {hoverClass:"dragHover"},
 			anchor: "AutoDefault",
 			allowLoopback: false,
-			scope: target_group
+			scope: target_group,
+			maxConnections: target_group_max_conn,
+			onMaxConnections: function(info, e) {
+				console.log("Maximum connections (" + info.maxConnections + ") reached");
+			}
 		});
 	}
 
@@ -190,7 +191,7 @@ jsPlumb.ready(function() {
 
 	// setup some defaults for jsPlumb.
 	jsp = jsPlumb.getInstance({
-		Endpoint:           ["Dot", {radius:2}],
+		Endpoint:           ["Blank", {}],
 		HoverPaintStyle:    {strokeStyle:"#1e8151", lineWidth:2 },
 		ConnectionOverlays: [
 			["Arrow", {

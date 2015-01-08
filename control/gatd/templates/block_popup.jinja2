@@ -1,4 +1,4 @@
-<div id="{{ block.uuid }}" class="block" data-type="{{ block.type }}" data-source-group="{{ block.source_group or '' }}" data-target-group="{{ block.target_group or '' }}" style="top:{{ block.top }}px; left:{{ block.left }}px;">
+<div id="{{ block.uuid }}" class="block" data-type="{{ block.type }}" data-source-group="{{ block.source_group or '' }}" data-target-group="{{ block.target_group or '' }}" data-target-group-max-conn="{{ block.target_group_max_conn or 0 }}" style="top:{{ block.top }}px; left:{{ block.left }}px;">
 
   {% if 'icon' in block %}
   <span class="fa fa-{{ block.icon }}">&nbsp;</span>

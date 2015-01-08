@@ -143,6 +143,23 @@ bits of the source IPv6 addresses are the same.',
 		]
 	},
 
+	'queue_combine_a': {
+		'name': 'Combiner',
+		'help': '''
+Aggregate multiple streams and create a new output stream.
+''',
+		'target_group': 'a',
+		'source_group': 'a',
+		'single_instance': False,
+		'script': 'queue_combine',
+		'hidden_parameters': [
+			{
+				'key': 'exchange',
+				'value': 'xch_scope_a'
+			}
+		]
+	},
+
 	'formatter_python': {
 		'name': 'Formatter (Python)',
 		'help': '''
@@ -241,11 +258,29 @@ data packet and the key:value pair to add to the packet if it is.''',
 		'target_group': 'b',
 		'source_group': None,
 		'single_instance': False,
+		'script': 'streamer',
 		'parameters': [
 			{
 				'name': 'Stream URL',
 				'help': 'The stream url to use when connecting to the \
 socket.io server.',
+				'key': 'url'
+			}
+		]
+	},
+
+	'streamer_websocket': {
+		'name': 'Streamer (websockets)',
+		'help': 'Stream packets using websockets.',
+		'target_group': 'b',
+		'source_group': None,
+		'single_instance': False,
+		'script': 'streamer',
+		'parameters': [
+			{
+				'name': 'Stream URL',
+				'help': 'The stream url to use when connecting to the \
+websocket server.',
 				'key': 'url'
 			}
 		]
@@ -271,6 +306,7 @@ socket.io server.',
 		'help': 'Issue queries to the database to retrieve historical data.',
 		'target_group': 'c',
 		'source_group': None,
+		'target_group_max_conn': 1,
 		'single_instance': True,
 		'virtual_queues': True,
 		'parameters': [
