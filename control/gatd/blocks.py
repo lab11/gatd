@@ -232,8 +232,8 @@ and that included the "Content-Type" field in their response/POST headers.
 		]
 	},
 
-	'meta_info_simple': {
-		'name': 'Meta Info (Simple)',
+	'meta_keyvalue': {
+		'name': 'Meta Info (Key:Value)',
 		'help': '''
 This block adds data from a static list to incoming packets. For instance, if
 the incoming data is from sensors, you may wish to add the sensor's location to
@@ -244,6 +244,14 @@ data packet and the key:value pair to add to the packet if it is.''',
 		'target_group': 'b',
 		'source_group': 'b',
 		'single_instance': False,
+		'parameters': [
+			{
+				'name': 'Edit the Meta Data',
+				'help': 'Go to this page to edit the stored key:value meta data.',
+				'key': 'edit_url',
+				'type': 'link'
+			}
+		]
 	},
 
 	'streamer_socketio': {

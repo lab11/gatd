@@ -1,0 +1,185 @@
+{% extends "base.jinja2" %}
+
+{% block title %}
+GATD - Editor - Meta (Key: Value)
+{% endblock %}
+
+{% block nav %}
+<div class="navbar-collapse collapse">
+  <ul class="nav navbar-nav">
+    <li><a href="/">Home</a></li>
+    <li><a href="/profiles">Profiles</a></li>
+  </ul>
+</div><!--/.nav-collapse -->
+{% endblock %}
+
+{% block body %}
+
+
+<div class="container">
+
+  <h1>Edit the Key: Value Meta Information</h1>
+  <h2>Profile {{ profile.name }}, block {{ block.uuid }}</h2>
+
+  <p>Key: Value Meta Information is a way to add static information to a stream
+  that may be hard to append either at the source or point of consumption of
+  the stream. A canonical example is location information. A sensor may be in
+  a fixed location, but it doesn't know that location when it sends data packets.
+  GATD, however, can add the location to the packet as it streams through.</p>
+
+  <p>The semantics of this block work like so: "If a packet with this key:value
+  pair enters the block, add these key:value pairs to the packet." Keeping with
+  the location example, a meta block may be setup such that if a packet has
+  a key "id" with value "1" the packet is appended with "location":"Building X".</p>
+
+  <p>Instructions:</p>
+
+  <div id="meta">
+
+    <form>
+
+      <table class="table">
+
+        <tr>
+          <thead>
+            <th>Match Key:Value</th>
+            <th>Additional Key:Values</th>
+          </thead>
+        </tr>
+
+        {% for line in lines %}
+        <tr>
+          <td>
+            {{ line.query[0] }}: {{ line.query[1] }}
+            {# <input type="text" name="{{ line._id|string }}_match_key">
+            <input type="text" name="{{ line._id|string }}_match_value">#}
+          </td>
+
+          <td>
+            {% for add in line.additional %}
+              {{ add[0] }}: {{ add[1] }}
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+
+      </table>
+
+
+
+
+    </form>
+
+
+  </div>
+
+</div>
+
+
+<!-- <div style="margin: 10px 50px 0 50px;">
+  <div class="well well-sm">
+    <div class="row">
+      <div class="col-lg-5">
+        <h1>Edit Profile: <span id="profile-name" data-placement="bottom" data-title="Enter a new profile name">{{ profile.name }}</span></h1>
+      </div>
+
+      <div class="col-lg-2 instructions" style="text-align:center;">
+        <h3>Instructions</h3>
+      </div>
+
+      <div class="col-lg-5 instructions">
+        <p>Add new blocks by clicking the buttons on the right.</p>
+        <p>Move blocks by clicking and dragging them.</p>
+        <p>Connect blocks by clicking and dragging arrows from the colored
+        ends of the blocks.</p>
+        <p>Double click blocks to edit them.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row">
+    <div id="gatd-editor" class="col-lg-10" data-profile-uuid="{{ profile.uuid }}">
+      {{ profile_html|safe }}
+
+      {% for connection in connections %}
+      <span class="connection" data-src="{{ connection.source_uuid }}" data-tar="{{ connection.target_uuid }}"></span>
+      {% endfor %}
+    </div>
+    <div id="gatd-editor-buttons" class="col-lg-2">
+
+
+      <div class="btn-group-vertical" role="group">
+
+      <button type="button" id="gatd-editor-save" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-save">
+        <span class="fa fa-save"></span>&nbsp; Save Profile
+      </button>
+      <button type="button" id="gatd-editor-upload" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-upload">
+        <span class="fa fa-cloud-upload"></span>&nbsp; Save and Execute
+      </button>
+
+        {% for button_group in block_buttons %}
+
+          <button class="btn btn-success">{{ button_group[0] }}</button>
+
+          {% for button in button_group[1] %}
+            <button type="button" class="gatd-editor-button btn btn-default" data-block="{{ button }}">
+              {% if blocks[button]['target_group'] %}<div class="gatd-editor-button-target group-{{ blocks[button]['target_group'] }}"></div>{% endif %}
+              {% if blocks[button]['source_group'] %}<div class="gatd-editor-button-source group-{{ blocks[button]['source_group'] }}"></div>{% endif %}
+              Add {{ blocks[button]['name'] }}
+            </button>
+          {% endfor %}
+
+
+        {% endfor %}
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="modal-profile-save" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Saving Profile</h4>
+      </div>
+      <div class="modal-body">
+        <span class="fa fa-spinner fa-spin fa-4x"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modal-profile-upload" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Saving and Executing Profile</h4>
+      </div>
+      <div class="modal-body">
+        <span class="fa fa-spinner fa-spin fa-4x"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+{% endblock %}
+

@@ -142,10 +142,11 @@ def main(global_config, **settings):
 	config.add_route('profile_new', '/profile/new')
 
 
-	config.add_route('editor_block', '/editor/block/{block}')
-	config.add_route('editor_save',  '/editor/save')
-	config.add_route('editor_saveupload',  '/editor/saveupload')
-	config.add_route('editor',       '/editor/{uuid}')
+	config.add_route('editor_block',         '/editor/block/{profile}/{block}')
+	config.add_route('editor_save',          '/editor/save')
+	config.add_route('editor_saveupload',    '/editor/saveupload')
+	config.add_route('editor_meta_keyvalue', '/editor/meta_keyvalue/{profile}/{block}')
+	config.add_route('editor',               '/editor/{uuid}')
 
 	config.scan()
 	return config.make_wsgi_app()

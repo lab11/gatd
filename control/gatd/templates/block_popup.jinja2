@@ -39,13 +39,23 @@
           <h3>Parameters</h3>
 
           {% for param in block.parameters %}
-          <div class="parameter" data-key="{{ param.key }}" data-value="{{ param.value }}">
-            {% if 'help' in param %}
-            <span class="tooltipster fa fa-info" title="{{ param.help }}"></span>
-            {% endif %}
-            <span>{{ param.name }}:</span> {{ param.value }}
-          </div>
+          {% if 'value' in param %}
+            <div class="parameter" data-key="{{ param.key }}" data-value="{{ param.value }}">
+              {% if 'help' in param %}
+                <span class="tooltipster fa fa-info" title="{{ param.help }}"></span>
+              {% endif %}
+              {% if param.type|default('text') == 'link' %}
+                <a href="{{ param.value }}" target="_blank">{{ param.name }}</a>
+              {% else %}
+                <span>{{ param.name }}:</span> {{ param.value }}
+              {% endif %}
+            </div>
+          {% endif %}
           {% endfor %}
+
+          {% if block.parameters|length == 0 %}
+          Save the profile and refresh to see parameters.
+          {% endif %}
 
         </div>
         {% endif %}

@@ -63,7 +63,7 @@ function new_block (uuid) {
 
 
 	// Make the block dragable
-	jsp.draggable(uuid);
+	jsp.draggable(uuid, { grid:[10,10]});
 
 	var source_group = new_block.attr('data-source-group');
 	var target_group = new_block.attr('data-target-group');
@@ -74,7 +74,7 @@ function new_block (uuid) {
 		jsp.makeSource($(new_block), {
 			filter: '.source-group', // make the block the source but only work from the little square
 			anchor: "AutoDefault",   // use the best anchor, but only in the middle of each side
-			connector:[ "Flowchart", { cornerRadius:5 } ], // make the connectors straight lines with 90 degree bends
+			connector:[ "Flowchart", { cornerRadius:10 } ], // make the connectors straight lines with 90 degree bends
 			connectorStyle:{ strokeStyle: colors[source_group],
 			                 lineWidth: 2,
 			                 outlineColor: "transparent",
@@ -169,12 +169,12 @@ function save_profile () {
 	}
 
 	// Remove any blocks that aren't connected to anything.
-	var blocks_len = blocks.length;
-	while (blocks_len--) {
-		if (!(blocks[blocks_len].uuid in connection_ids)) {
-			blocks.splice(blocks_len, 1);
-		}
-	}
+	// var blocks_len = blocks.length;
+	// while (blocks_len--) {
+	// 	if (!(blocks[blocks_len].uuid in connection_ids)) {
+	// 		blocks.splice(blocks_len, 1);
+	// 	}
+	// }
 
 	var profile = Object();
 
@@ -252,7 +252,8 @@ jsPlumb.ready(function() {
 
 	$(".gatd-editor-button").click(function () {
 		var block_type = $(this).attr('data-block');
-		$.ajax('/editor/block/'+block_type, {'dataType': 'json'})
+		var profile_uuid = $('#gatd-editor').attr('data-profile-uuid');
+		$.ajax('/editor/block/'+profile_uuid+'/'+block_type, {'dataType': 'json'})
 		.done(function (j) {
 			if (j.status != 'success') {
 				console.log('Error occurred getting block.');
