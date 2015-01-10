@@ -524,7 +524,7 @@ def profile_new (request):
 def validate_profile_uuid (request, profile_uuid):
 	query = {
 		'uuid': profile_uuid,
-		'_userid': str(request.user['_id'])
+		# '_userid': str(request.user['_id'])
 	}
 	return request.db['conf_profiles'].find_one(query)
 
@@ -634,9 +634,9 @@ def save_profile (request, data):
 				print('Cannot connect these blocks.')
 				return None
 
-		# data['_userid'] = str(request.user['_id'])
 
 		# At this point the block checks out
+		data['_userid'] = str(request.user['_id'])
 		data['_id'] = profile['_id']
 		request.db['conf_profiles'].save(data)
 
@@ -800,7 +800,7 @@ def editor_saveupload (request):
 	profile = save_profile(request, data)
 
 	if not profile:
-		raise pyramid.httpexceptions.exc.HTTPBadRequest()
+		raise pyramid.httpexceptions.HTTPBadRequest()
 
 	# # Do some validation on the editor blob
 	# if 'uuid' not in data:
