@@ -25,6 +25,8 @@ def connect_mongodb ():
 def save (args, channel, method, prop, body):
 	global mdb
 
+	l.info(body)
+
 	try:
 		# No magic here, just try to insert the record into the capped collection
 		mdb[str(args.uuid)].insert(body)
@@ -60,6 +62,6 @@ def init (args):
 
 description = 'Streaming'
 settings = []
-parameters = [('url', str)]
+parameters = [('socketio_url', str), ('websocket_url', str)]
 
 gatdBlock.start_block(l, description, settings, parameters, save, init=init)

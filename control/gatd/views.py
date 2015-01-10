@@ -64,15 +64,12 @@ def meta_keyvalue_parameters (profile, block):
 			p['value'] = '/editor/meta_keyvalue/{}/{}'\
 			.format(profile['uuid'], block['uuid'])
 
-def streamer_socketio_parameters (profile, block):
+def streamer_parameters (profile, block):
 	for p in block['parameters']:
-		if p['key'] == 'url':
+		if p['key'] == 'socketio_url':
 			p['value'] = 'http://socketio.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
-
-def streamer_websocket_parameters (profile, block):
-	for p in block['parameters']:
-		if p['key'] == 'url':
+		elif p['key'] == 'websocket_url':
 			p['value'] = 'ws://websocket.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
 
@@ -99,8 +96,7 @@ block_parameters_fns = {
 	'receiver_udp_ipv4': receiver_udp_ipv4_parameters,
 	'receiver_http_post': receiver_http_post_parameters,
 	'meta_keyvalue': meta_keyvalue_parameters,
-	'streamer_socketio': streamer_socketio_parameters,
-	'streamer_websocket': streamer_websocket_parameters,
+	'streamer': streamer_parameters,
 	'viewer': viewer_parameters,
 	'queryer': queryer_parameters,
 	'replayer': replayer_parameters,
@@ -285,7 +281,7 @@ def run_profile (request, profile):
 		amqp_chan.queue_delete(queue=queue_name)
 
 
-	if profile['uuid'] != '9e5026f5-bdd0-466a-be5b-0fea8f35f2bb':
+	if profile['uuid'] != '89626667-443e-4cd7-bdde-8039e2254467':
 		return
 
 
@@ -663,8 +659,7 @@ def editor (request):
 					                 'formatter_json']),
 					 ('Processors', ['processor_python', 'meta_keyvalue']),
 					 ('Storage', ['database_mongodb']),
-					 ('Viewers', ['streamer_socketio',
-					              'streamer_websocket',
+					 ('Viewers', ['streamer',
 					              'viewer',
 					              'queryer',
 					              'replayer'])
@@ -828,7 +823,7 @@ def editor_saveupload (request):
 
 
 @view_config(route_name='editor_meta_keyvalue',
-			 renderer='templates/editor_meta_keyvalue',
+			 renderer='templates/editor_meta_keyvalue.jinja2',
 			 permission='loggedin')
 def editor_meta_keyvalue (request):
 	profile_uuid = request.matchdict['profile']

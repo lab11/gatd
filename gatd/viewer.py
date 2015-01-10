@@ -27,21 +27,29 @@ def save (args, channel, method, prop, body):
 
 	try:
 		query = {'uuid': str(args.uuid)}
-		push  = {'$push': {
-					'packets': {
-						'$each': [body],
-						'$slice': -10
-					}
-				}}
+
+		## This garbage doesn't seem to work:
+		# push  = {'$push': {
+		# 			'packets': {
+		# 				'$each': [body],
+		# 				'$slice': -10
+		# 			}
+		# 		}}
 
 		l.debug('Adding packet to viewer (uuid:{})'.format(args.uuid))
 
 		existing = mdb['viewer'].find_one(query)
 		if not existing:
 			l.debug('First packet for this stream.')
-			mdb['viewer'].insert(query)
 
-		mdb['viewer'].update(query, push, upsert=True)
+			first = {'uuid': str(args.uuid),
+			         'packets': [body]}
+			mdb['viewer'].insert(first)
+
+		else:
+			existing['packets'].append(body)
+			existing['packets'] = existing['packets'][-10:]
+			mdb['viewer'].update(query, existing)
 
 		channel.basic_ack(delivery_tag=method.delivery_tag)
 

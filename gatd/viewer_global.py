@@ -30,15 +30,19 @@ def before_request ():
 def viewer (uuid):
 
 	d = flask.g.db['viewer'].find_one({'uuid': uuid})
+	if d:
 
-	count = int(flask.request.args.get('count', 10))
+		count = int(flask.request.args.get('count', 10))
 
-	end = len(d['packets'])
-	start = end - count
-	if start < 0:
-		start = 0
+		end = len(d['packets'])
+		start = end - count
+		if start < 0:
+			start = 0
 
-	resp = d['packets'][start:end]
+		resp = d['packets'][start:end]
+
+	else:
+		resp = {}
 
 	return flask.Response(json.dumps(resp),  mimetype='application/json')
 

@@ -7,7 +7,7 @@ import werkzeug
 import gatdLog
 import formatter
 
-l = gatdLog.getLogger('formatter-ct')
+l = gatdLog.getLogger('formatter-ct2')
 
 def format (data, meta):
 

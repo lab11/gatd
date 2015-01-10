@@ -67,8 +67,11 @@ def init_profiles (db):
 
 	for profile in profile_cursor:
 
-		if profile['uuid'] != '9e5026f5-bdd0-466a-be5b-0fea8f35f2bb':
-			return
+		if profile['uuid'] != '89626667-443e-4cd7-bdde-8039e2254467':
+			print('Not this profile')
+			continue
+
+		print('start it')
 
 		for block_uuid,content in profile['blocks'].items():
 

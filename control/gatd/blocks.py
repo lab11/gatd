@@ -254,36 +254,24 @@ data packet and the key:value pair to add to the packet if it is.''',
 		]
 	},
 
-	'streamer_socketio': {
-		'name': 'Streamer (socket.io)',
-		'help': 'Stream packets using the Socket.IO protocol.',
+	'streamer': {
+		'name': 'Streamer',
+		'help': 'Stream packets in real-time.',
 		'target_group': 'b',
 		'source_group': None,
 		'single_instance': False,
-		'script': 'streamer',
 		'parameters': [
 			{
-				'name': 'Stream URL',
+				'name': 'Socket.io Stream URL',
 				'help': 'The stream url to use when connecting to the \
 socket.io server.',
-				'key': 'url'
-			}
-		]
-	},
-
-	'streamer_websocket': {
-		'name': 'Streamer (websockets)',
-		'help': 'Stream packets using websockets.',
-		'target_group': 'b',
-		'source_group': None,
-		'single_instance': False,
-		'script': 'streamer',
-		'parameters': [
+				'key': 'socketio_url'
+			},
 			{
-				'name': 'Stream URL',
+				'name': 'Websocket Stream URL',
 				'help': 'The stream url to use when connecting to the \
 websocket server.',
-				'key': 'url'
+				'key': 'websocket_url'
 			}
 		]
 	},

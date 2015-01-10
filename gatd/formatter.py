@@ -33,7 +33,6 @@ def start_formatting(l, description, settings, parameters, callback):
 
 			# Call the formatter with the data and the meta information
 			ret = callback(body['data'], copy.deepcopy(meta))
-
 			if type(ret) == list:
 				# Formatters may return a list of items
 				for item in ret:
@@ -62,6 +61,7 @@ def start_formatting(l, description, settings, parameters, callback):
 			l.exception('Error formatting packet.')
 
 		# Ack all packets
+		l.info('herhe???')
 		channel.basic_ack(delivery_tag=method.delivery_tag)
 
 	# Start the connection to rabbitmq

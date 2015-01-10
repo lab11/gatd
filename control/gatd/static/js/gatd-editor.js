@@ -12,6 +12,10 @@ function new_block (uuid) {
 
 	var new_block = $('#'+uuid);
 
+
+	var w = new_block.width();
+	new_block.width(Math.ceil(new_block.width()/20)*20);
+
 	// Initialize the popup
 	// $('#block_'+uuid+'_popup').popup({
 	// 	positionTo: "origin"
@@ -73,7 +77,7 @@ function new_block (uuid) {
 	if (source_group) {
 		jsp.makeSource($(new_block), {
 			filter: '.source-group', // make the block the source but only work from the little square
-			anchor: "AutoDefault",   // use the best anchor, but only in the middle of each side
+			anchor: "Right",   // use the best anchor, but only in the middle of each side
 			connector:[ "Flowchart", { cornerRadius:10 } ], // make the connectors straight lines with 90 degree bends
 			connectorStyle:{ strokeStyle: colors[source_group],
 			                 lineWidth: 2,
@@ -94,7 +98,7 @@ function new_block (uuid) {
 	if (target_group) {
 		jsp.makeTarget($(new_block), {
 			dropOptions: {hoverClass:"dragHover"},
-			anchor: "AutoDefault",
+			anchor: "Left",
 			allowLoopback: false,
 			scope: target_group,
 			maxConnections: target_group_max_conn,
@@ -110,7 +114,7 @@ function save_profile () {
 	var blocks = [];
 	var connections = [];
 
-	var connection_ids = {};
+	// var connection_ids = {};
 
 	// Add all blocks
 	$('.block').each(function () {
@@ -164,8 +168,8 @@ function save_profile () {
 
 		// Keep track of all blocks that are connected so we can get rid of
 		// floating blocks that aren't connected to anything.
-		connection_ids[src] = true;
-		connection_ids[tar] = true;
+		// connection_ids[src] = true;
+		// connection_ids[tar] = true;
 	}
 
 	// Remove any blocks that aren't connected to anything.
