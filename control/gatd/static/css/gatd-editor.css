@@ -63,8 +63,8 @@
 	right: 0;
 	width:0.8em;
 	height:100%;
-	-moz-border-radius: 0 8px 8px 0;
-	border-radius: 0 8px 8px 0;
+	-moz-border-radius: 0 7px 7px 0;
+	border-radius: 0 7px 7px 0;
 	cursor:pointer;
 }
 
@@ -78,8 +78,8 @@
 	left: 0;
 	width:0.8em;
 	height:100%;
-	-moz-border-radius: 8px 0 0 8px;
-	border-radius:8px 0 0 8px;
+	-moz-border-radius: 7px 0 0 7px;
+	border-radius: 7px 0 0 7px;
 }
 
 .group-a {

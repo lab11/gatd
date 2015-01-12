@@ -78,7 +78,7 @@ function new_block (uuid) {
 		jsp.makeSource($(new_block), {
 			filter: '.source-group', // make the block the source but only work from the little square
 			anchor: "Right",   // use the best anchor, but only in the middle of each side
-			connector:[ "Flowchart", { cornerRadius:10 } ], // make the connectors straight lines with 90 degree bends
+			connector:[ "Flowchart", { cornerRadius:5 } ], // make the connectors straight lines with 90 degree bends
 			connectorStyle:{ strokeStyle: colors[source_group],
 			                 lineWidth: 2,
 			                 outlineColor: "transparent",
