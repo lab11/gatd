@@ -171,6 +171,9 @@ def query_block_exists (uuid, circus_client):
 	return response['status'] != 'error'
 
 
+# Distills an entire profile down to just the essential pieces for running
+# the profile. This is used to check if the profile has changed, and if
+# so, what blocks need to be restarted.
 def create_running_profile (profile):
 
 	rp = {'uuid': profile['uuid'],
@@ -198,9 +201,6 @@ def create_running_profile (profile):
 			newblock['parameters'][param['key']] = block[param['key']]
 
 	return rp
-
-
-
 
 
 # This function causes GATD to start executing the profile
@@ -520,11 +520,13 @@ def profile_new (request):
 def validate_profile_uuid (request, profile_uuid):
 	query = {
 		'uuid': profile_uuid,
-		# '_userid': str(request.user['_id'])
+		'_userid': str(request.user['_id'])
 	}
 	return request.db['conf_profiles'].find_one(query)
 
-
+# Save a profile to the database
+# Does many checks to ensure that the profile is valid and that the user
+# isn't trying to do anything he/she shouldn't be.
 def save_profile (request, data):
 	try:
 		# Make sure that we have exactly these required keys
@@ -761,30 +763,6 @@ def editor_save (request):
 		raise pyramid.httpexceptions.HTTPBadRequest()
 
 
-
-
-
-	# # Do some validation on the editor blob
-	# if 'uuid' not in data:
-	# 	print('No UUID in profile')
-	# else:
-
-	# 	data['_userid'] = str(request.user['_id'])
-
-	# 	# Save the current profile in the history collection
-	# 	# so we have a save history
-	# 	request.db['conf_profiles_history'].insert(data)
-
-	# 	# Update (or add) the profile to the main profiles
-	# 	# collection. .save() will use update if _id is present.
-	# 	old = request.db['conf_profiles'].find_one({'uuid': data['uuid'],
-	# 	                                            '_userid': data['_userid']})
-	# 	if old:
-	# 		data['_id'] = old['_id']
-
-	# 	request.db['conf_profiles'].save(data)
-
-
 @view_config(route_name='editor_saveupload',
 			 request_method='POST',
 			 renderer='json',
@@ -797,26 +775,7 @@ def editor_saveupload (request):
 	if not profile:
 		raise pyramid.httpexceptions.HTTPBadRequest()
 
-	# # Do some validation on the editor blob
-	# if 'uuid' not in data:
-	# 	print('No UUID in profile')
-	# else:
-
-	# 	data['_userid'] = str(request.user['_id'])
-
-	# 	# Save the current profile in the history collection
-	# 	# so we have a save history
-	# 	request.db['conf_profiles_history'].insert(data)
-
-	# 	# Update (or add) the profile to the main profiles
-	# 	# collection. .save() will use update if _id is present.
-	# 	old = request.db['conf_profiles'].find_one({'uuid': data['uuid'],
-	# 	                                            '_userid': data['_userid']})
-	# 	if old:
-	# 		data['_id'] = old['_id']
-
-	# 	request.db['conf_profiles'].save(data)
-
+	# After saving, run this profile.
 	run_profile(request, profile)
 
 	return {'status': 'success'}

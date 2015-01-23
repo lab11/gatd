@@ -165,6 +165,11 @@ path { cursor:pointer; }
     padding: 20px;
 }
 
+.block_popup_delete {
+	margin-top: 20px;
+	text-align: right;
+}
+
 .tooltipster {
     cursor: help;
 }

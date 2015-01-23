@@ -357,6 +357,26 @@ jsPlumb.ready(function() {
 		$(block).popover('hide');
 	});
 
+	$('#gatd-editor').on('click', '.block-delete-button', function () {
+		var block_uuid = $(this).attr('data-block-uuid');
+		var block = $('#'+block_uuid);
+
+		$('#modal-block-delete .block-delete').click(function () {
+			console.log('DELETE')
+			$(block).popover('hide');
+
+			jsp.detachAllConnections($(block));
+			// jsp.unmakeSource($(block), false);
+			// jsp.unmakeTarget($(block), false);
+			block.remove();
+
+			$(this).unbind('click');
+		});
+
+		$('#modal-block-delete').modal('show');
+
+	});
+
 	// 	// Initialize tooltips
 	// $('.tooltipster').tooltipster({
 	// 	theme: 'tooltipster-light',
