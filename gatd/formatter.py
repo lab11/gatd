@@ -1,12 +1,15 @@
 
 import copy
+import functools
 import pickle
 
 import arrow
 
 import gatdBlock
 
-def start_formatting(l, description, settings, parameters, callback):
+# split: set to true to allow a formatter to use a callback instead of return
+#        value when a packet is done
+def start_formatting(l, description, settings, parameters, callback, split=False, init=None, ioloop=None):
 
 	# This function handles getting packets from scope 'a' (the receive scope)
 	# into a structure that can be formatted before eventually calling the
@@ -31,38 +34,52 @@ def start_formatting(l, description, settings, parameters, callback):
 			t = arrow.get(meta['time_utc_iso'])
 			meta['time_utc_timestamp'] = int(t.datetime.timestamp()*1000000)
 
+			def submit_packet (args, pkt):
+				if type(pkt) == list:
+					# Formatters may return a list of items
+					l.debug('Publishing a list of packets')
+					for item in pkt:
+						if type(item) != dict:
+							l.warn('Formatter did not return a dict.')
+						else:
+							item['_gatd'] = meta
+							# for target in routing_keys:
+							channel.basic_publish(exchange='xch_scope_b',
+							                      body=pickle.dumps(item),
+							                      routing_key=str(args.uuid))
+
+				elif type(pkt) == dict:
+					pkt['_gatd'] = meta
+					# for target in routing_keys:
+					l.debug('Publishing a packet')
+					channel.basic_publish(exchange='xch_scope_b',
+					                      body=pickle.dumps(pkt),
+					                      routing_key=str(args.uuid))
+				elif pkt == None:
+					l.info('Formatter decided to drop packet or did not return anything.')
+
+				else:
+					l.warn('Formatter return not understood.')
+
+
+			done = functools.partial(submit_packet, args)
+
 			# Call the formatter with the data and the meta information
-			ret = callback(body['data'], copy.deepcopy(meta))
-			if type(ret) == list:
-				# Formatters may return a list of items
-				for item in ret:
-					if type(item) != dict:
-						l.warn('Formatter did not return a dict.')
-					else:
-						item['_gatd'] = meta
-						# for target in routing_keys:
-						channel.basic_publish(exchange='xch_scope_b',
-						                      body=pickle.dumps(item),
-						                      routing_key=str(args.uuid))
-
-			elif type(ret) == dict:
-				ret['_gatd'] = meta
-				# for target in routing_keys:
-				channel.basic_publish(exchange='xch_scope_b',
-				                      body=pickle.dumps(ret),
-				                      routing_key=str(args.uuid))
-			elif ret == None:
-				l.info('Formatter decided to drop packet or did not return anything.')
-
+			if split:
+				callback(done, body['data'], copy.deepcopy(meta))
 			else:
-				l.warn('Formatter return not understood.')
+				ret = callback(body['data'], copy.deepcopy(meta))
+				done(ret)
+
+
 
 		except:
 			l.exception('Error formatting packet.')
 
 		# Ack all packets
-		l.info('herhe???')
 		channel.basic_ack(delivery_tag=method.delivery_tag)
 
 	# Start the connection to rabbitmq
-	gatdBlock.start_block(l, description, settings, parameters, formatter_callback)
+	gatdBlock.start_block(l, description, settings, parameters,
+		formatter_callback, init, ioloop)
+

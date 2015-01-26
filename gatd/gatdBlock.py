@@ -1,5 +1,6 @@
 
 import argparse
+import asyncore
 import pickle
 import uuid
 
@@ -12,7 +13,7 @@ import gatdConfig
 #    uuid        | block |       uuid
 #                ---------
 #
-def start_block (l, description, settings, parameters, callback, init=None):
+def start_block (l, description, settings, parameters, callback, init=None, ioloop=None):
 	# Use global values so we can "return" things from this function,
 	# even though this function doesn't ever return
 
@@ -64,6 +65,8 @@ def start_block (l, description, settings, parameters, callback, init=None):
 	# Setup the connection to RabbitMQ
 	def pika_on_channel (amqp_chan):
 
+		print('got channel')
+
 		for src in args.source_uuid:
 			queue_name = '{}_{}'.format(str(src), str(args.uuid))
 
@@ -74,9 +77,13 @@ def start_block (l, description, settings, parameters, callback, init=None):
 			                        no_ack=False)
 
 	def pika_on_connection (unused_connection):
+		print('got connection')
+		print('got connection')
+		print('got connection')
+		print('got connection')
 		amqp_conn.channel(pika_on_channel)
 
-	amqp_conn = pika.SelectConnection(
+	amqp_conn = pika.TornadoConnection(
 					pika.ConnectionParameters(
 						host=gatdConfig.rabbitmq.HOST,
 						port=gatdConfig.rabbitmq.PORT,
@@ -84,6 +91,7 @@ def start_block (l, description, settings, parameters, callback, init=None):
 						credentials=pika.PlainCredentials(
 							gatdConfig.blocks.RMQ_USERNAME,
 							gatdConfig.blocks.RMQ_PASSWORD)),
-					pika_on_connection
+					pika_on_connection,
+					custom_ioloop=ioloop
 				)
 	amqp_conn.ioloop.start()

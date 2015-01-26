@@ -340,6 +340,9 @@ jsPlumb.ready(function() {
 			} else {
 				if ($(this).is("select")) {
 					$(this).find(":selected").attr("selected", "selected");
+				} else if ($(this).is("textarea")) {
+					console.log($(this).val());
+					$(this).text($(this).val());
 				} else {
 					console.log($(this).val());
 					$(this).attr("value", $(this).val());
