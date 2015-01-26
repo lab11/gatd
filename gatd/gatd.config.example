@@ -1,0 +1,61 @@
+[gatd]
+host: gatd.com
+ipv4: 111.222.333.444
+
+[log]
+config_file: gatd_log_config.json
+
+[mongo]
+host:                 gatd.com
+port:                 27071
+database:             gatd
+
+[rabbitmq]
+host:               gatd.com
+port:               5676
+vhost:              /gatd
+
+[circus]
+host:          127.0.0.1
+port:          5555
+
+##
+## BLOCKS
+##
+
+[blocks]
+mdb_username: gatd-block
+mdb_password: password
+rmq_username: gatd-block
+rmq_password: password
+
+[receiver_udp_ipv6]
+prefix: aaaa:0000:1111:2222::0/64
+port: 25002
+
+[receiver_udp_ipv4]
+port: 25003
+
+[streamer_socketio]
+port: 25004
+
+[streamer_websocket]
+port: 25007
+
+[viewer]
+port: 25005
+
+[queryer]
+port: 25006
+
+
+
+
+
+
+
+
+
+
+
+
