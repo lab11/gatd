@@ -380,6 +380,10 @@ jsPlumb.ready(function() {
 
 	});
 
+
+
+
+
 	// 	// Initialize tooltips
 	// $('.tooltipster').tooltipster({
 	// 	theme: 'tooltipster-light',

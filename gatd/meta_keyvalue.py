@@ -25,8 +25,6 @@ def connect_mongodb ():
 
 
 def process (args, channel, method, prop, body):
-
-
 	data = copy.deepcopy(body)
 
 	for k,v in body.items():
@@ -40,6 +38,7 @@ def process (args, channel, method, prop, body):
 	channel.basic_publish(exchange='xch_scope_b',
 	                      body=pickle.dumps(data),
 	                      routing_key=str(args.uuid))
+	channel.basic_ack(delivery_tag=method.delivery_tag)
 
 
 
@@ -61,10 +60,8 @@ def init (args):
 		for add in line['additional']:
 			sub[line['query'][1]].append(add)
 
-	print(queries)
-	print(additional)
-
-
+	l.info('Added queries: {}'.format(queries))
+	l.info('Added additional: {}'.format(additional))
 
 
 # Start the connection to rabbitmq

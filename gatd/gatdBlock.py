@@ -35,9 +35,6 @@ def start_block (l, description, settings, parameters, callback, init=None, iolo
 	parser.add_argument('--source_uuid',
 	                    nargs='*',
 	                    type=uuid.UUID)
-	# parser.add_argument('--target_uuid',
-	#                     nargs='*',
-	#                     type=uuid.UUID)
 
 	args = parser.parse_args()
 
@@ -48,15 +45,9 @@ def start_block (l, description, settings, parameters, callback, init=None, iolo
 		l.info('  {}: {}'.format(param[0], getattr(args, param[0])))
 	l.info('  uuid: {}'.format(args.uuid))
 	l.info('  source-uuid: {}'.format(args.source_uuid))
-	# l.info('  target-uuid: {}'.format(args.target_uuid))
 
 	if init:
 		init(args)
-
-	# Pre-enumerate all of the routing keys that we send packets to
-	# routing_keys = []
-	# for target in args.target_uuid:
-	# 	routing_keys.append('{}_{}'.format(args.uuid, str(target)))
 
 	def block_callback (channel, method, prop, body):
 		data = pickle.loads(body)
@@ -64,9 +55,6 @@ def start_block (l, description, settings, parameters, callback, init=None, iolo
 
 	# Setup the connection to RabbitMQ
 	def pika_on_channel (amqp_chan):
-
-		print('got channel')
-
 		for src in args.source_uuid:
 			queue_name = '{}_{}'.format(str(src), str(args.uuid))
 
@@ -77,10 +65,6 @@ def start_block (l, description, settings, parameters, callback, init=None, iolo
 			                        no_ack=False)
 
 	def pika_on_connection (unused_connection):
-		print('got connection')
-		print('got connection')
-		print('got connection')
-		print('got connection')
 		amqp_conn.channel(pika_on_channel)
 
 	amqp_conn = pika.TornadoConnection(

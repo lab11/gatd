@@ -36,36 +36,63 @@ GATD - Editor - Meta (Key: Value)
 
   <div id="meta">
 
-    <form>
 
-      <table class="table">
 
-        <tr>
-          <thead>
+  <button type="button" id="meta-key-value-new" class="btn btn-default">Add New Meta Item</button>
+
+
+
+    <form action="/editor/meta_keyvalue/save" method="POST">
+
+      <input type="hidden" name="profile_uuid" value="{{ profile.uuid }}">
+      <input type="hidden" name="block_uuid" value="{{ block.uuid }}">
+
+      <table class="table" id="meta-key-value-table">
+
+        <thead>
+          <tr>
             <th>Match Key:Value</th>
             <th>Additional Key:Values</th>
-          </thead>
-        </tr>
+          </tr>
+        </thead>
 
-        {% for line in lines %}
-        <tr>
-          <td>
-            {{ line.query[0] }}: {{ line.query[1] }}
-            {# <input type="text" name="{{ line._id|string }}_match_key">
-            <input type="text" name="{{ line._id|string }}_match_value">#}
-          </td>
+        <tbody>
 
-          <td>
-            {% for add in line.additional %}
-              {{ add[0] }}: {{ add[1] }}
-            {% endfor %}
-          </td>
-        </tr>
-        {% endfor %}
+
+          {% for line in lines %}
+          <tr>
+            <td>
+              {{ line.query[0] }}: {{ line.query[1] }}
+              {# <input type="text" name="{{ line._id|string }}_match_key">
+              <input type="text" name="{{ line._id|string }}_match_value">#}
+            </td>
+
+            <td>
+              {% for add in line.additional %}
+                {{ add[0] }}: {{ add[1] }}
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+
+
+          <tr style="display:none;" id="meta-key-value-row">
+            <td>
+              Key: <input type="text" class="form-control" name="new-query-key">
+              Value: <input type="text" class="form-control" name="new-query-value">
+            </td>
+            <td>
+              Key: <input type="text" class="form-control" name="new-addit-key">
+              | Value: <input type="text" class="form-control" name="new-addit-value">
+            </td>
+          </tr>
+
+
+        </tbody>
 
       </table>
 
-
+      <button type="submit" id="meta-key-value-save" class="btn btn-success">Save Meta</button>
 
 
     </form>
@@ -183,3 +210,8 @@ GATD - Editor - Meta (Key: Value)
 
 {% endblock %}
 
+{% block bottom_includes %}
+
+<script src="/static/js/gatd-editor-meta-keyvalue.js"></script>
+
+{% endblock %}

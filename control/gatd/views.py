@@ -812,5 +812,72 @@ def editor_meta_keyvalue (request):
 
 
 
+@view_config(route_name='editor_meta_keyvalue_save',
+			 request_method='POST',
+			 permission='loggedin')
+def editor_meta_keyvalue_save (request):
+	profile_uuid = request.POST['profile_uuid']
+	block_uuid = request.POST['block_uuid']
+
+	profile = validate_profile_uuid(request, profile_uuid)
+
+	if not profile:
+		return pyramid.httpexceptions.HTTPFound(location=request.route_url('profiles'))
+
+	for block in profile['blocks']:
+		if block['uuid'] == block_uuid and block['type'] == 'meta_keyvalue':
+
+			# Get all the records for the key value pairs
+			for k,v in request.POST.items():
+				names = k.split('-')
+				if len(names) == 4 and names[0] == 'new' and names[1] == 'query' and names[2] == 'key':
+					query = None
+					addits = []
+
+					print(k)
+					query_key = v
+					query_value = request.POST['new-query-value-{}'.format(names[3])]
+					query = (query_key, query_value)
+
+					i = 0
+					while True:
+						k_name = 'new-addit-key-{}-{}'.format(names[3], i)
+						v_name = 'new-addit-value-{}-{}'.format(names[3], i)
+
+						try:
+							addit_key = request.POST[k_name]
+							addit_value = request.POST[v_name]
+							addits.append((addit_key, addit_value))
+						except:
+							break
+
+						i += 1
+
+					request.db[block_uuid].insert({'query': query, 'additional': addits})
+
+			# Kill the meta block so it gets restarted with the new data
+			print('Kill {}'.format(block_uuid))
+			circus_client = circus.client.CircusClient(endpoint='tcp://{host}:{port}'\
+				.format(host=gatdConfig.circus.HOST, port=gatdConfig.circus.PORT))
+			to_circus = {
+				'command': 'signal',
+				'properties': {
+					'name': block_uuid,
+					'signum': 9
+				}
+			}
+			circus_client.call(to_circus)
+
+
+			return pyramid.httpexceptions.HTTPFound(location=request.route_url('editor_meta_keyvalue',
+				profile=profile_uuid, block=block_uuid))
+	else:
+		return pyramid.httpexceptions.HTTPFound(location=request.route_url('profiles'))
+
+
+
+
+
+
 
 
