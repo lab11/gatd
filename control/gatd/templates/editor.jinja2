@@ -43,24 +43,16 @@ GATD - Editor
   </div>
 
   <div class="row">
-    <div id="gatd-editor" class="col-lg-10" data-profile-uuid="{{ profile.uuid }}">
-      {{ profile_html|safe }}
 
-      {% for connection in connections %}
-      <span class="connection" data-src="{{ connection.source_uuid }}" data-tar="{{ connection.target_uuid }}"></span>
-      {% endfor %}
-    </div>
     <div id="gatd-editor-buttons" class="col-lg-2">
-
-
       <div class="btn-group-vertical" role="group">
 
-      <button type="button" id="gatd-editor-save" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-save">
-        <span class="fa fa-save"></span>&nbsp; Save Profile
-      </button>
-      <button type="button" id="gatd-editor-upload" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-upload">
-        <span class="fa fa-cloud-upload"></span>&nbsp; Save and Execute
-      </button>
+        <button type="button" id="gatd-editor-save" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-save">
+          <span class="fa fa-save"></span>&nbsp; Save Profile
+        </button>
+        <button type="button" id="gatd-editor-upload" class="btn btn-primary" data-toggle="modal" data-target="#modal-profile-upload">
+          <span class="fa fa-cloud-upload"></span>&nbsp; Save and Execute
+        </button>
 
         {% for button_group in block_buttons %}
         <!-- <h4>{{ button_group[0] }}</h4> -->
@@ -79,9 +71,16 @@ GATD - Editor
         {% endfor %}
 
       </div>
-
-
     </div>
+
+    <div id="gatd-editor" class="col-lg-10" data-profile-uuid="{{ profile.uuid }}">
+      {{ profile_html|safe }}
+
+      {% for connection in connections %}
+      <span class="connection" data-src="{{ connection.source_uuid }}" data-tar="{{ connection.target_uuid }}"></span>
+      {% endfor %}
+    </div>
+
   </div>
 </div>
 

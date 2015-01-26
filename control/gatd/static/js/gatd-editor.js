@@ -114,8 +114,6 @@ function save_profile () {
 	var blocks = [];
 	var connections = [];
 
-	// var connection_ids = {};
-
 	// Add all blocks
 	$('.block').each(function () {
 		//console.log($(this));
@@ -165,20 +163,7 @@ function save_profile () {
 		connection.target_uuid = tar;
 
 		connections.push(connection);
-
-		// Keep track of all blocks that are connected so we can get rid of
-		// floating blocks that aren't connected to anything.
-		// connection_ids[src] = true;
-		// connection_ids[tar] = true;
 	}
-
-	// Remove any blocks that aren't connected to anything.
-	// var blocks_len = blocks.length;
-	// while (blocks_len--) {
-	// 	if (!(blocks[blocks_len].uuid in connection_ids)) {
-	// 		blocks.splice(blocks_len, 1);
-	// 	}
-	// }
 
 	var profile = Object();
 
