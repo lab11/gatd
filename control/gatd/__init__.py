@@ -67,23 +67,22 @@ def init_profiles (db):
 
 	for profile in profile_cursor:
 
-		if profile['uuid'] != '89626667-443e-4cd7-bdde-8039e2254467':
-			print('Not this profile')
-			continue
+		try:
 
-		print('start it')
+			for block_uuid,content in profile['blocks'].items():
 
-		for block_uuid,content in profile['blocks'].items():
-
-			block_prototype = gatd.blocks.blocks[content['type']]
-			if block_prototype['single_instance']:
-				continue
-
-			exists = gatd.views.query_block_exists(block_uuid, circus_client)
-
-			if not exists:
 				block_prototype = gatd.blocks.blocks[content['type']]
-				gatd.views.start_block(block_uuid, content, block_prototype, circus_client)
+				if block_prototype['single_instance']:
+					continue
+
+				exists = gatd.views.query_block_exists(block_uuid, circus_client)
+
+				if not exists:
+					block_prototype = gatd.blocks.blocks[content['type']]
+					gatd.views.start_block(block_uuid, content, block_prototype, circus_client)
+
+		except Exception as e:
+			print('Error in starting profile')
 
 
 

@@ -11,6 +11,9 @@ GATD: Get All The Data / Lab11 / University of Michigan
     <li><a href="#desc" class="smothscroll">Overview</a></li>
     <li><a href="#showcase" class="smothScroll">Building Blocks</a></li>
     <li><a href="#contact" class="smothScroll">Get Started</a></li>
+    {% if user %}
+    <li><a href="/profiles" class="smothScroll">Profiles</a></li>
+    {% endif %}
   </ul>
 </div><!--/.nav-collapse -->
 {% endblock %}
@@ -44,6 +47,11 @@ GATD: Get All The Data / Lab11 / University of Michigan
 
 
         <div class="col-lg-3">
+          {% if user %}
+          <h3>View Your Profiles</h3>
+          <a class="btn btn-default" href="/profiles">Profiles</a>
+
+          {% else %}
           <h3>Login/Signup</h3>
           <p></p>
           <div class="sns-signin">
@@ -52,6 +60,7 @@ GATD: Get All The Data / Lab11 / University of Michigan
             <a href="/login/github" class="signin signin-github"><i class="fa fa-github"></i><span>Sign in with GitHub</span></a>
             <a href="/login/twitter" class="signin signin-twitter"><i class="fa fa-twitter"></i><span>Sign in with Twitter</span></a>
           </div>
+          {% endif %}
         </div>
       </div>
     </div> <!--/ .container -->

@@ -281,11 +281,6 @@ def run_profile (request, profile):
 		amqp_chan.queue_delete(queue=queue_name)
 
 
-	if profile['uuid'] != '89626667-443e-4cd7-bdde-8039e2254467':
-		return
-
-
-
 	# Need a pika connection for creating queues
 	amqp_conn = pika.BlockingConnection(
 					pika.ConnectionParameters(
@@ -478,7 +473,7 @@ def login (request):
 @view_config(route_name='home',
              renderer='templates/home.jinja2')
 def home (request):
-	return {}
+	return {'user': request.user}
 
 
 @view_config(route_name='socketio_test',
