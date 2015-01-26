@@ -1,0 +1,24 @@
+from authomatic.providers import oauth2, oauth1
+
+CONFIG = {
+
+    'twitter': { # Your internal provider name
+
+        # Provider class
+        'class_': oauth1.Twitter,
+
+        # Twitter is an AuthorizationProvider so we need to set several other properties too:
+        'consumer_key': 'insert key here',
+        'consumer_secret': 'insert secret here',
+    },
+
+    'github': {
+    	'class_': oauth2.GitHub,
+
+    	'consumer_key': 'insert key here',
+    	'consumer_secret': 'insert secret here',
+        'access_headers': {'User-Agent': 'GATDv6'},
+
+    	'scope': ['']
+    }
+}

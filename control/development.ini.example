@@ -14,6 +14,15 @@ pyramid.default_locale_name = en
 pyramid.includes =
     pyramid_debugtoolbar
 
+pyramid.auth.secret = 
+
+mongo_uri = mongodb://username:password@url:port/db
+
+################################################################################
+### Logins Supported
+################################################################################
+
+
 jinja2.filters =
 	model_url = pyramid_jinja2.filters:model_url_filter
 	route_url = pyramid_jinja2.filters:route_url_filter
