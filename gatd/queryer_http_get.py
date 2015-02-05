@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Issue HTTP GET requests to get data packets.
+"""
+
 import argparse
 import asyncio
 import pickle
@@ -10,10 +14,6 @@ import arrow
 import apscheduler.schedulers.asyncio
 import pika
 import requests
-
-# Enable logging in case apscheduler catches an error
-# import logging
-# logging.basicConfig()
 
 import gatdConfig
 import gatdLog
@@ -87,25 +87,6 @@ parser.add_argument('--source_uuid',
 
 args = parser.parse_args()
 
-# if len(sys.argv) < 4:
-# 	l.error('Not enough arguments.')
-# 	l.error('usage: {} <block uuid> <URL> <interval (seconds)>'.format(sys.argv[0]))
-# 	sys.exit(1)
-
-# block_uuid = sys.argv[1]
-# try:
-# 	u = uuid.UUID(block_uuid)
-# except:
-# 	l.exception('Block UUID is an invalid UUID ({})'.format(sys.argv[1]))
-# 	sys.exit(1)
-# url = sys.argv[2]
-# try:
-# 	interval = int(sys.argv[3])
-# except:
-# 	l.error('Interval ({}) must be an integer.'.format(sys.argv[3]))
-# 	sys.exit(1)
-
-# l.info('Started with UUID:{}, URL:{}, interval:{}'.format(block_uuid, url, interval))
 
 try:
 	sched = apscheduler.schedulers.asyncio.AsyncIOScheduler(standalone=True)

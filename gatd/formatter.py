@@ -1,4 +1,8 @@
 
+"""
+Helper file for all formatter blocks (source A to source B [blue to red]).
+"""
+
 import copy
 import functools
 import pickle
@@ -71,8 +75,6 @@ def start_formatting(l, description, settings, parameters, callback, split=False
 				ret = callback(body['data'], copy.deepcopy(meta))
 				done(ret)
 
-
-
 		except:
 			l.exception('Error formatting packet.')
 
@@ -82,4 +84,3 @@ def start_formatting(l, description, settings, parameters, callback, split=False
 	# Start the connection to rabbitmq
 	gatdBlock.start_block(l, description, settings, parameters,
 		formatter_callback, init, ioloop)
-

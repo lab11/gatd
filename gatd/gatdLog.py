@@ -1,19 +1,14 @@
-import os
-import json
 import logging
-import logging.config
 import sys
 
-import logging_tree
+import logstash
 
 import gatdConfig
 
-if os.path.exists(gatdConfig.log.CONFIG_FILE):
-    with open(gatdConfig.log.CONFIG_FILE) as f:
-        config = json.load(f)
-        logging.config.dictConfig(config)
-        logging_tree.printout()
-else:
-    logging.basicConfig(level=logging.INFO)
+def gatd_logger (name):
+	l = logging.getLogger(name)
+	l.setLevel(logging.DEBUG)
+	l.addHandler(logstash.TCPLogstashHandler(gatdConfig.log.HOST, gatdConfig.log.PORT, version=1))
+	return l
 
-setattr(sys.modules[__name__], 'getLogger', logging.getLogger)
+setattr(sys.modules[__name__], 'getLogger', gatd_logger)

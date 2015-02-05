@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Listen for HTTP posts and make the headers and content a packet.
+"""
+
 import http.server
 import ipaddress
 import pickle
@@ -85,23 +89,6 @@ class ForkingHTTPServer(socketserver.ForkingMixIn, http.server.HTTPServer):
 		http.server.HTTPServer.finish_request(self, request, client_address)
 
 try:
-	# # Make sure the exchange exists
-	# amqp_conn = pika.BlockingConnection(
-	# 				pika.ConnectionParameters(
-	# 					host=gatdConfig.rabbitmq.HOST,
-	# 					port=gatdConfig.rabbitmq.PORT,
-	# 					virtual_host=gatdConfig.rabbitmq.VHOST,
-	# 					credentials=pika.PlainCredentials(
-	# 						gatdConfig.blocks.RMQ_USERNAME,
-	# 						gatdConfig.blocks.RMQ_PASSWORD)
-	# 			))
-	# amqp_chan = amqp_conn.channel();
-
-	# amqp_chan.exchange_declare(exchange='xch_receiver_http_post',
-	#                            exchange_type='direct',
-	#                            durable='true')
-	# amqp_chan.close()
-
 	# Create a web server and define the handler to manage the incoming request
 	server = ForkingHTTPServer(('', 25101), gatdPostHandler)
 

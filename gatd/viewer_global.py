@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Handles the HTTP requests for the viewer.
+"""
+
 import json
 
 import flask

@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+"""
+Stream data with just websockets.
+"""
+
 import json
 
 import motor

@@ -1,4 +1,8 @@
 
+"""
+Parse packets based on the value of the Content-Type header.
+"""
+
 import json
 import urllib.parse
 
@@ -66,11 +70,9 @@ def format (data, meta):
 	return None
 
 
-
 settings = []
 parameters = []
 
 description = '''Format packets based on their content-type.'''
-
 
 formatter.start_formatting(l, description, settings, parameters, format)

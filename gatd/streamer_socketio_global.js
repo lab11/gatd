@@ -1,5 +1,9 @@
 #!/usr/bin/env nodejs
 
+/*
+Stream data with socket.io
+*/
+
 var path = require('path');
 var fs = require('fs');
 var sio = require('socket.io');

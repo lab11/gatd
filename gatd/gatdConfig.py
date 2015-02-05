@@ -27,7 +27,7 @@ class BaseConfigSection (object):
 
 CONFIG_FILENAME = 'gatd.config'
 
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(inline_comment_prefixes=['#'])
 config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          CONFIG_FILENAME))
 

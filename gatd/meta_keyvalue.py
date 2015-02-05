@@ -1,7 +1,12 @@
+
+"""
+Add key-value pairs to a data packet if the packet contains a particular
+key-value pair.
+"""
+
 import copy
 import pickle
 
-import pika
 import pymongo
 
 import gatdBlock

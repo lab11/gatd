@@ -1,4 +1,9 @@
 
+"""
+Helper module for each GATD block. Handles connecting to RabbitMQ and
+handling command line arguments.
+"""
+
 import argparse
 import asyncore
 import pickle

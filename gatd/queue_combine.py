@@ -1,3 +1,8 @@
+
+"""
+Simply allows two queues to merge into one.
+"""
+
 import pickle
 
 

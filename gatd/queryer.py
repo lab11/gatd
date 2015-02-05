@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Execute queries on the MongoDB and return the values in different
+formats.
+"""
+
 import base64
 import json
 

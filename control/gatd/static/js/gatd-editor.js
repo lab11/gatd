@@ -2,7 +2,6 @@
 
 var jsp;
 
-
 function new_block (uuid) {
 	var colors = {
 		'a': '#5696BC',
@@ -11,36 +10,13 @@ function new_block (uuid) {
 	}
 
 	var new_block = $('#'+uuid);
-
-
 	var w = new_block.width();
 	new_block.width(Math.ceil(new_block.width()/20)*20);
 
-	// Initialize the popup
-	// $('#block_'+uuid+'_popup').popup({
-	// 	positionTo: "origin"
-	// });
-	// $('#block_'+uuid+'_popup').css('display', 'block');
-
 	//  Make the popup appear on dbl click
 	$('#'+uuid).dblclick(function () {
-
 		$(this).popover('show');
-
-
-		// var position = $(this).position();
-		// $('#block_'+uuid+'_popup').popup('open', {
-		// 	x: position.left,
-		// 	y: position.top
-		// });
 	});
-
-	// // Initialize tooltips
-	// $('#block_'+uuid+'_popup .tooltipster').tooltipster({
-	// 	theme: 'tooltipster-light',
-	// });
-
-
 
 	$(new_block).each(function() {
 		$(this).popover({
@@ -57,14 +33,10 @@ function new_block (uuid) {
 		});
 	});
 
-
-
-		// Initialize tooltips
+	// Initialize tooltips
 	$(new_block).find('.tooltipster').tooltipster({
 		theme: 'tooltipster-light',
 	});
-
-
 
 	// Make the block dragable
 	jsp.draggable(uuid, { grid:[10,10]});
@@ -116,8 +88,6 @@ function save_profile () {
 
 	// Add all blocks
 	$('.block').each(function () {
-		//console.log($(this));
-
 		var block = Object();
 		block.uuid = $(this).attr('id');
 		block.type = $(this).attr('data-type');
@@ -201,7 +171,7 @@ jsPlumb.ready(function() {
 	// When a connection is created, update the attributes of the overlay
 	// label so we can associate a click on it to the correct connection.
 	jsp.bind("connection", function(info) {
-		 $(info.connection.getOverlay("delete").canvas)
+		$(info.connection.getOverlay("delete").canvas)
 		  .attr('data-tar', info.connection.targetId)
 		  .attr('data-src', info.connection.sourceId)
 		  .attr('data-scope', info.connection.scope);
@@ -232,12 +202,6 @@ jsPlumb.ready(function() {
 
 	// Make profile name editable
 	$('#profile-name').editable();
-
-	// Setup save popups
-	// $('#popup-editor-save').popup({
-	// 	overlayTheme: "b"
-	// });
-	// $('#popup-editor-save').css('display', 'block');
 
 	$(".gatd-editor-button").click(function () {
 		var block_type = $(this).attr('data-block');
@@ -292,32 +256,11 @@ jsPlumb.ready(function() {
 		});
 	});
 
-
-	// $('.block').each(function() {
-	// 	var pop = $(this).find('.block_popup');
-	// 	$(this).popover({
-	// 		content: pop.find('.block_popup_content').html(),
-	// 		html: true,
-	// 		placement: 'auto',
-	// 		trigger: 'manual',
-	// 		title: pop.find('.block_popup_title').html(),
-	// 	});
-	// 	$(this).find('.block_popup').remove();
-	// });
-
 	$('#gatd-editor').on('click', '.popover .close', function () {
-
-		// 		$(this).on('hide.bs.popover', function () {
-		// 	$(this).find('.block_popup_content').html($(this).find('.popover-content').html());
-		// 	console.log($(this).find('.popover-content'));
-		// });
-
 		var popid = $(this).attr('data-popover-id');
 		var block = $('#'+popid);
-		console.log(block);
 
 		$(this).parents('.popover').find("input,select,textarea").each(function() {
-			console.log($(this))
 			if ($(this).is("[type='radio']") || $(this).is("[type='checkbox']")) {
 				if ($(this).prop("checked")) {
 					$(this).attr("checked", "checked");
@@ -326,22 +269,14 @@ jsPlumb.ready(function() {
 				if ($(this).is("select")) {
 					$(this).find(":selected").attr("selected", "selected");
 				} else if ($(this).is("textarea")) {
-					console.log($(this).val());
 					$(this).text($(this).val());
 				} else {
-					console.log($(this).val());
 					$(this).attr("value", $(this).val());
 				}
 			}
 		});
 
-		// console.log($(block).find('.popover-content').html())
-
-		console.log($(this))
-		console.log($(this).parents('.popover'))
-
 		$(block).find('.block_popup_content').html($(this).parents('.popover').find('.popover-content').html());
-
 		$(block).popover('hide');
 	});
 
@@ -350,12 +285,9 @@ jsPlumb.ready(function() {
 		var block = $('#'+block_uuid);
 
 		$('#modal-block-delete .block-delete').click(function () {
-			console.log('DELETE')
 			$(block).popover('hide');
 
 			jsp.detachAllConnections($(block));
-			// jsp.unmakeSource($(block), false);
-			// jsp.unmakeTarget($(block), false);
 			block.remove();
 
 			$(this).unbind('click');
@@ -364,14 +296,5 @@ jsPlumb.ready(function() {
 		$('#modal-block-delete').modal('show');
 
 	});
-
-
-
-
-
-	// 	// Initialize tooltips
-	// $('.tooltipster').tooltipster({
-	// 	theme: 'tooltipster-light',
-	// });
 
 });

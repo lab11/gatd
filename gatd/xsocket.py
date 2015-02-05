@@ -1,3 +1,8 @@
+
+"""
+Class that helps with seeing destination IPv6 addresses.
+"""
+
 import ctypes
 import socket
 import ipaddress

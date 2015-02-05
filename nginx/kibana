@@ -1,0 +1,12 @@
+server {
+        listen 9292;
+        listen [::]:9292;
+
+        root /opt/kibana/kibana-3.1.2;
+        index index.html;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
+

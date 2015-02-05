@@ -1,5 +1,10 @@
 
+"""
+Parse all input packets as JSON.
+"""
+
 import json
+
 
 import gatdLog
 import formatter
@@ -7,8 +12,6 @@ import formatter
 l = gatdLog.getLogger('formatter-json')
 
 def format (data, meta):
-
-	l.debug(data)
 
 	try:
 		if type(data) == bytes:
@@ -26,7 +29,6 @@ def format (data, meta):
 		# On any exception dump the packet
 		l.warn('Packet was not valid JSON')
 		return None
-
 
 
 settings = []

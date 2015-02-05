@@ -1,4 +1,9 @@
 
+"""
+Takes in a stream and stores each packet to a collection.
+"""
+
+
 import pika
 import pymongo
 

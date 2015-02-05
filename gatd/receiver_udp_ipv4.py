@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Listen for UDP packets from an IPv4 host.
+"""
+
 import ipaddress
 import pickle
 import socket

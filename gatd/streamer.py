@@ -1,4 +1,7 @@
 
+"""
+This module takes in a stream and stores that stream in a capped collection.
+"""
 
 import pika
 import pymongo
@@ -24,8 +27,6 @@ def connect_mongodb ():
 
 def save (args, channel, method, prop, body):
 	global mdb
-
-	l.info(body)
 
 	try:
 		# No magic here, just try to insert the record into the capped collection

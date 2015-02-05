@@ -1,4 +1,10 @@
 
+"""
+Deduplicator.
+
+Drops identical packets that come in within some specified time range.
+"""
+
 import argparse
 import ipaddress
 import pickle
@@ -124,5 +130,3 @@ parameters = []
 
 
 gatdBlock.start_block(l, 'Deduplicate', settings, parameters, check_packet)
-
-

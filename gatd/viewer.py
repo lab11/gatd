@@ -1,4 +1,7 @@
 
+"""
+Get a glimpse into the 10 most recent packets.
+"""
 
 import pika
 import pymongo

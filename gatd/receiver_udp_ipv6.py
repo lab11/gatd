@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Listen for UDP packets from an IPv6 host.
+"""
+
 import ipaddress
 import pickle
 import socket
@@ -51,18 +55,6 @@ def receive (amqp_chan):
 
 # Setup the connection to RabbitMQ
 def pika_on_channel (amqp_chan):
-
-	# Create the receive exchange if it doesn't exist.
-	# amqp_chan.exchange_declare(exchange='xch_receiver_udp_ipv6',
-	#                            exchange_type='direct',
-	#                            durable='true')
-
-	# # Make sure there is a queue for unknown packets
-	# amqp_chan.queue_declare(queue='receive-unknown',
-	#                         durable=True)
-	# amqp_chan.queue_bind(queue='receive-unknown',
-	#                      exchange='xch_receiver_udp_ipv6',
-	#                      routing_key='unknown')
 
 	while True:
 		try:
