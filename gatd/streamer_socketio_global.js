@@ -11,7 +11,7 @@ var mc = require('mongodb').MongoClient;
 var ini = require('simple-ini');
 
 var config = new ini(function() {
-						return fs.readFileSync(path.resolve(__dirname, 'gatd.config'), 'utf-8');
+                         return fs.readFileSync('/etc/gatd/gatd.config', 'utf-8');
 			}, {'delimiter': ':',
 				'comments': '#',
 				'ignoreWhitespace': true});
@@ -28,7 +28,7 @@ var namespace_connection = function (socket) {
 
 	socket.on('query', function (data) {
 
-
+console.log('got query');
 		mc.connect(mongo_url, {uri_decode_auth: true}, function (err, db) {
 			if (err) {
 				return console.dir(err);

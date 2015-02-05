@@ -28,8 +28,7 @@ class BaseConfigSection (object):
 CONFIG_FILENAME = 'gatd.config'
 
 config = configparser.ConfigParser(inline_comment_prefixes=['#'])
-config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                         CONFIG_FILENAME))
+config.read('/etc/gatd/gatd.config')
 
 for section in config.sections():
 	attrs = dict(config.items(section))
