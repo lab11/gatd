@@ -16,7 +16,6 @@ configuration in other Python modules.
 
 In another module simply import the config module:
 
-    sys.path.append(os.path.abspath('../config'))
     import gatdConfig
 
 Then access the paramters like so:

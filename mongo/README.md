@@ -1,6 +1,6 @@
-GATD - MongoDB
+GATD - TokuMX - MongoDB
 ==============
 
-GATD uses [MongoDB](http://www.mongodb.org/) for its underlying data store.
-Once MongoDB is running, run `./init_mongo.py` once to setup the database and
-collections.
+GATD uses [TokuMX](http://www.tokutek.com/tokumx-for-mongodb/), an API-compatible
+replacement for 
+[MongoDB](http://www.mongodb.org/) as its primary underlying data store.
