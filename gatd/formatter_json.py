@@ -18,9 +18,11 @@ def format (data, meta):
 			data = data.decode('utf-8')
 		ret = json.loads(data, strict=False)
 
-		# JSON can be just a string or list. If so, force it into
+		# JSON can be just a string or list. Otherwise, force it into
 		# a dict
-		if type(ret) != dict:
+		if type(ret) == dict or type(ret) == list:
+			return ret
+		else
 			ret = {'data': ret}
 
 		return ret

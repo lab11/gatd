@@ -38,7 +38,8 @@ $('#streamer-start').click(function () {
 });
 
 function stream (uuid) {
-  var socket = io('http://memristor-v1.eecs.umich.edu:25004/'+uuid);
+  // var socket = io('http://memristor-v1.eecs.umich.edu:25004/'+uuid);
+  var socket = io('http://socketio.gatd.io:80/'+uuid);
   socket.on('connect', function () {
     socket.emit('query', {});
   });
