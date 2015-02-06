@@ -48,7 +48,13 @@ class gatdPostHandler (http.server.BaseHTTPRequestHandler):
 				l.error('No UUID found in POST URL.')
 				raise Exception('No UUID found')
 
-			src_addr = ipaddress.ip_address(self.client_address[0])
+			if 'X-Real-IP' in self.headers:
+				# This script is running behind nginx, and self.client_address
+				# is just local host, so nginx appends headers so we don't
+				# lose that information.
+				src_addr = ipaddress.ip_address(self.headers['X-Real-IP'])
+			else:
+				src_addr = ipaddress.ip_address(self.client_address[0])
 			port = self.client_address[1]
 
 			l.debug('Got POST. src:{}, len:{}'.format(src_addr, content_len))
