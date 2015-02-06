@@ -200,6 +200,18 @@ and that included the "Content-Type" field in their response/POST headers.
 		'single_instance': False,
 	},
 
+	'formatter_xml': {
+		'name': 'Formatter (XML)',
+		'help': '''
+Parse incoming data as XML and convert it to a Python dict. Uses the
+[xmltodict](https://github.com/martinblech/xmltodict) library which implements
+[this psuedo-spec](http://www.xml.com/pub/a/2006/05/31/converting-between-xml-and-json.html).
+''',
+		'target_group': 'a',
+		'source_group': 'b',
+		'single_instance': False,
+	},
+
 	'database_mongodb': {
 		'name': 'MongoDB',
 		'help': 'Store packets in a MongoDB database.',

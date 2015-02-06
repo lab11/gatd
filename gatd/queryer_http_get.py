@@ -95,7 +95,6 @@ try:
 	              trigger='interval',
 	              seconds=args.interval,
 	              kwargs={'url':args.url, 'block_uuid':str(args.uuid)})
-
 	sched.start()
 except:
 	l.exception('No good')
