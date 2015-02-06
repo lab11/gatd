@@ -22,7 +22,7 @@ def format (data, meta):
 		# a dict
 		if type(ret) == dict or type(ret) == list:
 			return ret
-		else
+		else:
 			ret = {'data': ret}
 
 		return ret
