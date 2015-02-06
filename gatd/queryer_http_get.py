@@ -87,6 +87,7 @@ parser.add_argument('--source_uuid',
 
 args = parser.parse_args()
 
+l.info('URL: {}'.format(args.url))
 
 try:
 	sched = apscheduler.schedulers.asyncio.AsyncIOScheduler(standalone=True)

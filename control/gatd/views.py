@@ -124,18 +124,21 @@ def start_block (uuid, block, block_prototype, circus_client):
 	# Add settings
 	for k,v in block['settings'].items():
 		cmd_args.append('--{}'.format(k))
-		cmd_args.append(shlex.quote(v))
+		#cmd_args.append(shlex.quote(v))
+		cmd_args.append(v)
 
 	# Add arguments
 	for k,v in block['parameters'].items():
 		cmd_args.append('--{}'.format(k))
-		cmd_args.append(shlex.quote(v))
+		#cmd_args.append(shlex.quote(v))
+		cmd_args.append(v)
 
 	# Add "hidden" arguments. These are needed to run the block
 	# but aren't shown to the user.
 	for param in block_prototype.get('hidden_parameters', []):
 		cmd_args.append('--{}'.format(param['key']))
-		cmd_args.append(shlex.quote(param['value']))
+		#cmd_args.append(shlex.quote(param['value']))
+		cmd_args.append(param['value'])
 
 	print('  args: {}'.format(cmd_args))
 
