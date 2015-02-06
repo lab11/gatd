@@ -1,0 +1,82 @@
+###
+# app configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/1.5-branch/narr/environment.html
+###
+
+[app:gatdv6]
+use = egg:gatd
+
+pyramid.reload_templates = false
+pyramid.debug_authorization = false
+pyramid.debug_notfound = false
+pyramid.debug_routematch = false
+pyramid.default_locale_name = en
+
+pyramid.auth.secret = abc123
+
+mongo_uri = mongodb://username:password@gatd.com:27017/gatdv6
+
+################################################################################
+### Logins Supported
+################################################################################
+
+
+jinja2.filters =
+	model_url = pyramid_jinja2.filters:model_url_filter
+	route_url = pyramid_jinja2.filters:route_url_filter
+	static_url = pyramid_jinja2.filters:static_url_filter
+
+# By default, the toolbar only appears for clients from IP addresses
+# '127.0.0.1' and '::1'.
+# debugtoolbar.hosts = 127.0.0.1 ::1
+
+###
+# wsgi server configuration
+###
+
+#---------- Pipeline Configuration ----------
+[filter:paste_prefix]
+use = egg:PasteDeploy#prefix
+
+[pipeline:main]
+pipeline =
+    paste_prefix
+    # a good spot for some logging middleware!
+    gatdv6
+
+[server:main]
+use = egg:waitress#main
+host = 127.0.0.1
+port = 19999
+
+###
+# logging configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/1.5-branch/narr/logging.html
+###
+
+[loggers]
+keys = root, gatd
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = INFO
+handlers = console
+
+[logger_gatd]
+level = DEBUG
+handlers =
+qualname = gatd
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
