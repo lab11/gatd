@@ -23,7 +23,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def open (self, uuid):
-		uuid = uuid.decode('utf-8')
+		#uuid = uuid.decode('utf-8')
 		self.uuid = uuid
 		l.debug('Got connection with {}'.format(uuid))
 
@@ -60,4 +60,5 @@ application = tornado.web.Application([
 
 http_server = tornado.httpserver.HTTPServer(application)
 http_server.listen(gatdConfig.streamer_websocket.PORT)
+#application.listen(gatdConfig.streamer_websocket.PORT)
 tornado.ioloop.IOLoop.instance().start()
