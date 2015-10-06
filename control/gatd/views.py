@@ -82,7 +82,7 @@ def viewer_parameters (profile, block):
 def queryer_parameters (profile, block):
 	for p in block['parameters']:
 		if p['key'] == 'url':
-			p['value'] = 'http://query.{}/{}'\
+			p['value'] = 'http://queryer.{}/{}'\
 			.format(gatdConfig.gatd.HOST, block['uuid'])
 
 def replayer_parameters (profile, block):
